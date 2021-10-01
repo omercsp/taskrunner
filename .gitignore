@@ -1,0 +1,4 @@
+*.swp
+pyrightconfig.json
+.idea/
+__pycache__/
