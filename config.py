@@ -9,36 +9,39 @@ def print_dict(d: dict):
     print(json.dumps(d, indent=4))
 
 
+class _GlobalKeys(object):
+    TASKS_KEY = "tasks"
+    DEFS_KEY = "definitions"
+    INCLUDE_KEY = "include"
+    DEFAULT_TASK = "default_task"
+    SUPRESS_KEY = "supress"
+    DEFAULT_SHELL_PATH = "defult_shell_path"
+    DEFAULT_CONTAINER_TOOL = "default_container_tool"
+
+
 class TaskKeys(object):
     SHORT_DESC = "short_desc"
     LONG_DESC = "description"
     COMMANDS = "commands"
     SHELL = "shell"
+    SHELL_PATH = "shell_path"
     STOP_ON_ERROR = "stop_on_error"
     ENV = "env"
+    IMAGE = "image"
 
 
 class Config(object):
     _CONF_FILE_NAME = "/task_runner.json"
-    _TASKS_KEY = "tasks"
-    _DEFS_KEY = "definitions"
-    _INCLUDE_KEY = "include"
-    DEFAULT_TASK = "default_task"
-    SUPRESS_KEY = "supress"
 
     _TASK_SCHEMA = {
         "type": "object",
         "properties": {
-            TaskKeys.SHORT_DESC: {
-                "type": "string",
-                "maxLength": 75
-            },
+            TaskKeys.SHORT_DESC: {"type": "string", "maxLength": 75},
             TaskKeys.LONG_DESC: {"type": "string"},
             TaskKeys.COMMANDS:
                 {
                     "type": "array",
-                    "items": {"type": "string", "minLength": 1},
-                    "minItems": 1
+                    "items": {"type": "string", "minLength": 1}
                 },
             TaskKeys.SHELL: {"type": "boolean"},
             TaskKeys.ENV : {
@@ -46,22 +49,27 @@ class Config(object):
                 "additionalProperties" : {
                     "type": "string"
                 }
-            }
+            },
+            TaskKeys.SHELL_PATH: {"type": "string", "minLength": 1},
+            TaskKeys.IMAGE :     {"type": "string", "maxLength": 64},
         },
-        "required": [TaskKeys.COMMANDS, TaskKeys.SHELL, TaskKeys.STOP_ON_ERROR]
     }
     _CONFIG_SCHEMA = {
         "type": "object",
         "properties": {
-            _DEFS_KEY: {"type": "object"},
-            DEFAULT_TASK: {"type": "string"},
-            _TASKS_KEY: {"type": "object"},
-            SUPRESS_KEY: {
+            _GlobalKeys.DEFS_KEY: {"type": "object"},
+            _GlobalKeys.DEFAULT_TASK: {"type": "string"},
+            _GlobalKeys.TASKS_KEY: {"type": "object"},
+            _GlobalKeys.SUPRESS_KEY: {
                 "type": "array",
                 "items": {
                     "type": "string",
                     "minLength": 1
                 }
+            },
+            _GlobalKeys.DEFAULT_SHELL_PATH: {
+                "type": "string",
+                "minLength": 1
             }
         }
     }
@@ -95,20 +103,29 @@ class Config(object):
         self._read_global_conf_file()
         self._read_local_conf_file()
 
-        self.global_tasks = self.global_conf.get(Config._TASKS_KEY, {})
-        self.local_tasks = self.local_conf.get(Config._TASKS_KEY, {})
+        self.global_tasks = self.global_conf.get(_GlobalKeys.TASKS_KEY, {})
+        self.local_tasks = self.local_conf.get(_GlobalKeys.TASKS_KEY, {})
 
-        self.defs = self.global_conf.get(Config._DEFS_KEY, {})
-        self.defs.update(self.local_conf.get(Config._DEFS_KEY, {}))
+        self.defs = self.global_conf.get(_GlobalKeys.DEFS_KEY, {})
+        self.defs.update(self.local_conf.get(_GlobalKeys.DEFS_KEY, {}))
 
-        self.supressed_tasks = self.global_conf.get(Config.SUPRESS_KEY, [])
-        self.supressed_tasks += self.local_conf.get(Config.SUPRESS_KEY, [])
+        self.supressed_tasks = self.global_conf.get(_GlobalKeys.SUPRESS_KEY, [])
+        self.supressed_tasks += self.local_conf.get(_GlobalKeys.SUPRESS_KEY, [])
 
     def local_setting(self, path: str):
         return json_dict_value(self.local_conf, path)
 
     def global_setting(self, path: str):
         return json_dict_value(self.global_conf, path)
+
+    def default_task_name(self) -> typing.Union[str, None]:
+        return self.setting(_GlobalKeys.DEFAULT_TASK)
+
+    def default_container_tool(self) -> typing.Union[str, None]:
+        return self.setting(_GlobalKeys.DEFAULT_CONTAINER_TOOL)
+
+    def default_shell_path(self) -> typing.Union[str, None]:
+        return self.setting(_GlobalKeys.DEFAULT_SHELL_PATH)
 
     #  Return anything. Types is forced by schema validations.
     def setting(self, path: str, default=None) -> typing.Any:
@@ -139,7 +156,7 @@ class Config(object):
             if t is None:
                 raise TaskException("Unknown included task '{}'".format(t_name))
             included_list.append(t_name)
-            self._include(t, t.get(Config._INCLUDE_KEY, []), included_list)
+            self._include(t, t.get(_GlobalKeys.INCLUDE_KEY, []), included_list)
             task.update(t)
 
     def task(self, name: str) -> dict:
@@ -149,17 +166,13 @@ class Config(object):
 
         task = {}
         try:
-            self._include(task, main_task.get(Config._INCLUDE_KEY, []), [])
+            self._include(task, main_task.get(_GlobalKeys.INCLUDE_KEY, []), [])
         except TaskException as e:
             raise TaskException("Error parsing task '{}' - {}".format(name, e))
         task.update(main_task)
-        task.setdefault(TaskKeys.SHELL, False)
-        task.setdefault(TaskKeys.STOP_ON_ERROR, True)
-        task.setdefault(TaskKeys.COMMANDS, [])
-        task.setdefault(TaskKeys.ENV, {})
         try:
             jsonschema.validate(task, schema=Config._TASK_SCHEMA)
         except (jsonschema.ValidationError) as e:
             raise TaskException("Error parsing task '{}' - {}".format(name, e))
-        task.pop(Config._INCLUDE_KEY, None)
+        task.pop(_GlobalKeys.INCLUDE_KEY, None)
         return task
