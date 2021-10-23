@@ -28,6 +28,7 @@ class TaskKeys(object):
     STOP_ON_ERROR = "stop_on_error"
     ENV = "env"
     IMAGE = "image"
+    CONTAINER_TOOL = "container_tool"
 
 
 class Config(object):
@@ -51,7 +52,8 @@ class Config(object):
                 }
             },
             TaskKeys.SHELL_PATH: {"type": "string", "minLength": 1},
-            TaskKeys.IMAGE :     {"type": "string", "maxLength": 64},
+            TaskKeys.IMAGE: {"type": "string", "maxLength": 64},
+            TaskKeys.CONTAINER_TOOL: {"type": "string"}
         },
     }
     _CONFIG_SCHEMA = {
@@ -122,7 +124,7 @@ class Config(object):
         return self.setting(_GlobalKeys.DEFAULT_TASK)
 
     def default_container_tool(self) -> typing.Union[str, None]:
-        return self.setting(_GlobalKeys.DEFAULT_CONTAINER_TOOL)
+        return self.setting(_GlobalKeys.DEFAULT_CONTAINER_TOOL, default="/usr/bin/docker")
 
     def default_shell_path(self) -> typing.Union[str, None]:
         return self.setting(_GlobalKeys.DEFAULT_SHELL_PATH)

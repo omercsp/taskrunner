@@ -1,7 +1,6 @@
 #!/bin/python3
 from common import *
 from config import *
-from actions import *
 import argparse
 from argparse import Namespace as Args
 from Task import Task
@@ -35,6 +34,7 @@ def _parse_arguments():
                            help='Set environment variable (append to config values)')
 
     parser.add_argument("-I", "--image", metavar='IMAGE', help='Container image to run the task in')
+    parser.add_argument("--container_tool", metavar='TOOL', help='Container image to run the task in')
     parser.add_argument("-a", "--args", metavar='ARGS', help='Set args for commands')
 
     parser.add_argument("task", nargs='?', metavar='TASK', default=None, help='Set task to run')

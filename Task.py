@@ -16,6 +16,18 @@ class Task(object):
         self.short_desc = task.get(TaskKeys.SHORT_DESC, None)
         self.long_desc = task.get(TaskKeys.LONG_DESC, None)
 
+        if args.stop_on_error:
+            self.stop_on_error = args.stop_on_error
+        else:
+            self.stop_on_error = task.get(TaskKeys.STOP_ON_ERROR, True)
+
+        if args.command:
+            self.commands = args.command
+        elif args.command_append:
+            self.commands += args.append_command
+        else:
+            self.commands = task.get(TaskKeys.COMMANDS, [])
+
         if args.shell:
             self.shell = args.shell
         else:
@@ -29,51 +41,40 @@ class Task(object):
         else:
             self.shell_path = None
 
-        if args.stop_on_error:
-            self.stop_on_error = args.stop_on_error
-        else:
-            self.stop_on_error = task.get(TaskKeys.STOP_ON_ERROR, True)
-
-        if args.command:
-            self.commands = args.command
-        elif args.command_append:
-            self.commands += args.append_command
-        else:
-            self.commands = task.get(TaskKeys.COMMANDS, [])
-
-        raw_envs = []
+        cli_env = []
         if args.env:
-            raw_envs = args.env
+            cli_env = args.env
             self.env = {}
-        elif args.env_append:
-            raw_envs = args.env_append
-            self.env = task.get(TaskKeys.ENV, {})
         else:
-            self.env = None
-        for e in raw_envs:
+            self.env = task.get(TaskKeys.ENV, {})
+            if args.env_append:
+                cli_env = args.env_append
+
+        for e in cli_env:
             e_name, e_value = Task._parse_env_string(e)
             self.env[e_name] = e_value
+
         if args.image:
-            self.imaeg = args.image
+            self.image = args.image
         else:
             self.image = task.get(TaskKeys.IMAGE, None)
-
-    def _gen_command_array(self, command: str, shell: bool) -> list:
-        #  When using shell, pass the command  'as is'
-        if shell:
-            return [command]
-        try:
-            return shlex.split(command)
-        except ValueError as e:
-            raise TaskException("Illegal command '{}' for task '{}' - {}".format(command, self.name, e))
+        if args.container_tool:
+            self.container_tool = args.container_tool
+        else:
+            self.container_tool = self.config.default_container_tool()
 
 
-    def _active_task_name(self, config: Config, args) -> str:
-        task_name = config.default_task_name() if args.task is None else args.task
-        if task_name is None:
-            raise TaskException("No main task name was given")
-        return task_name
-
+    def _exec_in_image(self, command: str) -> int:
+        cmd_array = [self.container_tool, "run", "-it", "--rm", self.image]
+        if self.shell:
+            shell =  "/usr/bin/sh" if self.shell_path is None else self.shell_path
+            command = "\"{}\"".format(command)
+            cmd_array += [shell, "-c", "\"{}\"".format(command)]
+        else:
+            cmd_array += [command]
+        print(cmd_array)
+        p = subprocess.Popen(cmd_array, stdout=sys.stdout, stderr=sys.stderr)
+        return p.wait()
 
     @staticmethod
     def _parse_env_string(s: str):
@@ -82,27 +83,40 @@ class Task(object):
             return s, ""
         return parts[0], str(parts[1])
 
+    def _exec_in_system(self, cmd_str: str) -> int:
+        cmd_str = expand_string(cmd_str, self.config.defs)
+        if self.shell:
+            cmd_array = [cmd_str]
+        else:
+            try:
+                cmd_array =  shlex.split(cmd_str)
+            except ValueError as e:
+                raise TaskException("Illegal command '{}' for task '{}' - {}".format(cmd_str, self.name, e))
+        try:
+            if self.env is None:
+                penv = None
+            else:
+                #  penv = os.environ.copy()
+                penv = {}
+                penv.update(self.env)
+            p = subprocess.Popen(cmd_array, shell=self.shell, executable=self.shell_path,
+                                 stdout=sys.stdout, stderr=sys.stderr, env=penv)
+            return p.wait()
 
-    def _exec_default_command(self) -> int:
-        if len(self.commands) == 0:
+        except (OSError, FileNotFoundError) as e:
+            raise TaskException("Error occured running command '{}' - {}".format(cmd_str, e))
+
+    def execute(self) -> int:
+        if not self.image and len(self.commands) == 0:
             print("No commands defined for task '{}'. Nothing to do.".format(self.name))
             return 0
 
         rc = 0
         for cmd_str in self.commands:
-            cmd_str = expand_string(cmd_str, self.config.defs)
-            cmd_array = self._gen_command_array(cmd_str, self.shell)
-            try:
-                if self.env is None:
-                    penv = None
-                else:
-                    penv = os.environ.copy()
-                    penv.update(self.env)
-                p = subprocess.Popen(cmd_array, shell=self.shell, executable=self.shell_path,
-                                     stdout=sys.stdout, stderr=sys.stderr, env=penv)
-                cmd_rc = p.wait()
-            except (OSError, FileNotFoundError) as e:
-                raise TaskException("Error occured running command '{}' - {}".format(cmd_str, e))
+            if self.image:
+                cmd_rc = self._exec_in_image(cmd_str)
+            else:
+                cmd_rc = self._exec_in_system(cmd_str)
             if cmd_rc == 0:
                 continue
             if self.stop_on_error:
@@ -110,15 +124,6 @@ class Task(object):
             if rc == 0:
                 rc = cmd_rc
         return rc
-
-    def _exec_image_command(self) -> int:
-        return 0
-
-    def execute(self) -> int:
-        if self.image:
-            return self._exec_image_command()
-        else:
-            return self._exec_default_command()
 
     def show_info(self):
         PRINT_FMT = "{:<24}{:<80}"
@@ -145,14 +150,16 @@ class Task(object):
         print_val("Short description:", self.short_desc)
         if self.long_desc:
             print_blob("Description:", self.long_desc)
+
+        if self.image:
+            print_val("Image:", self.image)
+
         if self.shell:
             if self.shell_path:
                 print_val("Shell:", self.shell_path)
             else:
                 print_val("Shell:", "default (/usr/bin/sh)")
         print_bool("Stop on error:", self.stop_on_error)
-        if self.image:
-            print_val("Image:", self.image)
 
         count = 0
         if self.env:
