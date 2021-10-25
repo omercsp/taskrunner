@@ -21,6 +21,7 @@ def _parse_arguments():
                                 action='append',
                                 help='Set command to run (append to config values)')
 
+    parser.add_argument("--cwd", metavar='DIR', default=None, help='Set working direcotry')
     parser.add_argument("--shell", action=argparse.BooleanOptionalAction, default=None,
                         help='Set shell usage')
     parser.add_argument("--shell-path", metavar='PATH', help='Set shell path', default=None)

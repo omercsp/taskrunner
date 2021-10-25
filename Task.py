@@ -28,6 +28,11 @@ class Task(object):
         else:
             self.commands = task.get(TaskKeys.COMMANDS, [])
 
+        if args.cwd:
+            self.cwd = args.cwd
+        else:
+            self.cwd = task.get(TaskKeys.CWD, None)
+
         if args.shell:
             self.shell = args.shell
         else:
@@ -65,7 +70,11 @@ class Task(object):
 
 
     def _exec_in_image(self, command: str) -> int:
-        cmd_array = [self.container_tool, "run", "-it", "--rm", self.image]
+        cmd_array = [self.container_tool, "run", "-it", "--rm"]
+        if self.cwd:
+            cmd_array += ["-w", self.cwd]
+
+        cmd_array.append(self.image)
         if self.shell:
             shell =  "/usr/bin/sh" if self.shell_path is None else self.shell_path
             command = "\"{}\"".format(command)
@@ -100,7 +109,7 @@ class Task(object):
                 penv = {}
                 penv.update(self.env)
             p = subprocess.Popen(cmd_array, shell=self.shell, executable=self.shell_path,
-                                 stdout=sys.stdout, stderr=sys.stderr, env=penv)
+                                 stdout=sys.stdout, stderr=sys.stderr, env=penv, cwd=self.cwd)
             return p.wait()
 
         except (OSError, FileNotFoundError) as e:

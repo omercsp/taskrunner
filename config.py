@@ -29,6 +29,7 @@ class TaskKeys(object):
     ENV = "env"
     IMAGE = "image"
     CONTAINER_TOOL = "container_tool"
+    CWD = "cwd"
 
 
 class Config(object):
@@ -53,7 +54,8 @@ class Config(object):
             },
             TaskKeys.SHELL_PATH: {"type": "string", "minLength": 1},
             TaskKeys.IMAGE: {"type": "string", "maxLength": 64},
-            TaskKeys.CONTAINER_TOOL: {"type": "string"}
+            TaskKeys.CONTAINER_TOOL: {"type": "string"},
+            TaskKeys.CWD: {"type": "string", "maxLength": 1}
         },
     }
     _CONFIG_SCHEMA = {
