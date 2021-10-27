@@ -30,17 +30,19 @@ def _parse_arguments():
 
     env_group = parser.add_mutually_exclusive_group(required=False)
     env_group.add_argument("-e", "--env", metavar='CMD', default=None, action='append',
-                          help='Set environment variable (replace config values)')
+                           help='Set environment variable (replace config values)')
     env_group.add_argument("-E", "--env-append", metavar='CMD', default=None, action='append',
                            help='Set environment variable (append to config values)')
 
     parser.add_argument("-I", "--image", metavar='IMAGE', help='Container image to run the task in')
-    parser.add_argument("--container_tool", metavar='TOOL', help='Container image to run the task in')
+    parser.add_argument("--container_tool", metavar='TOOL',
+                        help='Container image to run the task in')
     parser.add_argument("-a", "--args", metavar='ARGS', help='Set args for commands')
 
     parser.add_argument("task", nargs='?', metavar='TASK', default=None, help='Set task to run')
 
     return parser.parse_args()
+
 
 def _active_task_name(config: Config, args) -> str:
     task_name = config.default_task_name() if args.task is None else args.task
@@ -75,10 +77,12 @@ def list_tasks(config: Config):
         desc = task.get(TaskKeys.SHORT_DESC, "")
         print(PRINT_FMT.format("g", task_name, desc, "l"))
 
+
 def show_task_info(config: Config, args: Args):
     task_name = _active_task_name(config, args)
     task = Task(config.task(task_name), task_name, config, args)
     task.show_info()
+
 
 def dump_task(config: Config, args: Args):
     task_name = _active_task_name(config, args)

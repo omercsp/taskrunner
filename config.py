@@ -31,6 +31,7 @@ class TaskKeys(object):
     CONTAINER_TOOL = "container_tool"
     CWD = "cwd"
 
+
 class AutoDefsKyes(object):
     # Auto defintiosn keys
     CONF_PATH = "CONF_PATH"
@@ -52,9 +53,9 @@ class Config(object):
                     "items": {"type": "string", "minLength": 1}
                 },
             TaskKeys.SHELL: {"type": "boolean"},
-            TaskKeys.ENV : {
+            TaskKeys.ENV: {
                 "type": "object",
-                "additionalProperties" : {
+                "additionalProperties": {
                     "type": "string"
                 }
             },

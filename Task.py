@@ -68,7 +68,6 @@ class Task(object):
         else:
             self.container_tool = self.config.default_container_tool()
 
-
     def _exec_in_image(self, command: str) -> int:
         cmd_array = [self.container_tool, "run", "-it", "--rm"]
         if self.cwd:
@@ -76,7 +75,7 @@ class Task(object):
 
         cmd_array.append(self.image)
         if self.shell:
-            shell =  "/usr/bin/sh" if self.shell_path is None else self.shell_path
+            shell = "/usr/bin/sh" if self.shell_path is None else self.shell_path
             command = "\"{}\"".format(command)
             cmd_array += [shell, "-c", "\"{}\"".format(command)]
         else:
@@ -98,9 +97,10 @@ class Task(object):
             cmd_array = [cmd_str]
         else:
             try:
-                cmd_array =  shlex.split(cmd_str)
+                cmd_array = shlex.split(cmd_str)
             except ValueError as e:
-                raise TaskException("Illegal command '{}' for task '{}' - {}".format(cmd_str, self.name, e))
+                raise TaskException("Illegal command '{}' for task '{}' - {}".format(
+                    cmd_str, self.name, e))
         try:
             if self.env is None:
                 penv = None
@@ -143,7 +143,7 @@ class Task(object):
         def print_bool(title, value: bool):
             print_val(title, "Yes" if value else "No")
 
-        def print_blob(title:str , text: str):
+        def print_blob(title: str, text: str):
             if text is None:
                 text = ""
             first = True
