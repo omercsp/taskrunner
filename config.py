@@ -31,6 +31,12 @@ class TaskKeys(object):
     CONTAINER_TOOL = "container_tool"
     CWD = "cwd"
 
+class AutoDefsKyes(object):
+    # Auto defintiosn keys
+    CONF_PATH = "CONF_PATH"
+    CWD = "CWD"
+    CWD_REL_CONF = "CWD_REL_CONF"
+
 
 class Config(object):
     _CONF_FILE_NAME = "/task_runner.json"
@@ -87,31 +93,37 @@ class Config(object):
         except (IOError, TypeError, ValueError, jsonschema.ValidationError) as e:
             raise TaskException("Error parsing {} - {}".format(file_path, e))
 
-    def _read_local_conf_file(self):
+    def _read_local_conf_file(self) -> typing.Tuple[dict, str]:
         directory = os.getcwd()
         f = directory + Config._CONF_FILE_NAME
         while not os.path.exists(f):
             if directory == "/":
-                return
+                return {}, ""
             directory = os.path.dirname(directory)
             f = directory + Config._CONF_FILE_NAME
-        self.local_conf = self._read_tasks_file(f)
+        return self._read_tasks_file(f), f
 
     def _read_global_conf_file(self):
         f = str(pathlib.Path.home()) + "/.config/" + Config._CONF_FILE_NAME
         if not os.path.isfile(f):
-            return
-        self.global_conf = self._read_tasks_file(f)
+            return {}, ""
+        return self._read_tasks_file(f), f
 
     def __init__(self):
-        self._read_global_conf_file()
-        self._read_local_conf_file()
+        self.global_conf, self.global_conf_path = self._read_global_conf_file()
+        self.local_conf, self.local_conf_path = self._read_local_conf_file()
 
         self.global_tasks = self.global_conf.get(_GlobalKeys.TASKS_KEY, {})
         self.local_tasks = self.local_conf.get(_GlobalKeys.TASKS_KEY, {})
 
         self.defs = self.global_conf.get(_GlobalKeys.DEFS_KEY, {})
         self.defs.update(self.local_conf.get(_GlobalKeys.DEFS_KEY, {}))
+
+        self.defs[AutoDefsKyes.CWD] = os.getcwd()
+        if self.local_conf:
+            self.defs[AutoDefsKyes.CONF_PATH] = os.path.dirname(self.local_conf_path)
+            self.defs[AutoDefsKyes.CWD_REL_CONF] = os.path.relpath(
+                    self.defs[AutoDefsKyes.CWD], self.defs[AutoDefsKyes.CONF_PATH])
 
         self.supressed_tasks = self.global_conf.get(_GlobalKeys.SUPRESS_KEY, [])
         self.supressed_tasks += self.local_conf.get(_GlobalKeys.SUPRESS_KEY, [])

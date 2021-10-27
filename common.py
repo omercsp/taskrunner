@@ -60,9 +60,7 @@ class StringVarExpander(object):
         path = match.group()[2:-2]
         if path in self.previous_expansions:
             raise TaskException("Recursive expanded var '{}'".format(path))
-        if path not in self.defs.keys():
-            raise TaskException("Command expansion error - path '{}' not found".format(path))
-        value = self.defs[path]
+        value = self.defs.get(path, "")
         if type(value) is list or type(value) is dict:
             raise TaskException("Var expanded path '{}' doesn't refer to valid type".format(path))
         next_expander = StringVarExpander(self.defs, self.previous_expansions + [path])
