@@ -2,6 +2,7 @@ import logging
 import sys
 import re
 import typing
+import os
 
 
 class TaskException(Exception):
@@ -57,13 +58,18 @@ class StringVarExpander(object):
         return re.sub(StringVarExpander.var_re, self._expand_re, s)
 
     def _expand_re(self, match) -> str:
-        path = match.group()[2:-2]
-        if path in self.previous_expansions:
-            raise TaskException("Recursive expanded var '{}'".format(path))
-        value = self.defs.get(path, "")
+        var = match.group()[2:-2]
+        if var in self.previous_expansions:
+            raise TaskException("Recursive expanded var '{}'".format(var))
+        if var.startswith("$"):
+            if len(var) == 1:
+                raise TaskException("Empty environment variable definition")
+            var = var[1:]
+            return os.getenv(var, "")
+        value = self.defs.get(var, "")
         if type(value) is list or type(value) is dict:
-            raise TaskException("Var expanded path '{}' doesn't refer to valid type".format(path))
-        next_expander = StringVarExpander(self.defs, self.previous_expansions + [path])
+            raise TaskException("Var expanded path '{}' doesn't refer to valid type".format(var))
+        next_expander = StringVarExpander(self.defs, self.previous_expansions + [var])
         return re.sub(StringVarExpander.var_re, next_expander._expand_re, str(value))
 
 

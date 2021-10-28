@@ -92,7 +92,6 @@ class Task(object):
         return parts[0], str(parts[1])
 
     def _exec_in_system(self, cmd_str: str) -> int:
-        cmd_str = expand_string(cmd_str, self.config.defs)
         if self.shell:
             cmd_array = [cmd_str]
         else:
@@ -121,7 +120,8 @@ class Task(object):
             return 0
 
         rc = 0
-        for cmd_str in self.commands:
+        for cmd in self.commands:
+            cmd_str = expand_string(cmd, self.config.defs)
             if self.image:
                 cmd_rc = self._exec_in_image(cmd_str)
             else:
