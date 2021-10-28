@@ -30,6 +30,7 @@ class TaskKeys(object):
     IMAGE = "image"
     CONTAINER_TOOL = "container_tool"
     CWD = "cwd"
+    VOLUMES = "volumes"
 
 
 class AutoDefsKyes(object):
@@ -47,22 +48,25 @@ class Config(object):
         "properties": {
             TaskKeys.SHORT_DESC: {"type": "string", "maxLength": 75},
             TaskKeys.LONG_DESC: {"type": "string"},
-            TaskKeys.COMMANDS:
-                {
-                    "type": "array",
-                    "items": {"type": "string", "minLength": 1}
-                },
+            TaskKeys.COMMANDS: {
+                "type": "array",
+                "items": {"type": "string", "minLength": 1}
+            },
+            TaskKeys.CWD: {"type": "string", "maxLength": 1},
             TaskKeys.SHELL: {"type": "boolean"},
+            TaskKeys.SHELL_PATH: {"type": "string", "minLength": 1},
             TaskKeys.ENV: {
                 "type": "object",
                 "additionalProperties": {
                     "type": "string"
                 }
             },
-            TaskKeys.SHELL_PATH: {"type": "string", "minLength": 1},
             TaskKeys.IMAGE: {"type": "string", "maxLength": 64},
             TaskKeys.CONTAINER_TOOL: {"type": "string"},
-            TaskKeys.CWD: {"type": "string", "maxLength": 1}
+            TaskKeys.VOLUMES: {
+                "type": "array",
+                "items": {"type": "string"}
+            }
         },
     }
     _CONFIG_SCHEMA = {

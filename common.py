@@ -48,7 +48,7 @@ def init_logging():
 
 
 class StringVarExpander(object):
-    var_re = re.compile(r'{{\S*}}')
+    var_re = re.compile(r'{{\S*?}}')
 
     def __init__(self, defs: dict, previous_expansions: list):
         self.previous_expansions = previous_expansions

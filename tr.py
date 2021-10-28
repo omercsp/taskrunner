@@ -37,6 +37,11 @@ def _parse_arguments():
     parser.add_argument("-I", "--image", metavar='IMAGE', help='Container image to run the task in')
     parser.add_argument("--container_tool", metavar='TOOL',
                         help='Container image to run the task in')
+    vol_group = parser.add_mutually_exclusive_group(required=False)
+    vol_group.add_argument("-V","--volumes", metavar='VOLUME', action='append', default=None,
+                           help='Container volume (replace config values)')
+    vol_group.add_argument("-L","--volumes-append", metavar='VOLUME', action='append', default=None,
+                           help='Container volume (append config values)')
     parser.add_argument("-a", "--args", metavar='ARGS', help='Set args for commands')
 
     parser.add_argument("task", nargs='?', metavar='TASK', default=None, help='Set task to run')

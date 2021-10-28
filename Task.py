@@ -56,22 +56,37 @@ class Task(object):
                 cli_env = args.env_append
 
         for e in cli_env:
-            e_name, e_value = Task._parse_env_string(e)
+            e_name, e_value = Task._parse_assignmet_str(e)
             self.env[e_name] = e_value
 
         if args.image:
             self.image = args.image
         else:
             self.image = task.get(TaskKeys.IMAGE, None)
+
+        if not self.image:
+            return
+
+        #  Container specific settings
+        if args.volumes:
+            self.volumes = args.volumes
+        else:
+            self.volumes = task.get(TaskKeys.VOLUMES, [])
+            if args.volumes_append:
+                self.volumes += args.volumes_append
+
         if args.container_tool:
             self.container_tool = args.container_tool
         else:
             self.container_tool = self.config.default_container_tool()
 
-    def _exec_in_image(self, command: str) -> int:
+    def _container_execute(self, command: str) -> int:
         cmd_array = [self.container_tool, "run", "-it", "--rm"]
         if self.cwd:
             cmd_array += ["-w", self.cwd]
+
+        for v in self.volumes:
+            cmd_array += ["-v", expand_string(v, self.config.defs)]
 
         cmd_array.append(self.image)
         if self.shell:
@@ -85,13 +100,13 @@ class Task(object):
         return p.wait()
 
     @staticmethod
-    def _parse_env_string(s: str):
+    def _parse_assignmet_str(s: str):
         parts = s.split('=', maxsplit=1)
         if len(parts) == 1:
             return s, ""
         return parts[0], str(parts[1])
 
-    def _exec_in_system(self, cmd_str: str) -> int:
+    def _system_execute(self, cmd_str: str) -> int:
         if self.shell:
             cmd_array = [cmd_str]
         else:
@@ -123,9 +138,9 @@ class Task(object):
         for cmd in self.commands:
             cmd_str = expand_string(cmd, self.config.defs)
             if self.image:
-                cmd_rc = self._exec_in_image(cmd_str)
+                cmd_rc = self._container_execute(cmd_str)
             else:
-                cmd_rc = self._exec_in_system(cmd_str)
+                cmd_rc = self._system_execute(cmd_str)
             if cmd_rc == 0:
                 continue
             if self.stop_on_error:
