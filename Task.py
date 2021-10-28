@@ -196,7 +196,7 @@ class Task(object):
             print("NOTICE: No commands defined for task")
             return
         if len(self.commands) == 1:
-            print_blob("Command:", self.commands[0])
+            print_blob("Command:", expand_string(self.commands[0], self.config.defs))
             return
 
         print(PRINT_FMT.format("Commands:", ""))

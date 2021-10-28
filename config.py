@@ -10,6 +10,7 @@ def print_dict(d: dict):
 
 
 class _GlobalKeys(object):
+    VERSION = "version"
     TASKS_KEY = "tasks"
     DEFS_KEY = "definitions"
     INCLUDE_KEY = "include"
@@ -20,6 +21,7 @@ class _GlobalKeys(object):
 
 
 class TaskKeys(object):
+    VERSION = "version"
     SHORT_DESC = "short_desc"
     LONG_DESC = "description"
     COMMANDS = "commands"
@@ -41,7 +43,9 @@ class AutoDefsKyes(object):
 
 
 class Config(object):
-    _CONF_FILE_NAME = "/task_runner.json"
+    _CONF_FILE_NAME = "task_runner.json"
+    _MAJOR_VER: int = 0
+    _MINOR_VER: int = 1
 
     _TASK_SCHEMA = {
         "type": "object",
@@ -67,9 +71,16 @@ class Config(object):
                 "type": "array",
                 "items": {"type": "string"}
             }
-        },
+        }
     }
     _CONFIG_SCHEMA = {
+        TaskKeys.VERSION: {
+            "type": "object",
+            "properties": {
+                "major": {"type": "number", "minValue": 0},
+                "minor": {"type": "number", "minValue": 1}
+            }
+        },
         "type": "object",
         "properties": {
             _GlobalKeys.DEFS_KEY: {"type": "object"},
@@ -86,33 +97,50 @@ class Config(object):
                 "type": "string",
                 "minLength": 1
             }
-        }
+        },
+        "required": [TaskKeys.VERSION]
     }
 
     @staticmethod
     def _read_tasks_file(file_path: str) -> dict:
         try:
-            conf_file = json.load(open(file_path, 'r'))
-            jsonschema.validate(conf_file, schema=Config._CONFIG_SCHEMA)
-            return conf_file
+            data: dict = json.load(open(file_path, 'r'))
+            jsonschema.validate(data, schema=Config._CONFIG_SCHEMA)
+            return data
         except (IOError, TypeError, ValueError, jsonschema.ValidationError) as e:
             raise TaskException("Error parsing {} - {}".format(file_path, e))
 
+    @staticmethod
+    def _check_config_file_version(data: dict, local: bool) -> None:
+        conf_file_type = "local" if local else "global"
+        major = data["version"]["major"]
+        minor = data["version"]["minor"]
+        if major != Config._MAJOR_VER or minor > Config._MINOR_VER:
+            raise TaskException(("Incompatible {} configuration file version: " +
+                    "Found:{}.{}, expected <= {}.{}").format(
+                conf_file_type, major, minor, Config._MAJOR_VER, Config._MINOR_VER))
+        if minor != Config._MINOR_VER:
+            print("Incompatible {} configuration file minor version".format(conf_file_type))
+
     def _read_local_conf_file(self) -> typing.Tuple[dict, str]:
         directory = os.getcwd()
-        f = directory + Config._CONF_FILE_NAME
+        f = directory + "/" + Config._CONF_FILE_NAME
         while not os.path.exists(f):
             if directory == "/":
                 return {}, ""
             directory = os.path.dirname(directory)
-            f = directory + Config._CONF_FILE_NAME
-        return self._read_tasks_file(f), f
+            f = directory + "/" + Config._CONF_FILE_NAME
+        data = Config._read_tasks_file(f)
+        Config._check_config_file_version(data, local=True)
+        return data, f
 
     def _read_global_conf_file(self):
         f = str(pathlib.Path.home()) + "/.config/" + Config._CONF_FILE_NAME
         if not os.path.isfile(f):
             return {}, ""
-        return self._read_tasks_file(f), f
+        data = Config._read_tasks_file(f)
+        Config._check_config_file_version(data, local=False)
+        return data, f
 
     def __init__(self):
         self.global_conf, self.global_conf_path = self._read_global_conf_file()
