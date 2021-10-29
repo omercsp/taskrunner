@@ -42,6 +42,12 @@ def _parse_arguments():
                            help='Container volume (replace config values)')
     vol_group.add_argument("-L","--volumes-append", metavar='VOLUME', action='append', default=None,
                            help='Container volume (append config values)')
+    parser.add_argument("--tty", action=argparse.BooleanOptionalAction, default=None,
+                        help='Set container tty allocation')
+    parser.add_argument("--interactive", action=argparse.BooleanOptionalAction,
+                        help='Set container interactive mode')
+    parser.add_argument("--container-flags", default=None, help='Container flags')
+
     parser.add_argument("-a", "--args", metavar='ARGS', help='Set args for commands')
 
     parser.add_argument("task", nargs='?', metavar='TASK', default=None, help='Set task to run')

@@ -59,10 +59,11 @@ class Task(object):
             e_name, e_value = Task._parse_assignmet_str(e)
             self.env[e_name] = e_value
 
+        container = task.get(TaskKeys.CONTAINER, {})
         if args.image:
             self.image = args.image
         else:
-            self.image = task.get(TaskKeys.IMAGE, None)
+            self.image = container.get(TaskKeys.Container.IMAGE)
 
         if not self.image:
             return
@@ -71,22 +72,40 @@ class Task(object):
         if args.volumes:
             self.volumes = args.volumes
         else:
-            self.volumes = task.get(TaskKeys.VOLUMES, [])
+            self.volumes = container.get(TaskKeys.Container.VOLUMES, [])
             if args.volumes_append:
                 self.volumes += args.volumes_append
+
+        if args.interactive is not None:
+            self.interactive = args.interactive
+        else:
+            self.interactive = task.get(TaskKeys.Container.INTERACTIVE, False)
+
+        if args.tty is not None:
+            self.tty = args.tty
+        else:
+            self.tty = task.get(TaskKeys.Container.TTY, False)
 
         if args.container_tool:
             self.container_tool = args.container_tool
         else:
-            self.container_tool = self.config.default_container_tool()
+            self.container_tool = container.get(TaskKeys.Container.CONTAINER_TOOL,
+                                                self.config.default_container_tool())
 
     def _container_execute(self, command: str) -> int:
-        cmd_array = [self.container_tool, "run", "-it", "--rm"]
+        cmd_array = [self.container_tool, "run", "--rm"]
         if self.cwd:
             cmd_array += ["-w", self.cwd]
+        if self.interactive:
+            cmd_array.append("-i")
+        if self.tty:
+            cmd_array.append("-t")
 
         for v in self.volumes:
             cmd_array += ["-v", expand_string(v, self.config.defs)]
+
+        if self.args.container_flags:
+            cmd_array += self.args.container_flags.split()
 
         cmd_array.append(self.image)
         if self.shell:
@@ -177,6 +196,18 @@ class Task(object):
 
         if self.image:
             print_val("Image:", self.image)
+            print_bool("Interactive container:", self.interactive)
+            print_bool("Container TTY:", self.tty)
+            if self.args.container_flags:
+                print_blob("Container flags:", self.args.container_flags)
+            if len(self.volumes) == 1:
+                print_blob("Volume:", self.volumes[0])
+            elif len(self.volumes) > 1:
+                count = 0
+                print(PRINT_FMT.format("Volumes:", ""))
+                for vol in self.volumes:
+                    print_blob("     [{}]".format(count), vol)
+                    count += 1
 
         if self.shell:
             if self.shell_path:

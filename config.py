@@ -13,11 +13,11 @@ class _GlobalKeys(object):
     VERSION = "version"
     TASKS_KEY = "tasks"
     DEFS_KEY = "definitions"
-    INCLUDE_KEY = "include"
+    INCLUDE = "include"
     DEFAULT_TASK = "default_task"
-    SUPRESS_KEY = "supress"
-    DEFAULT_SHELL_PATH = "defult_shell_path"
-    DEFAULT_CONTAINER_TOOL = "default_container_tool"
+    SUPRESS = "supress"
+    DFLT_SHELL_PATH = "defult_shell_path"
+    DFLT_CONTAINER_TOOL = "default_container_tool"
 
 
 class TaskKeys(object):
@@ -29,10 +29,14 @@ class TaskKeys(object):
     SHELL_PATH = "shell_path"
     STOP_ON_ERROR = "stop_on_error"
     ENV = "env"
-    IMAGE = "image"
-    CONTAINER_TOOL = "container_tool"
     CWD = "cwd"
-    VOLUMES = "volumes"
+    CONTAINER = "container"
+    class Container(object):
+        IMAGE = "image"
+        CONTAINER_TOOL = "container_tool"
+        VOLUMES = "volumes"
+        INTERACTIVE = "interactive"
+        TTY = "tty"
 
 
 class AutoDefsKyes(object):
@@ -65,12 +69,20 @@ class Config(object):
                     "type": "string"
                 }
             },
-            TaskKeys.IMAGE: {"type": "string", "maxLength": 64},
-            TaskKeys.CONTAINER_TOOL: {"type": "string"},
-            TaskKeys.VOLUMES: {
-                "type": "array",
-                "items": {"type": "string"}
-            }
+            TaskKeys.CONTAINER: {
+                "type": "object",
+                TaskKeys.SHELL: {"type": "boolean"},
+                TaskKeys.SHELL_PATH: {"type": "string", "minLength": 1},
+                TaskKeys.Container.IMAGE: {"type": "string", "maxLength": 64},
+                TaskKeys.Container.CONTAINER_TOOL: {"type": "string"},
+                TaskKeys.Container.VOLUMES: {
+                    "type": "array",
+                    "items": {"type": "string"}
+                },
+                TaskKeys.Container.INTERACTIVE: {"type": "boolean"},
+                TaskKeys.Container.TTY: {"type": "boolean"},
+                "required": [TaskKeys.Container.IMAGE]
+            },
         }
     }
     _CONFIG_SCHEMA = {
@@ -86,14 +98,14 @@ class Config(object):
             _GlobalKeys.DEFS_KEY: {"type": "object"},
             _GlobalKeys.DEFAULT_TASK: {"type": "string"},
             _GlobalKeys.TASKS_KEY: {"type": "object"},
-            _GlobalKeys.SUPRESS_KEY: {
+            _GlobalKeys.SUPRESS: {
                 "type": "array",
                 "items": {
                     "type": "string",
                     "minLength": 1
                 }
             },
-            _GlobalKeys.DEFAULT_SHELL_PATH: {
+            _GlobalKeys.DFLT_SHELL_PATH: {
                 "type": "string",
                 "minLength": 1
             }
@@ -158,23 +170,23 @@ class Config(object):
             self.defs[AutoDefsKyes.CWD_REL_CONF] = os.path.relpath(
                     self.defs[AutoDefsKyes.CWD], self.defs[AutoDefsKyes.CONF_PATH])
 
-        self.supressed_tasks = self.global_conf.get(_GlobalKeys.SUPRESS_KEY, [])
-        self.supressed_tasks += self.local_conf.get(_GlobalKeys.SUPRESS_KEY, [])
+        self.supressed_tasks = self.global_conf.get(_GlobalKeys.SUPRESS, [])
+        self.supressed_tasks += self.local_conf.get(_GlobalKeys.SUPRESS, [])
 
     def local_setting(self, path: str):
-        return json_dict_value(self.local_conf, path)
+        return dict_value(self.local_conf, path)
 
     def global_setting(self, path: str):
-        return json_dict_value(self.global_conf, path)
+        return dict_value(self.global_conf, path)
 
     def default_task_name(self) -> typing.Union[str, None]:
         return self.setting(_GlobalKeys.DEFAULT_TASK)
 
     def default_container_tool(self) -> typing.Union[str, None]:
-        return self.setting(_GlobalKeys.DEFAULT_CONTAINER_TOOL, default="/usr/bin/docker")
+        return self.setting(_GlobalKeys.DFLT_CONTAINER_TOOL, default="/usr/bin/docker")
 
     def default_shell_path(self) -> typing.Union[str, None]:
-        return self.setting(_GlobalKeys.DEFAULT_SHELL_PATH)
+        return self.setting(_GlobalKeys.DFLT_SHELL_PATH)
 
     #  Return anything. Types is forced by schema validations.
     def setting(self, path: str, default=None) -> typing.Any:
@@ -205,7 +217,7 @@ class Config(object):
             if t is None:
                 raise TaskException("Unknown included task '{}'".format(t_name))
             included_list.append(t_name)
-            self._include(t, t.get(_GlobalKeys.INCLUDE_KEY, []), included_list)
+            self._include(t, t.get(_GlobalKeys.INCLUDE, []), included_list)
             task.update(t)
 
     def task(self, name: str) -> dict:
@@ -215,7 +227,7 @@ class Config(object):
 
         task = {}
         try:
-            self._include(task, main_task.get(_GlobalKeys.INCLUDE_KEY, []), [])
+            self._include(task, main_task.get(_GlobalKeys.INCLUDE, []), [])
         except TaskException as e:
             raise TaskException("Error parsing task '{}' - {}".format(name, e))
         task.update(main_task)
@@ -223,5 +235,5 @@ class Config(object):
             jsonschema.validate(task, schema=Config._TASK_SCHEMA)
         except (jsonschema.ValidationError) as e:
             raise TaskException("Error parsing task '{}' - {}".format(name, e))
-        task.pop(_GlobalKeys.INCLUDE_KEY, None)
+        task.pop(_GlobalKeys.INCLUDE, None)
         return task
