@@ -23,8 +23,6 @@ class Task(object):
 
         if args.command:
             self.commands = args.command
-        elif args.command_append:
-            self.commands += args.append_command
         else:
             self.commands = task.get(TaskKeys.COMMANDS, [])
 
@@ -46,68 +44,71 @@ class Task(object):
         else:
             self.shell_path = None
 
-        cli_env = []
         if args.env:
-            cli_env = args.env
             self.env = {}
+            for e in args.env:
+                e_name, e_value = Task._parse_assignmet_str(e)
+                self.env[e_name] = e_value
         else:
             self.env = task.get(TaskKeys.ENV, {})
-            if args.env_append:
-                cli_env = args.env_append
 
-        for e in cli_env:
-            e_name, e_value = Task._parse_assignmet_str(e)
-            self.env[e_name] = e_value
-
-        container = task.get(TaskKeys.CONTAINER, {})
-        if args.image:
-            self.image = args.image
+        c_settings = task.get(TaskKeys.CONTAINER, {})
+        if args.c_image:
+            self.c_image = args.c_image
         else:
-            self.image = container.get(TaskKeys.Container.IMAGE)
+            self.c_image = c_settings.get(TaskKeys.C.IMAGE)
 
-        if not self.image:
+        if not self.c_image:
             return
 
         #  Container specific settings
-        if args.volumes:
-            self.volumes = args.volumes
+        if args.c_volume:
+            self.c_volumes = args.c_volume
         else:
-            self.volumes = container.get(TaskKeys.Container.VOLUMES, [])
-            if args.volumes_append:
-                self.volumes += args.volumes_append
+            self.c_volumes = c_settings.get(TaskKeys.C.VOLUMES, [])
 
-        if args.interactive is not None:
-            self.interactive = args.interactive
+        if args.c_interactive is not None:
+            self.c_interactive = args.interactive
         else:
-            self.interactive = task.get(TaskKeys.Container.INTERACTIVE, False)
+            self.c_interactive = task.get(TaskKeys.C.INTERACTIVE, False)
 
-        if args.tty is not None:
-            self.tty = args.tty
+        if args.c_tty is not None:
+            self.c_tty = args.c_tty
         else:
-            self.tty = task.get(TaskKeys.Container.TTY, False)
+            self.c_tty = task.get(TaskKeys.C.TTY, False)
 
-        if args.container_tool:
-            self.container_tool = args.container_tool
+        if args.c_flags:
+            self.c_flags = args.c_flags
         else:
-            self.container_tool = container.get(TaskKeys.Container.CONTAINER_TOOL,
-                                                self.config.default_container_tool())
+            self.c_flags = task.get(TaskKeys.C.FLAGS, None)
+        self.c_exec = args.c_exec or task.get(TaskKeys.C.EXEC, False)
+        self.c_rm = task.get(TaskKeys.C.KEEP, True) if args.c_rm is None else args.c_rm
+
+        if args.c_tool:
+            self.c_tool = args.container_tool
+        else:
+            self.c_tool = c_settings.get(TaskKeys.C.CONTAINER_TOOL,
+                                         self.config.default_container_tool())
 
     def _container_execute(self, command: str) -> int:
-        cmd_array = [self.container_tool, "run", "--rm"]
+        cmd_array = [self.c_tool]
+        cmd_array.append("exec" if self.c_exec else "exec")
         if self.cwd:
             cmd_array += ["-w", self.cwd]
-        if self.interactive:
+        if self.c_interactive:
             cmd_array.append("-i")
-        if self.tty:
+        if self.c_tty:
             cmd_array.append("-t")
+        if self.c_rm:
+            cmd_array.append("--rm")
 
-        for v in self.volumes:
+        for v in self.c_volumes:
             cmd_array += ["-v", expand_string(v, self.config.defs)]
 
         if self.args.container_flags:
             cmd_array += self.args.container_flags.split()
 
-        cmd_array.append(self.image)
+        cmd_array.append(self.c_image)
         if self.shell:
             shell = "/usr/bin/sh" if self.shell_path is None else self.shell_path
             command = "\"{}\"".format(command)
@@ -149,14 +150,14 @@ class Task(object):
             raise TaskException("Error occured running command '{}' - {}".format(cmd_str, e))
 
     def execute(self) -> int:
-        if not self.image and len(self.commands) == 0:
+        if not self.c_image and len(self.commands) == 0:
             print("No commands defined for task '{}'. Nothing to do.".format(self.name))
             return 0
 
         rc = 0
         for cmd in self.commands:
             cmd_str = expand_string(cmd, self.config.defs)
-            if self.image:
+            if self.c_image:
                 cmd_rc = self._container_execute(cmd_str)
             else:
                 cmd_rc = self._system_execute(cmd_str)
@@ -194,18 +195,22 @@ class Task(object):
         if self.long_desc:
             print_blob("Description:", self.long_desc)
 
-        if self.image:
-            print_val("Image:", self.image)
-            print_bool("Interactive container:", self.interactive)
-            print_bool("Container TTY:", self.tty)
-            if self.args.container_flags:
-                print_blob("Container flags:", self.args.container_flags)
-            if len(self.volumes) == 1:
-                print_blob("Volume:", self.volumes[0])
-            elif len(self.volumes) > 1:
+        if self.c_image:
+            if self.c_exec:
+                print_val("Execute in:", self.c_image)
+            else:
+                print_val("Run image:", self.c_image)
+                print_bool("Remove container:", self.c_rm)
+            print_bool("Container interactive:", self.c_interactive)
+            print_bool("Container TTY:", self.c_tty)
+            if self.c_flags:
+                print_blob("Container flags:", self.c_flags)
+            if len(self.c_volumes) == 1:
+                print_blob("Volume:", self.c_volumes[0])
+            elif len(self.c_volumes) > 1:
                 count = 0
                 print(PRINT_FMT.format("Volumes:", ""))
-                for vol in self.volumes:
+                for vol in self.c_volumes:
                     print_blob("     [{}]".format(count), vol)
                     count += 1
 
@@ -214,7 +219,6 @@ class Task(object):
                 print_val("Shell:", self.shell_path)
             else:
                 print_val("Shell:", "default (/usr/bin/sh)")
-        print_bool("Stop on error:", self.stop_on_error)
 
         count = 0
         if self.env:
@@ -230,7 +234,8 @@ class Task(object):
             print_blob("Command:", expand_string(self.commands[0], self.config.defs))
             return
 
-        print(PRINT_FMT.format("Commands:", ""))
+        print_bool("Stop on error:", self.stop_on_error)
+        print_val("Commands:", "")
         count = 0
         for cmd_str in self.commands:
             print_blob("     [{}]".format(count), expand_string(cmd_str, self.config.defs))

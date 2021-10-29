@@ -14,13 +14,8 @@ def _parse_arguments():
     show_group.add_argument("-d", "--dump", action='store_true', help=argparse.SUPPRESS)
     parser.add_argument("-x", "--exapnd",  action='store_true', default=False,
                         help=argparse.SUPPRESS)
-    commands_group = parser.add_mutually_exclusive_group(required=False)
-    commands_group.add_argument("-c", "--command", metavar='CMD', default=None, action='append',
-                                help='Set command to run (replace config values)')
-    commands_group.add_argument("-C", "--command-append", metavar='CMD', default=None,
-                                action='append',
-                                help='Set command to run (append to config values)')
-
+    parser.add_argument("-c", "--command", metavar='CMD', default=None, action='append',
+                        help='Set command to run (replace config values)')
     parser.add_argument("--cwd", metavar='DIR', default=None, help='Set working direcotry')
     parser.add_argument("--shell", action=argparse.BooleanOptionalAction, default=None,
                         help='Set shell usage')
@@ -28,27 +23,29 @@ def _parse_arguments():
     parser.add_argument("--stop-on-error", action=argparse.BooleanOptionalAction,
                         help='Set stop on first error behavior')
 
-    env_group = parser.add_mutually_exclusive_group(required=False)
-    env_group.add_argument("-e", "--env", metavar='CMD', default=None, action='append',
-                           help='Set environment variable (replace config values)')
-    env_group.add_argument("-E", "--env-append", metavar='CMD', default=None, action='append',
-                           help='Set environment variable (append to config values)')
-
-    parser.add_argument("-I", "--image", metavar='IMAGE', help='Container image to run the task in')
-    parser.add_argument("--container_tool", metavar='TOOL',
-                        help='Container image to run the task in')
-    vol_group = parser.add_mutually_exclusive_group(required=False)
-    vol_group.add_argument("-V","--volumes", metavar='VOLUME', action='append', default=None,
-                           help='Container volume (replace config values)')
-    vol_group.add_argument("-L","--volumes-append", metavar='VOLUME', action='append', default=None,
-                           help='Container volume (append config values)')
-    parser.add_argument("--tty", action=argparse.BooleanOptionalAction, default=None,
-                        help='Set container tty allocation')
-    parser.add_argument("--interactive", action=argparse.BooleanOptionalAction,
-                        help='Set container interactive mode')
-    parser.add_argument("--container-flags", default=None, help='Container flags')
-
+    parser.add_argument("-e", "--env", metavar='ENV', default=None, action='append',
+                        help='Set environment variable')
     parser.add_argument("-a", "--args", metavar='ARGS', help='Set args for commands')
+
+    #  Container specific arguments
+
+    parser.add_argument("--c-image", metavar='IMAGE',
+                                   help='Container image to run the task in')
+    parser.add_argument("--c-tool", metavar='TOOL',
+                        help='Container image to run the task in')
+    parser.add_argument("--c-volume", metavar='VOLUME', action='append', default=None,
+                        help='Container volume')
+    parser.add_argument("--c-tty", action=argparse.BooleanOptionalAction, default=None,
+                        help='Set container tty allocation')
+    parser.add_argument("--c-interactive", action=argparse.BooleanOptionalAction, default=None,
+                        help='Set container interactive mode')
+    parser.add_argument("--c-flags", default=None, help='Container flags')
+
+    cont_run_type_grp = parser.add_mutually_exclusive_group()
+    cont_run_type_grp.add_argument("--c-exec", action="store_true", default=False,
+                                   help='Existing container to run the task in')
+    cont_run_type_grp.add_argument("--c-rm", action=argparse.BooleanOptionalAction, default=None,
+                                   help='Set container removal after run')
 
     parser.add_argument("task", nargs='?', metavar='TASK', default=None, help='Set task to run')
 

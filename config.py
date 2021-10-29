@@ -31,12 +31,15 @@ class TaskKeys(object):
     ENV = "env"
     CWD = "cwd"
     CONTAINER = "container"
-    class Container(object):
+    class C(object):
         IMAGE = "image"
         CONTAINER_TOOL = "container_tool"
         VOLUMES = "volumes"
         INTERACTIVE = "interactive"
         TTY = "tty"
+        FLAGS = "flags"
+        EXEC = "exec"
+        KEEP = "keep"
 
 
 class AutoDefsKyes(object):
@@ -71,17 +74,17 @@ class Config(object):
             },
             TaskKeys.CONTAINER: {
                 "type": "object",
-                TaskKeys.SHELL: {"type": "boolean"},
-                TaskKeys.SHELL_PATH: {"type": "string", "minLength": 1},
-                TaskKeys.Container.IMAGE: {"type": "string", "maxLength": 64},
-                TaskKeys.Container.CONTAINER_TOOL: {"type": "string"},
-                TaskKeys.Container.VOLUMES: {
+                TaskKeys.C.IMAGE: {"type": "string", "maxLength": 64},
+                TaskKeys.C.CONTAINER_TOOL: {"type": "string"},
+                TaskKeys.C.VOLUMES: {
                     "type": "array",
                     "items": {"type": "string"}
                 },
-                TaskKeys.Container.INTERACTIVE: {"type": "boolean"},
-                TaskKeys.Container.TTY: {"type": "boolean"},
-                "required": [TaskKeys.Container.IMAGE]
+                TaskKeys.C.INTERACTIVE: {"type": "boolean"},
+                TaskKeys.C.TTY: {"type": "boolean"},
+                TaskKeys.C.FLAGS: {"type": "string"},
+                TaskKeys.C.EXEC: {"type": "boolean"},
+                "required": [TaskKeys.C.IMAGE]
             },
         }
     }
