@@ -11,8 +11,8 @@ def print_dict(d: dict):
 
 class _GlobalKeys(object):
     VERSION = "version"
-    TASKS_KEY = "tasks"
-    DEFS_KEY = "definitions"
+    TASKS = "tasks"
+    DEFINITIOS = "definitions"
     INCLUDE = "include"
     DEFAULT_TASK = "default_task"
     SUPRESS = "supress"
@@ -31,6 +31,7 @@ class TaskKeys(object):
     ENV = "env"
     CWD = "cwd"
     CONTAINER = "container"
+
     class C(object):
         IMAGE = "image"
         CONTAINER_TOOL = "container_tool"
@@ -98,9 +99,9 @@ class Config(object):
         },
         "type": "object",
         "properties": {
-            _GlobalKeys.DEFS_KEY: {"type": "object"},
+            _GlobalKeys.DEFINITIOS: {"type": "object"},
             _GlobalKeys.DEFAULT_TASK: {"type": "string"},
-            _GlobalKeys.TASKS_KEY: {"type": "object"},
+            _GlobalKeys.TASKS: {"type": "object"},
             _GlobalKeys.SUPRESS: {
                 "type": "array",
                 "items": {
@@ -132,7 +133,7 @@ class Config(object):
         minor = data["version"]["minor"]
         if major != Config._MAJOR_VER or minor > Config._MINOR_VER:
             raise TaskException(("Incompatible {} configuration file version: " +
-                    "Found:{}.{}, expected <= {}.{}").format(
+                                 "Found:{}.{}, expected <= {}.{}").format(
                 conf_file_type, major, minor, Config._MAJOR_VER, Config._MINOR_VER))
         if minor != Config._MINOR_VER:
             print("Incompatible {} configuration file minor version".format(conf_file_type))
@@ -161,11 +162,11 @@ class Config(object):
         self.global_conf, self.global_conf_path = self._read_global_conf_file()
         self.local_conf, self.local_conf_path = self._read_local_conf_file()
 
-        self.global_tasks = self.global_conf.get(_GlobalKeys.TASKS_KEY, {})
-        self.local_tasks = self.local_conf.get(_GlobalKeys.TASKS_KEY, {})
+        self.global_tasks = self.global_conf.get(_GlobalKeys.TASKS, {})
+        self.local_tasks = self.local_conf.get(_GlobalKeys.TASKS, {})
 
-        self.defs = self.global_conf.get(_GlobalKeys.DEFS_KEY, {})
-        self.defs.update(self.local_conf.get(_GlobalKeys.DEFS_KEY, {}))
+        self.defs = self.global_conf.get(_GlobalKeys.DEFINITIOS, {})
+        self.defs.update(self.local_conf.get(_GlobalKeys.DEFINITIOS, {}))
 
         self.defs[AutoDefsKyes.CWD] = os.getcwd()
         if self.local_conf:
@@ -185,7 +186,7 @@ class Config(object):
     def default_task_name(self) -> typing.Union[str, None]:
         return self.setting(_GlobalKeys.DEFAULT_TASK)
 
-    def default_container_tool(self) -> typing.Union[str, None]:
+    def default_container_tool(self) -> str:
         return self.setting(_GlobalKeys.DFLT_CONTAINER_TOOL, default="/usr/bin/docker")
 
     def default_shell_path(self) -> typing.Union[str, None]:
@@ -194,11 +195,9 @@ class Config(object):
     #  Return anything. Types is forced by schema validations.
     def setting(self, path: str, default=None) -> typing.Any:
         setting = self.local_setting(path)
-        if setting is not None:
-            return setting
-        if setting is not None:
-            self.global_setting(path)
-        return default
+        if setting is None:
+            setting = self.global_setting(path)
+        return default if setting is None else setting
 
     def _raw_task(self, name: str) -> typing.Any:
         if name is None:

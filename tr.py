@@ -8,6 +8,7 @@ from Task import Task
 
 def _parse_arguments():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--task", metavar='TASK', default=None, help='Set task')
     show_group = parser.add_mutually_exclusive_group(required=False)
     show_group.add_argument("-l", "--list", action='store_true', help='List all tasks')
     show_group.add_argument("-i", "--info", action='store_true', help='Show task info')
@@ -15,7 +16,7 @@ def _parse_arguments():
     parser.add_argument("-x", "--exapnd",  action='store_true', default=False,
                         help=argparse.SUPPRESS)
     parser.add_argument("-c", "--command", metavar='CMD', default=None, action='append',
-                        help='Set command to run (replace config values)')
+                        help='Set command to run')
     parser.add_argument("--cwd", metavar='DIR', default=None, help='Set working direcotry')
     parser.add_argument("--shell", action=argparse.BooleanOptionalAction, default=None,
                         help='Set shell usage')
@@ -30,24 +31,22 @@ def _parse_arguments():
 
     #  Container specific arguments
     parser.add_argument("--c-image", metavar='IMAGE',
-                                   help='Container image to run the task in')
+                        help='Set image or container to run the task in')
     parser.add_argument("--c-tool", metavar='TOOL',
-                        help='Container image to run the task in')
+                        help='Set container tool to use')
     parser.add_argument("--c-volume", metavar='VOLUME', action='append', default=None,
-                        help='Container volume')
+                        help='Set container volume')
     parser.add_argument("--c-tty", action=argparse.BooleanOptionalAction, default=None,
                         help='Set container tty allocation')
     parser.add_argument("--c-interactive", action=argparse.BooleanOptionalAction, default=None,
                         help='Set container interactive mode')
-    parser.add_argument("--c-flags", default=None, help='Container flags')
 
     cont_run_type_grp = parser.add_mutually_exclusive_group()
-    cont_run_type_grp.add_argument("--c-exec", action="store_true", default=False,
-                                   help='Existing container to run the task in')
     cont_run_type_grp.add_argument("--c-rm", action=argparse.BooleanOptionalAction, default=None,
                                    help='Set container removal after run')
-
-    parser.add_argument("task", nargs='?', metavar='TASK', default=None, help='Set task to run')
+    cont_run_type_grp.add_argument("--c-exec", action="store_true", default=False,
+                                   help='Run command in existing container')
+    parser.add_argument("--c-flags", metavar='FLAGS', default=None, help='Set Container flags')
 
     return parser.parse_args()
 
@@ -97,7 +96,7 @@ def dump_task(config: Config, args: Args):
     task = config.task(task_name)
     if args.exapnd:
         for i in range(len(task[TaskKeys.COMMANDS])):
-            task[TaskKeys.COMMANDS][i] = expand_string(task[TaskKeys.COMMANDS][i], config.defs)
+            task[TaskKeys.COMMANDS][i] = expand_string(task[TaskKeys.COMMANDS][i], [], config.defs)
     print(json.dumps(task, indent=4))
 
 

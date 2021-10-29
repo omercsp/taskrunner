@@ -71,12 +71,12 @@ class Task(object):
         if args.c_interactive is not None:
             self.c_interactive = args.interactive
         else:
-            self.c_interactive = task.get(TaskKeys.C.INTERACTIVE, False)
+            self.c_interactive = c_settings.get(TaskKeys.C.INTERACTIVE, False)
 
         if args.c_tty is not None:
             self.c_tty = args.c_tty
         else:
-            self.c_tty = task.get(TaskKeys.C.TTY, False)
+            self.c_tty = c_settings.get(TaskKeys.C.TTY, False)
 
         if args.c_flags:
             self.c_flags = args.c_flags
@@ -93,7 +93,7 @@ class Task(object):
 
     def _container_execute(self, command: str) -> int:
         cmd_array = [self.c_tool]
-        cmd_array.append("exec" if self.c_exec else "exec")
+        cmd_array.append("exec" if self.c_exec else "run")
         if self.cwd:
             cmd_array += ["-w", self.cwd]
         if self.c_interactive:
@@ -106,8 +106,8 @@ class Task(object):
         for v in self.c_volumes:
             cmd_array += ["-v", expand_string(v, self.cmd_args, self.config.defs)]
 
-        if self.args.container_flags:
-            cmd_array += self.args.container_flags.split()
+        if self.args.c_flags:
+            cmd_array += self.args.c_flags.split()
 
         cmd_array.append(self.c_image)
         if self.shell:
@@ -156,7 +156,7 @@ class Task(object):
 
         rc = 0
         for cmd in self.commands:
-            cmd_str = expand_string(cmd, self.cmd_args,self.config.defs)
+            cmd_str = expand_string(cmd, self.cmd_args, self.config.defs)
             if self.c_image:
                 cmd_rc = self._container_execute(cmd_str)
             else:
@@ -169,7 +169,7 @@ class Task(object):
                 rc = cmd_rc
         return rc
 
-    def show_info(self, full_details: bool=False):
+    def show_info(self, full_details: bool = False):
         PRINT_FMT = "{:<24}{:<80}"
 
         def print_val(title: str, value: typing.Any):
@@ -201,25 +201,28 @@ class Task(object):
                 print_val("Execute in:", self.c_image)
             else:
                 print_val("Run image:", self.c_image)
-                print_bool("Remove container:", self.c_rm)
+                print_bool("Container remove:", self.c_rm)
             print_bool("Container interactive:", self.c_interactive)
-            print_bool("Container TTY:", self.c_tty)
+            print_bool("Container tty:", self.c_tty)
             if self.c_flags:
                 print_blob("Container flags:", self.c_flags)
             if len(self.c_volumes) == 1:
-                print_blob("Volume:", expand_string(self.c_volumes[0], self.cmd_args, self.config.defs))
+                print_blob("Container volume:", expand_string(self.c_volumes[0], self.cmd_args,
+                           self.config.defs))
             elif len(self.c_volumes) > 1:
                 count = 0
-                print(PRINT_FMT.format("Volumes:", ""))
+                print(PRINT_FMT.format("Container volumes:", ""))
                 for vol in self.c_volumes:
-                    print_blob("     [{}]".format(count), expand_string(vol, self.cmd_args, self.config.defs))
+                    print_blob("     [{}]".format(count), expand_string(vol, self.cmd_args,
+                                                                        self.config.defs))
                     count += 1
 
         if self.shell:
+            shell_title = "Container shell:" if self.c_image else "Shell:"
             if self.shell_path:
-                print_val("Shell:", self.shell_path)
+                print_val(shell_title, self.shell_path)
             else:
-                print_val("Shell:", "default (/usr/bin/sh)")
+                print_val(shell_title, "default (/usr/bin/sh)")
 
         count = 0
         if self.env:
@@ -239,5 +242,6 @@ class Task(object):
         print_val("Commands:", "")
         count = 0
         for cmd_str in self.commands:
-            print_blob("     [{}]".format(count), expand_string(cmd_str, self.cmd_args, self.config.defs))
+            print_blob("     [{}]".format(count), expand_string(cmd_str, self.cmd_args,
+                                                                self.config.defs))
             count += 1
