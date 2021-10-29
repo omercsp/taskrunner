@@ -50,7 +50,8 @@ def init_logging():
 class StringVarExpander(object):
     var_re = re.compile(r'{{\S*?}}')
 
-    def __init__(self, defs: dict, previous_expansions: list):
+    def __init__(self, args: list, defs: dict, previous_expansions: list):
+        self.args = args
         self.previous_expansions = previous_expansions
         self.defs = defs
 
@@ -63,15 +64,22 @@ class StringVarExpander(object):
             raise TaskException("Recursive expanded var '{}'".format(var))
         if var.startswith("$"):
             if len(var) == 1:
-                raise TaskException("Empty environment variable definition")
+                raise TaskException("Empty definition")
             var = var[1:]
+            if var == "*":
+                return " ".join(self.args)
+            if var.isdigit():
+                try:
+                    return self.args[int(var)]
+                except IndexError:
+                    raise TaskException("Unknown argument index '{}'".format(int(var)))
             return os.getenv(var, "")
         value = self.defs.get(var, "")
         if type(value) is list or type(value) is dict:
             raise TaskException("Var expanded path '{}' doesn't refer to valid type".format(var))
-        next_expander = StringVarExpander(self.defs, self.previous_expansions + [var])
+        next_expander = StringVarExpander(self.args, self.defs, self.previous_expansions + [var])
         return re.sub(StringVarExpander.var_re, next_expander._expand_re, str(value))
 
 
-def expand_string(s: str, defs: dict):
-    return StringVarExpander(defs, []).expand(s)
+def expand_string(s: str, args: list, defs: dict):
+    return StringVarExpander(args, defs, []).expand(s)

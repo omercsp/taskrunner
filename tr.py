@@ -25,10 +25,10 @@ def _parse_arguments():
 
     parser.add_argument("-e", "--env", metavar='ENV', default=None, action='append',
                         help='Set environment variable')
-    parser.add_argument("-a", "--args", metavar='ARGS', help='Set args for commands')
+    parser.add_argument("-a", "--args", metavar='ARGS', action='append', default=[],
+                        help='Set args for commands')
 
     #  Container specific arguments
-
     parser.add_argument("--c-image", metavar='IMAGE',
                                    help='Container image to run the task in')
     parser.add_argument("--c-tool", metavar='TOOL',

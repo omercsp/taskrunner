@@ -58,6 +58,7 @@ class Task(object):
         else:
             self.c_image = c_settings.get(TaskKeys.C.IMAGE)
 
+        self.cmd_args = args.args
         if not self.c_image:
             return
 
@@ -103,7 +104,7 @@ class Task(object):
             cmd_array.append("--rm")
 
         for v in self.c_volumes:
-            cmd_array += ["-v", expand_string(v, self.config.defs)]
+            cmd_array += ["-v", expand_string(v, self.cmd_args, self.config.defs)]
 
         if self.args.container_flags:
             cmd_array += self.args.container_flags.split()
@@ -139,8 +140,7 @@ class Task(object):
             if self.env is None:
                 penv = None
             else:
-                #  penv = os.environ.copy()
-                penv = {}
+                penv = os.environ.copy()
                 penv.update(self.env)
             p = subprocess.Popen(cmd_array, shell=self.shell, executable=self.shell_path,
                                  stdout=sys.stdout, stderr=sys.stderr, env=penv, cwd=self.cwd)
@@ -156,7 +156,7 @@ class Task(object):
 
         rc = 0
         for cmd in self.commands:
-            cmd_str = expand_string(cmd, self.config.defs)
+            cmd_str = expand_string(cmd, self.cmd_args,self.config.defs)
             if self.c_image:
                 cmd_rc = self._container_execute(cmd_str)
             else:
@@ -169,7 +169,7 @@ class Task(object):
                 rc = cmd_rc
         return rc
 
-    def show_info(self):
+    def show_info(self, full_details: bool=False):
         PRINT_FMT = "{:<24}{:<80}"
 
         def print_val(title: str, value: typing.Any):
@@ -190,10 +190,11 @@ class Task(object):
                         continue
                     print(PRINT_FMT.format("", in_line))
 
-        print(PRINT_FMT.format("Task name:", self.name))
-        print_val("Short description:", self.short_desc)
-        if self.long_desc:
-            print_blob("Description:", self.long_desc)
+        print_val("Task name:", self.name)
+        if full_details:
+            print_val("Short description:", self.short_desc)
+            if self.long_desc:
+                print_blob("Description:", self.long_desc)
 
         if self.c_image:
             if self.c_exec:
@@ -206,12 +207,12 @@ class Task(object):
             if self.c_flags:
                 print_blob("Container flags:", self.c_flags)
             if len(self.c_volumes) == 1:
-                print_blob("Volume:", self.c_volumes[0])
+                print_blob("Volume:", expand_string(self.c_volumes[0], self.cmd_args, self.config.defs))
             elif len(self.c_volumes) > 1:
                 count = 0
                 print(PRINT_FMT.format("Volumes:", ""))
                 for vol in self.c_volumes:
-                    print_blob("     [{}]".format(count), vol)
+                    print_blob("     [{}]".format(count), expand_string(vol, self.cmd_args, self.config.defs))
                     count += 1
 
         if self.shell:
@@ -231,12 +232,12 @@ class Task(object):
             print("NOTICE: No commands defined for task")
             return
         if len(self.commands) == 1:
-            print_blob("Command:", expand_string(self.commands[0], self.config.defs))
+            print_blob("Command:", expand_string(self.commands[0], self.cmd_args, self.config.defs))
             return
 
         print_bool("Stop on error:", self.stop_on_error)
         print_val("Commands:", "")
         count = 0
         for cmd_str in self.commands:
-            print_blob("     [{}]".format(count), expand_string(cmd_str, self.config.defs))
+            print_blob("     [{}]".format(count), expand_string(cmd_str, self.cmd_args, self.config.defs))
             count += 1

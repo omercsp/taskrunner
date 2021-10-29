@@ -1,4 +1,3 @@
 * json skeleton file (?)
-* Add container support
 * Replace json path with library
 * Bash autocomplete
