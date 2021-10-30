@@ -1,3 +1,4 @@
+from typing import Container
 from common import *
 from config import *
 from argparse import Namespace as Args
@@ -13,23 +14,23 @@ class Task(object):
         self.name = name
         self.config = config
         self.args = args
-        self.short_desc = task.get(TaskKeys.SHORT_DESC, None)
-        self.long_desc = task.get(TaskKeys.LONG_DESC, None)
+        self.short_desc = task.get(TaskSchema.Keys.ShortDesc, None)
+        self.long_desc = task.get(TaskSchema.Keys.LongDesc, None)
 
         if args.stop_on_error:
             self.stop_on_error = args.stop_on_error
         else:
-            self.stop_on_error = task.get(TaskKeys.STOP_ON_ERROR, True)
+            self.stop_on_error = task.get(TaskSchema.Keys.StopOnError, True)
 
         if args.command:
             self.commands = args.command
         else:
-            self.commands = task.get(TaskKeys.COMMANDS, [])
+            self.commands = task.get(TaskSchema.Keys.Commands, [])
 
         if args.cwd:
             self.cwd = args.cwd
         else:
-            self.cwd = task.get(TaskKeys.CWD, None)
+            self.cwd = task.get(TaskSchema.Keys.Cwd, None)
         if self.cwd is not None:
             self.cwd = expand_string(self.cwd, [], config.defs)
             if len(self.cwd) == 0:
@@ -38,13 +39,13 @@ class Task(object):
         if args.shell:
             self.shell = args.shell
         else:
-            self.shell = task.get(TaskKeys.SHELL, False)
+            self.shell = task.get(TaskSchema.Keys.Shell, False)
 
         if self.shell:
             if args.shell_path:
                 self.shell_path = args.shell_path
             else:
-                self.shell_path = task.get(TaskKeys.SHELL_PATH, config.default_shell_path())
+                self.shell_path = task.get(TaskSchema.Keys.ShellPath, config.default_shell_path())
         else:
             self.shell_path = None
 
@@ -54,13 +55,13 @@ class Task(object):
                 e_name, e_value = Task._parse_assignmet_str(e)
                 self.env[e_name] = e_value
         else:
-            self.env = task.get(TaskKeys.ENV, {})
+            self.env = task.get(TaskSchema.Keys.Env, {})
 
-        c_settings = task.get(TaskKeys.CONTAINER, {})
+        c_settings = task.get(TaskSchema.Keys.Container, {})
         if args.c_image:
             self.c_image = args.c_image
         else:
-            self.c_image = c_settings.get(TaskKeys.C.IMAGE)
+            self.c_image = c_settings.get(ContSchema.Keys.Image)
 
         self.cmd_args = args.args
         if not self.c_image:
@@ -70,29 +71,29 @@ class Task(object):
         if args.c_volume:
             self.c_volumes = args.c_volume
         else:
-            self.c_volumes = c_settings.get(TaskKeys.C.VOLUMES, [])
+            self.c_volumes = c_settings.get(ContSchema.Keys.Volumes, [])
 
         if args.c_interactive is not None:
             self.c_interactive = args.interactive
         else:
-            self.c_interactive = c_settings.get(TaskKeys.C.INTERACTIVE, False)
+            self.c_interactive = c_settings.get(ContSchema.Keys.Interactive, False)
 
         if args.c_tty is not None:
             self.c_tty = args.c_tty
         else:
-            self.c_tty = c_settings.get(TaskKeys.C.TTY, False)
+            self.c_tty = c_settings.get(ContSchema.Keys.Tty, False)
 
         if args.c_flags:
             self.c_flags = args.c_flags
         else:
-            self.c_flags = task.get(TaskKeys.C.FLAGS, None)
-        self.c_exec = args.c_exec or task.get(TaskKeys.C.EXEC, False)
-        self.c_rm = task.get(TaskKeys.C.KEEP, True) if args.c_rm is None else args.c_rm
+            self.c_flags = task.get(ContSchema.Keys.Flags, None)
+        self.c_exec = args.c_exec or task.get(ContSchema.Keys.Exec, False)
+        self.c_rm = task.get(ContSchema.Keys.Keep, True) if args.c_rm is None else args.c_rm
 
         if args.c_tool:
             self.c_tool = args.container_tool
         else:
-            self.c_tool = c_settings.get(TaskKeys.C.CONTAINER_TOOL,
+            self.c_tool = c_settings.get(ContSchema.Keys.Tool,
                                          self.config.default_container_tool())
 
     def _container_execute(self, command: str) -> int:
@@ -185,7 +186,7 @@ class Task(object):
             print_val(title, "Yes" if value else "No")
 
         def print_blob(title: str, text: str):
-            if text is None or len(text)==0:
+            if text is None or len(text) == 0:
                 print(PRINT_FMT.format(title, ""))
                 return
             first = True
@@ -204,21 +205,22 @@ class Task(object):
                 print_blob("Description:", self.long_desc)
 
         if self.c_image:
+            print_val("Container details:", "")
             if self.c_exec:
-                print_val("Execute in:", self.c_image)
+                print_val("  Execute in:", self.c_image)
             else:
-                print_val("Run image:", self.c_image)
-                print_bool("Container remove:", self.c_rm)
-            print_bool("Container interactive:", self.c_interactive)
-            print_bool("Container tty:", self.c_tty)
+                print_val("  Run image:", self.c_image)
+                print_bool("  Remove:", self.c_rm)
+            print_bool("  Interactive:", self.c_interactive)
+            print_bool("  tty:", self.c_tty)
             if self.c_flags:
-                print_blob("Container flags:", self.c_flags)
+                print_blob("  Run/Exec flags:", self.c_flags)
             if len(self.c_volumes) == 1:
-                print_blob("Container volume:", expand_string(self.c_volumes[0], self.cmd_args,
+                print_blob(" Volume:", expand_string(self.c_volumes[0], self.cmd_args,
                            self.config.defs))
             elif len(self.c_volumes) > 1:
                 count = 0
-                print(PRINT_FMT.format("Container volumes:", ""))
+                print(PRINT_FMT.format("  Volumes:", ""))
                 for vol in self.c_volumes:
                     print_blob("     [{}]".format(count), expand_string(vol, self.cmd_args,
                                                                         self.config.defs))

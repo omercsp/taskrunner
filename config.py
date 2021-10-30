@@ -1,4 +1,5 @@
 from common import *
+from schemas import *
 import os
 import pathlib
 import json
@@ -9,119 +10,22 @@ def print_dict(d: dict):
     print(json.dumps(d, indent=4))
 
 
-class _GlobalKeys(object):
-    VERSION = "version"
-    TASKS = "tasks"
-    DEFINITIOS = "definitions"
-    INCLUDE = "include"
-    DEFAULT_TASK = "default_task"
-    SUPRESS = "supress"
-    DFLT_SHELL_PATH = "defult_shell_path"
-    DFLT_CONTAINER_TOOL = "default_container_tool"
-
-
-class TaskKeys(object):
-    VERSION = "version"
-    SHORT_DESC = "short_desc"
-    LONG_DESC = "description"
-    COMMANDS = "commands"
-    SHELL = "shell"
-    SHELL_PATH = "shell_path"
-    STOP_ON_ERROR = "stop_on_error"
-    ENV = "env"
-    CWD = "cwd"
-    CONTAINER = "container"
-
-    class C(object):
-        IMAGE = "image"
-        CONTAINER_TOOL = "container_tool"
-        VOLUMES = "volumes"
-        INTERACTIVE = "interactive"
-        TTY = "tty"
-        FLAGS = "flags"
-        EXEC = "exec"
-        KEEP = "keep"
-
-
-class AutoDefsKyes(object):
-    # Auto defintiosn keys
-    CONF_PATH = "CONF_PATH"
-    CWD = "CWD"
-    CWD_REL_CONF = "CWD_REL_CONF"
-
-
 class Config(object):
+    class _AutoDefsKeys(object):
+        # Auto defintiosn keys
+        CONF_PATH = "CONF_PATH"
+        CWD = "CWD"
+        CWD_REL_CONF = "CWD_REL_CONF"
+
     _CONF_FILE_NAME = "task_runner.json"
     _MAJOR_VER: int = 0
     _MINOR_VER: int = 1
-
-    _TASK_SCHEMA = {
-        "type": "object",
-        "properties": {
-            TaskKeys.SHORT_DESC: {"type": "string", "maxLength": 75},
-            TaskKeys.LONG_DESC: {"type": "string"},
-            TaskKeys.COMMANDS: {
-                "type": "array",
-                "items": {"type": "string", "minLength": 1}
-            },
-            TaskKeys.CWD: {"type": "string", "minLength": 1},
-            TaskKeys.SHELL: {"type": "boolean"},
-            TaskKeys.SHELL_PATH: {"type": "string", "minLength": 1},
-            TaskKeys.ENV: {
-                "type": "object",
-                "additionalProperties": {
-                    "type": "string"
-                }
-            },
-            TaskKeys.CONTAINER: {
-                "type": "object",
-                TaskKeys.C.IMAGE: {"type": "string", "maxLength": 64},
-                TaskKeys.C.CONTAINER_TOOL: {"type": "string"},
-                TaskKeys.C.VOLUMES: {
-                    "type": "array",
-                    "items": {"type": "string"}
-                },
-                TaskKeys.C.INTERACTIVE: {"type": "boolean"},
-                TaskKeys.C.TTY: {"type": "boolean"},
-                TaskKeys.C.FLAGS: {"type": "string"},
-                TaskKeys.C.EXEC: {"type": "boolean"},
-                "required": [TaskKeys.C.IMAGE]
-            },
-        }
-    }
-    _CONFIG_SCHEMA = {
-        TaskKeys.VERSION: {
-            "type": "object",
-            "properties": {
-                "major": {"type": "number", "minValue": 0},
-                "minor": {"type": "number", "minValue": 1}
-            }
-        },
-        "type": "object",
-        "properties": {
-            _GlobalKeys.DEFINITIOS: {"type": "object"},
-            _GlobalKeys.DEFAULT_TASK: {"type": "string"},
-            _GlobalKeys.TASKS: {"type": "object"},
-            _GlobalKeys.SUPRESS: {
-                "type": "array",
-                "items": {
-                    "type": "string",
-                    "minLength": 1
-                }
-            },
-            _GlobalKeys.DFLT_SHELL_PATH: {
-                "type": "string",
-                "minLength": 1
-            }
-        },
-        "required": [TaskKeys.VERSION]
-    }
 
     @staticmethod
     def _read_tasks_file(file_path: str) -> dict:
         try:
             data: dict = json.load(open(file_path, 'r'))
-            jsonschema.validate(data, schema=Config._CONFIG_SCHEMA)
+            jsonschema.validate(data, schema=ConfigScheme.schema)
             return data
         except (IOError, TypeError, ValueError, jsonschema.ValidationError) as e:
             raise TaskException("Error parsing {} - {}".format(file_path, e))
@@ -162,20 +66,23 @@ class Config(object):
         self.global_conf, self.global_conf_path = self._read_global_conf_file()
         self.local_conf, self.local_conf_path = self._read_local_conf_file()
 
-        self.global_tasks = self.global_conf.get(_GlobalKeys.TASKS, {})
-        self.local_tasks = self.local_conf.get(_GlobalKeys.TASKS, {})
+        self.global_tasks = self.global_conf.get(ConfigScheme.Keys.Tasks, {})
+        self.local_tasks = self.local_conf.get(ConfigScheme.Keys.Tasks, {})
 
-        self.defs = self.global_conf.get(_GlobalKeys.DEFINITIOS, {})
-        self.defs.update(self.local_conf.get(_GlobalKeys.DEFINITIOS, {}))
+        self.defs = self.global_conf.get(ConfigScheme.Keys.Definitions, {})
+        self.defs.update(self.local_conf.get(ConfigScheme.Keys.Definitions, {}))
 
-        self.defs[AutoDefsKyes.CWD] = os.getcwd()
+        self.defs[Config._AutoDefsKeys.CWD] = os.getcwd()
         if self.local_conf:
-            self.defs[AutoDefsKyes.CONF_PATH] = os.path.dirname(self.local_conf_path)
-            self.defs[AutoDefsKyes.CWD_REL_CONF] = os.path.relpath(
-                    self.defs[AutoDefsKyes.CWD], self.defs[AutoDefsKyes.CONF_PATH])
+            self.defs[Config._AutoDefsKeys.CONF_PATH] = os.path.dirname(self.local_conf_path)
+            self.defs[Config._AutoDefsKeys.CWD_REL_CONF] = os.path.relpath(
+                    self.defs[Config._AutoDefsKeys.CWD], self.defs[Config._AutoDefsKeys.CONF_PATH])
 
-        self.supressed_tasks = self.global_conf.get(_GlobalKeys.SUPRESS, [])
-        self.supressed_tasks += self.local_conf.get(_GlobalKeys.SUPRESS, [])
+        self.containers = self.global_conf.get(ConfigScheme.Keys.Containers, {})
+        self.containers.update(self.local_conf.get(ConfigScheme.Keys.Containers, {}))
+
+        self.supressed_tasks = self.global_conf.get(ConfigScheme.Keys.Supress, [])
+        self.supressed_tasks += self.local_conf.get(ConfigScheme.Keys.Supress, [])
 
     def local_setting(self, path: str):
         return dict_value(self.local_conf, path)
@@ -184,13 +91,13 @@ class Config(object):
         return dict_value(self.global_conf, path)
 
     def default_task_name(self) -> typing.Union[str, None]:
-        return self.setting(_GlobalKeys.DEFAULT_TASK)
+        return self.setting(ConfigScheme.Keys.DfltTask)
 
     def default_container_tool(self) -> str:
-        return self.setting(_GlobalKeys.DFLT_CONTAINER_TOOL, default="/usr/bin/docker")
+        return self.setting(ConfigScheme.Keys.DfltContainerTool, default="/usr/bin/docker")
 
     def default_shell_path(self) -> typing.Union[str, None]:
-        return self.setting(_GlobalKeys.DFLT_SHELL_PATH)
+        return self.setting(ConfigScheme.Keys.DfltShellPath)
 
     #  Return anything. Types is forced by schema validations.
     def setting(self, path: str, default=None) -> typing.Any:
@@ -219,7 +126,7 @@ class Config(object):
             if t is None:
                 raise TaskException("Unknown included task '{}'".format(t_name))
             included_list.append(t_name)
-            self._include(t, t.get(_GlobalKeys.INCLUDE, []), included_list)
+            self._include(t, t.get(ConfigScheme.Keys.Include, []), included_list)
             task.update(t)
 
     def task(self, name: str) -> dict:
@@ -229,13 +136,20 @@ class Config(object):
 
         task = {}
         try:
-            self._include(task, main_task.get(_GlobalKeys.INCLUDE, []), [])
+            self._include(task, main_task.get(ConfigScheme.Keys.Include, []), [])
         except TaskException as e:
             raise TaskException("Error parsing task '{}' - {}".format(name, e))
         task.update(main_task)
         try:
-            jsonschema.validate(task, schema=Config._TASK_SCHEMA)
+            jsonschema.validate(task, schema=TaskSchema.schema)
         except (jsonschema.ValidationError) as e:
             raise TaskException("Error parsing task '{}' - {}".format(name, e))
-        task.pop(_GlobalKeys.INCLUDE, None)
+        container = task.get(TaskSchema.Keys.Container, None)
+        if container is not None:
+            try:
+                task[TaskSchema.Keys.Container] = self.containers[container]
+            except KeyError:
+                raise TaskException("Unknown container setting '{}' for task '{}'".format(
+                    container, name))
+        task.pop(ConfigScheme.Keys.Include, None)
         return task

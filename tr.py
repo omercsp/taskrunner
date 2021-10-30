@@ -74,7 +74,7 @@ def list_tasks(config: Config):
         if task_name in config.supressed_tasks or (not local and name in local_tasks):
             return
         default = name == default_task_name
-        desc = task.get(TaskKeys.SHORT_DESC, "")
+        desc = task.get(TaskSchema.Keys.ShortDesc, "")
         if len(desc) > 55:
             desc = desc[:52] + "..."
         flags = "{}{}".format("*" if default else " ", "l" if local else "g")
@@ -98,8 +98,9 @@ def dump_task(config: Config, args: Args):
     task_name = _active_task_name(config, args)
     task = config.task(task_name)
     if args.exapnd:
-        for i in range(len(task[TaskKeys.COMMANDS])):
-            task[TaskKeys.COMMANDS][i] = expand_string(task[TaskKeys.COMMANDS][i], [], config.defs)
+        for i in range(len(task[TaskSchema.Keys.Commands])):
+            task[TaskSchema.Keys.Commands][i] = expand_string(task[TaskSchema.Keys.Commands][i],
+                                                              [], config.defs)
     print(json.dumps(task, indent=4))
 
 
