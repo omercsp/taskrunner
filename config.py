@@ -64,7 +64,7 @@ class Config(object):
                 "type": "array",
                 "items": {"type": "string", "minLength": 1}
             },
-            TaskKeys.CWD: {"type": "string", "maxLength": 1},
+            TaskKeys.CWD: {"type": "string", "minLength": 1},
             TaskKeys.SHELL: {"type": "boolean"},
             TaskKeys.SHELL_PATH: {"type": "string", "minLength": 1},
             TaskKeys.ENV: {

@@ -30,6 +30,10 @@ class Task(object):
             self.cwd = args.cwd
         else:
             self.cwd = task.get(TaskKeys.CWD, None)
+        if self.cwd is not None:
+            self.cwd = expand_string(self.cwd, [], config.defs)
+            if len(self.cwd) == 0:
+                raise TaskException("CWD setting for task '{}' is empty".format(name))
 
         if args.shell:
             self.shell = args.shell
@@ -116,7 +120,7 @@ class Task(object):
             cmd_array += [shell, "-c", "\"{}\"".format(command)]
         else:
             cmd_array += [command]
-        print(cmd_array)
+        print(" ".join(cmd_array))
         p = subprocess.Popen(cmd_array, stdout=sys.stdout, stderr=sys.stderr)
         return p.wait()
 
@@ -157,6 +161,8 @@ class Task(object):
         rc = 0
         for cmd in self.commands:
             cmd_str = expand_string(cmd, self.cmd_args, self.config.defs)
+            if cmd_str == "":
+                raise TaskException("Empty expanded command")
             if self.c_image:
                 cmd_rc = self._container_execute(cmd_str)
             else:
@@ -179,8 +185,9 @@ class Task(object):
             print_val(title, "Yes" if value else "No")
 
         def print_blob(title: str, text: str):
-            if text is None:
-                text = ""
+            if text is None or len(text)==0:
+                print(PRINT_FMT.format(title, ""))
+                return
             first = True
             for line in text.split('\n'):
                 for in_line in textwrap.wrap(line, width=80):

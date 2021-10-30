@@ -8,9 +8,9 @@ from Task import Task
 
 def _parse_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--task", metavar='TASK', default=None, help='Set task')
+    parser.add_argument("-t", "--task", metavar='TASK', default=None, help='Set task')
     show_group = parser.add_mutually_exclusive_group(required=False)
-    show_group.add_argument("-l", "--list", action='store_true', help='List all tasks')
+    show_group.add_argument("-l", "--list", action='store_true', help='List tasks')
     show_group.add_argument("-i", "--info", action='store_true', help='Show task info')
     show_group.add_argument("-d", "--dump", action='store_true', help=argparse.SUPPRESS)
     parser.add_argument("-x", "--exapnd",  action='store_true', default=False,
@@ -65,24 +65,27 @@ def execute_task(config: Config, args: Args) -> int:
 
 
 def list_tasks(config: Config):
-    PRINT_FMT = "{:<2}{:<24}{:<55}"
-    print(PRINT_FMT.format("L", "Name", "Description"))
-    print(PRINT_FMT.format("-", "-----", "-----------"))
+    PRINT_FMT = "{:<24}{:<3}{:<55}"
+    default_task_name = config.default_task_name()
     local_tasks = config.local_tasks.keys()
-    for task_name in local_tasks:
-        if task_name in config.supressed_tasks:
-            continue
-        task: dict = config.task(task_name)
+
+    def print_task(name: str, task: dict, local: bool):
+        # Don't show supressed tasks and global tasks overridden by local tasks
+        if task_name in config.supressed_tasks or (not local and name in local_tasks):
+            return
+        default = name == default_task_name
         desc = task.get(TaskKeys.SHORT_DESC, "")
         if len(desc) > 55:
             desc = desc[:52] + "..."
-        print(PRINT_FMT.format("l", task_name, desc[-55:], "l"))
+        flags = "{}{}".format("*" if default else " ", "l" if local else "g")
+        print(PRINT_FMT.format(task_name, flags, desc[-55:]))
+
+    print(PRINT_FMT.format("Name", "DL", "Description"))
+    print(PRINT_FMT.format("----", "--", "-----------"))
+    for task_name in local_tasks:
+        print_task(task_name, config.task(task_name), local=True)
     for task_name in config.global_tasks.keys():
-        if task_name in local_tasks or task_name in config.supressed_tasks:
-            continue
-        task: dict = config.task(task_name)
-        desc = task.get(TaskKeys.SHORT_DESC, "")
-        print(PRINT_FMT.format("g", task_name, desc, "l"))
+        print_task(task_name, config.task(task_name), local=False)
 
 
 def show_task_info(config: Config, args: Args):
