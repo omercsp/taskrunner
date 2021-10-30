@@ -37,6 +37,7 @@ class TaskSchema(object):
         Env = "env"
         Cwd = "cwd"
         Container = "container"
+        Abstract = "abstract"
     schema = {
         "type": "object",
         "properties": {
@@ -55,7 +56,8 @@ class TaskSchema(object):
                     "type": "string"
                 }
             },
-            Keys.Container:  {"type": "string", "maxLength": 64}
+            Keys.Container:  {"type": "string", "maxLength": 64},
+            Keys.Abstract: {"type": "boolean"},
         }
     }
 

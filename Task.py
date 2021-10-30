@@ -8,6 +8,11 @@ import subprocess
 
 
 class Task(object):
+    def _check_empty_setting(self, str, title):
+        if len(str) > 0:
+            return
+        raise TaskException("Expanded {} for task '{}' is empty".format(title, self.name))
+
     def __init__(self, task: dict, name: str, config: Config, args: Args) -> None:
         super().__init__()
         self._task = task
@@ -16,6 +21,8 @@ class Task(object):
         self.args = args
         self.short_desc = task.get(TaskSchema.Keys.ShortDesc, None)
         self.long_desc = task.get(TaskSchema.Keys.LongDesc, None)
+        self.abstract = task.get(TaskSchema.Keys.Abstract, False)
+        self.cmd_args = args.args
 
         if args.stop_on_error:
             self.stop_on_error = args.stop_on_error
@@ -27,14 +34,17 @@ class Task(object):
         else:
             self.commands = task.get(TaskSchema.Keys.Commands, [])
 
+        for i in range(len(self.commands)):
+            self.commands[i] = expand_string(self.commands[i], self.cmd_args, self.config.defs)
+            self._check_empty_setting(self.commands[i], "command #{}".format(i))
+
         if args.cwd:
             self.cwd = args.cwd
         else:
             self.cwd = task.get(TaskSchema.Keys.Cwd, None)
         if self.cwd is not None:
-            self.cwd = expand_string(self.cwd, [], config.defs)
-            if len(self.cwd) == 0:
-                raise TaskException("CWD setting for task '{}' is empty".format(name))
+            self.cwd = expand_string(self.cwd, self.cmd_args, config.defs)
+            self._check_empty_setting(self.cwd, "CWD")
 
         if args.shell:
             self.shell = args.shell
@@ -63,7 +73,6 @@ class Task(object):
         else:
             self.c_image = c_settings.get(ContSchema.Keys.Image)
 
-        self.cmd_args = args.args
         if not self.c_image:
             return
 
@@ -72,6 +81,9 @@ class Task(object):
             self.c_volumes = args.c_volume
         else:
             self.c_volumes = c_settings.get(ContSchema.Keys.Volumes, [])
+        for i in range(len(self.c_volumes)):
+            self.c_volumes[i] = expand_string(self.c_volumes[i], self.cmd_args, self.config.defs)
+            self._check_empty_setting(self.c_volumes[i], "container volume #{}".format(i))
 
         if args.c_interactive is not None:
             self.c_interactive = args.interactive
@@ -109,7 +121,7 @@ class Task(object):
             cmd_array.append("--rm")
 
         for v in self.c_volumes:
-            cmd_array += ["-v", expand_string(v, self.cmd_args, self.config.defs)]
+            cmd_array += ["-v", v]
 
         if self.args.c_flags:
             cmd_array += self.args.c_flags.split()
@@ -161,13 +173,10 @@ class Task(object):
 
         rc = 0
         for cmd in self.commands:
-            cmd_str = expand_string(cmd, self.cmd_args, self.config.defs)
-            if cmd_str == "":
-                raise TaskException("Empty expanded command")
             if self.c_image:
-                cmd_rc = self._container_execute(cmd_str)
+                cmd_rc = self._container_execute(cmd)
             else:
-                cmd_rc = self._system_execute(cmd_str)
+                cmd_rc = self._system_execute(cmd)
             if cmd_rc == 0:
                 continue
             if self.stop_on_error:
@@ -216,14 +225,12 @@ class Task(object):
             if self.c_flags:
                 print_blob("  Run/Exec flags:", self.c_flags)
             if len(self.c_volumes) == 1:
-                print_blob(" Volume:", expand_string(self.c_volumes[0], self.cmd_args,
-                           self.config.defs))
+                print_blob(" Volume:", self.c_volumes[0])
             elif len(self.c_volumes) > 1:
                 count = 0
                 print(PRINT_FMT.format("  Volumes:", ""))
                 for vol in self.c_volumes:
-                    print_blob("     [{}]".format(count), expand_string(vol, self.cmd_args,
-                                                                        self.config.defs))
+                    print_blob("     [{}]".format(count), vol)
                     count += 1
 
         if self.shell:
@@ -244,13 +251,12 @@ class Task(object):
             print("NOTICE: No commands defined for task")
             return
         if len(self.commands) == 1:
-            print_blob("Command:", expand_string(self.commands[0], self.cmd_args, self.config.defs))
+            print_blob("Command:", self.commands[0])
             return
 
         print_bool("Stop on error:", self.stop_on_error)
         print_val("Commands:", "")
         count = 0
-        for cmd_str in self.commands:
-            print_blob("     [{}]".format(count), expand_string(cmd_str, self.cmd_args,
-                                                                self.config.defs))
+        for cmd in self.commands:
+            print_blob("     [{}]".format(count), cmd)
             count += 1

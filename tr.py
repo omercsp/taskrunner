@@ -96,12 +96,7 @@ def show_task_info(config: Config, args: Args):
 
 def dump_task(config: Config, args: Args):
     task_name = _active_task_name(config, args)
-    task = config.task(task_name)
-    if args.exapnd:
-        for i in range(len(task[TaskSchema.Keys.Commands])):
-            task[TaskSchema.Keys.Commands][i] = expand_string(task[TaskSchema.Keys.Commands][i],
-                                                              [], config.defs)
-    print(json.dumps(task, indent=4))
+    print(json.dumps(config.task(task_name, raw=True), indent=4))
 
 
 if __name__ == "__main__":

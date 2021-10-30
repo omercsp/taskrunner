@@ -129,21 +129,27 @@ class Config(object):
             self._include(t, t.get(ConfigScheme.Keys.Include, []), included_list)
             task.update(t)
 
-    def task(self, name: str) -> dict:
+    def task(self, name: str, raw: bool = False) -> dict:
         main_task = self.local_tasks.get(name, self.global_tasks.get(name, None))
         if main_task is None or name in self.supressed_tasks:
             raise TaskException("No such task '{}'".format(name))
+
+        if raw:
+            return main_task
 
         task = {}
         try:
             self._include(task, main_task.get(ConfigScheme.Keys.Include, []), [])
         except TaskException as e:
             raise TaskException("Error parsing task '{}' - {}".format(name, e))
+        task.pop(ConfigScheme.Keys.Include, None)
         task.update(main_task)
+
         try:
             jsonschema.validate(task, schema=TaskSchema.schema)
         except (jsonschema.ValidationError) as e:
             raise TaskException("Error parsing task '{}' - {}".format(name, e))
+
         container = task.get(TaskSchema.Keys.Container, None)
         if container is not None:
             try:
@@ -151,5 +157,5 @@ class Config(object):
             except KeyError:
                 raise TaskException("Unknown container setting '{}' for task '{}'".format(
                     container, name))
-        task.pop(ConfigScheme.Keys.Include, None)
+
         return task
