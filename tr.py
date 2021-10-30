@@ -8,7 +8,7 @@ from Task import Task
 
 def _parse_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-t", "--task", metavar='TASK', default=None, help='Set task')
+    parser.add_argument("task", nargs='?', metavar='TASK', default=None, help='Set task to run')
     show_group = parser.add_mutually_exclusive_group(required=False)
     show_group.add_argument("-l", "--list", action='store_true', help='List tasks')
     show_group.add_argument("-i", "--info", action='store_true', help='Show task info')
@@ -71,7 +71,7 @@ def list_tasks(config: Config):
 
     def print_task(name: str, task: dict, local: bool):
         # Don't show supressed tasks and global tasks overridden by local tasks
-        if task_name in config.supressed_tasks or (not local and name in local_tasks):
+        if task.get(TaskSchema.Keys.Abstract, False) or (not local and name in local_tasks):
             return
         default = name == default_task_name
         desc = task.get(TaskSchema.Keys.ShortDesc, "")

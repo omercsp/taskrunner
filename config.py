@@ -25,7 +25,7 @@ class Config(object):
     def _read_tasks_file(file_path: str) -> dict:
         try:
             data: dict = json.load(open(file_path, 'r'))
-            jsonschema.validate(data, schema=ConfigScheme.schema)
+            jsonschema.validate(data, schema=ConfigSchema.schema)
             return data
         except (IOError, TypeError, ValueError, jsonschema.ValidationError) as e:
             raise TaskException("Error parsing {} - {}".format(file_path, e))
@@ -66,11 +66,11 @@ class Config(object):
         self.global_conf, self.global_conf_path = self._read_global_conf_file()
         self.local_conf, self.local_conf_path = self._read_local_conf_file()
 
-        self.global_tasks = self.global_conf.get(ConfigScheme.Keys.Tasks, {})
-        self.local_tasks = self.local_conf.get(ConfigScheme.Keys.Tasks, {})
+        self.global_tasks = self.global_conf.get(ConfigSchema.Keys.Tasks, {})
+        self.local_tasks = self.local_conf.get(ConfigSchema.Keys.Tasks, {})
 
-        self.defs = self.global_conf.get(ConfigScheme.Keys.Definitions, {})
-        self.defs.update(self.local_conf.get(ConfigScheme.Keys.Definitions, {}))
+        self.defs = self.global_conf.get(ConfigSchema.Keys.Definitions, {})
+        self.defs.update(self.local_conf.get(ConfigSchema.Keys.Definitions, {}))
 
         self.defs[Config._AutoDefsKeys.CWD] = os.getcwd()
         if self.local_conf:
@@ -78,11 +78,8 @@ class Config(object):
             self.defs[Config._AutoDefsKeys.CWD_REL_CONF] = os.path.relpath(
                     self.defs[Config._AutoDefsKeys.CWD], self.defs[Config._AutoDefsKeys.CONF_PATH])
 
-        self.containers = self.global_conf.get(ConfigScheme.Keys.Containers, {})
-        self.containers.update(self.local_conf.get(ConfigScheme.Keys.Containers, {}))
-
-        self.supressed_tasks = self.global_conf.get(ConfigScheme.Keys.Supress, [])
-        self.supressed_tasks += self.local_conf.get(ConfigScheme.Keys.Supress, [])
+        self.containers = self.global_conf.get(ConfigSchema.Keys.Containers, {})
+        self.containers.update(self.local_conf.get(ConfigSchema.Keys.Containers, {}))
 
     def local_setting(self, path: str):
         return dict_value(self.local_conf, path)
@@ -91,13 +88,13 @@ class Config(object):
         return dict_value(self.global_conf, path)
 
     def default_task_name(self) -> typing.Union[str, None]:
-        return self.setting(ConfigScheme.Keys.DfltTask)
+        return self.setting(ConfigSchema.Keys.DfltTask)
 
     def default_container_tool(self) -> str:
-        return self.setting(ConfigScheme.Keys.DfltContainerTool, default="/usr/bin/docker")
+        return self.setting(ConfigSchema.Keys.DfltContainerTool, default="/usr/bin/docker")
 
     def default_shell_path(self) -> typing.Union[str, None]:
-        return self.setting(ConfigScheme.Keys.DfltShellPath)
+        return self.setting(ConfigSchema.Keys.DfltShellPath)
 
     #  Return anything. Types is forced by schema validations.
     def setting(self, path: str, default=None) -> typing.Any:
@@ -106,49 +103,45 @@ class Config(object):
             setting = self.global_setting(path)
         return default if setting is None else setting
 
-    def _raw_task(self, name: str) -> typing.Any:
-        if name is None:
-            raise TaskException("No task name was given")
-        try:
-            if name.startswith("global/"):
-                task = self.global_tasks[name[7:]]
-            else:
-                task = self.local_tasks[name]
-        except KeyError:
-            return None
-        return task
-
-    def _include(self, task: dict, to_include: list, included_list: list):
+    def _include(self, name: str, task: dict, to_include: list, included_list: list):
         for t_name in to_include:
             if t_name in included_list:
                 continue
-            t = self._raw_task(t_name)
+            t = self.task(t_name, raw=True)
             if t is None:
-                raise TaskException("Unknown included task '{}'".format(t_name))
+                raise TaskException("Error parsing '{}' - unknown included task '{}'".format(
+                    name, t_name))
             included_list.append(t_name)
-            self._include(t, t.get(ConfigScheme.Keys.Include, []), included_list)
+            self._include(name, t, t.get(TaskSchema.Keys.Include, []), included_list)
             task.update(t)
 
     def task(self, name: str, raw: bool = False) -> dict:
-        main_task = self.local_tasks.get(name, self.global_tasks.get(name, None))
-        if main_task is None or name in self.supressed_tasks:
-            raise TaskException("No such task '{}'".format(name))
+        def _validate_task(task):
+            try:
+                jsonschema.validate(task, schema=TaskSchema.schema)
+            except (jsonschema.ValidationError) as e:
+                raise TaskException("Error parsing task '{}' - {}".format(name, e))
 
+        if name.startswith("global/"):
+            main_task = self.global_tasks.get(name[7:], None)
+            global_task = True
+        else:
+            main_task = self.local_tasks.get(name, self.global_tasks.get(name, None))
+            global_task = False
+        if main_task is None:
+            raise TaskException("No such task '{}'".format(name))
+        main_task[TaskSchema.Keys.Global] = global_task
+        if TaskSchema.Keys.Abstract not in main_task:
+            main_task[TaskSchema.Keys.Abstract] = False
         if raw:
+            _validate_task(main_task)
             return main_task
 
         task = {}
-        try:
-            self._include(task, main_task.get(ConfigScheme.Keys.Include, []), [])
-        except TaskException as e:
-            raise TaskException("Error parsing task '{}' - {}".format(name, e))
-        task.pop(ConfigScheme.Keys.Include, None)
+        self._include(name, task, main_task.get(TaskSchema.Keys.Include, []), [])
+        task.pop(TaskSchema.Keys.Include, None)
+        _validate_task(task)
         task.update(main_task)
-
-        try:
-            jsonschema.validate(task, schema=TaskSchema.schema)
-        except (jsonschema.ValidationError) as e:
-            raise TaskException("Error parsing task '{}' - {}".format(name, e))
 
         container = task.get(TaskSchema.Keys.Container, None)
         if container is not None:

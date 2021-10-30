@@ -22,12 +22,14 @@ class ContSchema(object):
             Keys.Flags: {"type": "string"},
             Keys.Exec: {"type": "boolean"},
         },
+        "additionalProperties": False,
         "required": [Keys.Image]
     }
 
 
 class TaskSchema(object):
     class Keys(object):
+        Include = "include"
         ShortDesc = "short_desc"
         LongDesc = "description"
         Commands = "commands"
@@ -38,9 +40,14 @@ class TaskSchema(object):
         Cwd = "cwd"
         Container = "container"
         Abstract = "abstract"
+        Global = "global"
     schema = {
         "type": "object",
         "properties": {
+            Keys.Include: {
+                "type": "array",
+                "items": {"type": "string", "minLength": 1}
+            },
             Keys.ShortDesc: {"type": "string", "maxLength": 75},
             Keys.LongDesc: {"type": "string"},
             Keys.Commands: {
@@ -58,18 +65,18 @@ class TaskSchema(object):
             },
             Keys.Container:  {"type": "string", "maxLength": 64},
             Keys.Abstract: {"type": "boolean"},
-        }
+            Keys.Global: {"type": "boolean"},
+        },
+        "additionalProperties": False
     }
 
 
-class ConfigScheme(object):
+class ConfigSchema(object):
     class Keys(object):
         Version = "version"
         Tasks = "tasks"
         Definitions = "definitions"
-        Include = "include"
         DfltTask = "default_task"
-        Supress = "supress"
         DfltShellPath = "defult_shell_path"
         DfltContainerTool = "default_container_tool"
         Containers = "containers"
@@ -90,17 +97,12 @@ class ConfigScheme(object):
             },
             Keys.Definitions: {"type": "object"},
             Keys.DfltTask: {"type": "string"},
-            Keys.Supress: {
-                "type": "array",
-                "items": {
-                    "type": "string",
-                    "minLength": 1
-                }
-            },
             Keys.DfltShellPath: {
                 "type": "string",
                 "minLength": 1
-            }
+            },
+            Keys.DfltContainerTool: {"type": "string", "minLength": 1}
         },
-        "required": [Keys.Version]
+        "required": [Keys.Version],
+        "additionalProperties": False
     }

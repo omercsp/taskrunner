@@ -1,4 +1,3 @@
-from typing import Container
 from common import *
 from config import *
 from argparse import Namespace as Args
@@ -22,6 +21,7 @@ class Task(object):
         self.short_desc = task.get(TaskSchema.Keys.ShortDesc, None)
         self.long_desc = task.get(TaskSchema.Keys.LongDesc, None)
         self.abstract = task.get(TaskSchema.Keys.Abstract, False)
+        self.global_task = task["global"]
         self.cmd_args = args.args
 
         if args.stop_on_error:
@@ -34,15 +34,16 @@ class Task(object):
         else:
             self.commands = task.get(TaskSchema.Keys.Commands, [])
 
-        for i in range(len(self.commands)):
-            self.commands[i] = expand_string(self.commands[i], self.cmd_args, self.config.defs)
-            self._check_empty_setting(self.commands[i], "command #{}".format(i))
+        if not self.abstract:
+            for i in range(len(self.commands)):
+                self.commands[i] = expand_string(self.commands[i], self.cmd_args, self.config.defs)
+                self._check_empty_setting(self.commands[i], "command #{}".format(i))
 
         if args.cwd:
             self.cwd = args.cwd
         else:
             self.cwd = task.get(TaskSchema.Keys.Cwd, None)
-        if self.cwd is not None:
+        if self.cwd is not None and not self.abstract:
             self.cwd = expand_string(self.cwd, self.cmd_args, config.defs)
             self._check_empty_setting(self.cwd, "CWD")
 
@@ -81,12 +82,14 @@ class Task(object):
             self.c_volumes = args.c_volume
         else:
             self.c_volumes = c_settings.get(ContSchema.Keys.Volumes, [])
-        for i in range(len(self.c_volumes)):
-            self.c_volumes[i] = expand_string(self.c_volumes[i], self.cmd_args, self.config.defs)
-            self._check_empty_setting(self.c_volumes[i], "container volume #{}".format(i))
+        if not self.abstract:
+            for i in range(len(self.c_volumes)):
+                self.c_volumes[i] = expand_string(self.c_volumes[i], self.cmd_args,
+                                                  self.config.defs)
+                self._check_empty_setting(self.c_volumes[i], "container volume #{}".format(i))
 
         if args.c_interactive is not None:
-            self.c_interactive = args.interactive
+            self.c_interactive = args.c_interactive
         else:
             self.c_interactive = c_settings.get(ContSchema.Keys.Interactive, False)
 
@@ -167,6 +170,8 @@ class Task(object):
             raise TaskException("Error occured running command '{}' - {}".format(cmd_str, e))
 
     def execute(self) -> int:
+        if self.abstract:
+            print("Task '{}' is abstract, and can't be ran directly")
         if not self.c_image and len(self.commands) == 0:
             print("No commands defined for task '{}'. Nothing to do.".format(self.name))
             return 0
@@ -208,10 +213,12 @@ class Task(object):
                     print(PRINT_FMT.format("", in_line))
 
         print_val("Task name:", self.name)
+        print_bool("Abstract", self.abstract)
         if full_details:
             print_val("Short description:", self.short_desc)
             if self.long_desc:
                 print_blob("Description:", self.long_desc)
+            print_val("Locality:", "Global" if self.global_task else "Local")
 
         if self.c_image:
             print_val("Container details:", "")
@@ -221,11 +228,11 @@ class Task(object):
                 print_val("  Run image:", self.c_image)
                 print_bool("  Remove:", self.c_rm)
             print_bool("  Interactive:", self.c_interactive)
-            print_bool("  tty:", self.c_tty)
+            print_bool("  Allocate tty:", self.c_tty)
             if self.c_flags:
                 print_blob("  Run/Exec flags:", self.c_flags)
             if len(self.c_volumes) == 1:
-                print_blob(" Volume:", self.c_volumes[0])
+                print_blob("  Volume:", self.c_volumes[0])
             elif len(self.c_volumes) > 1:
                 count = 0
                 print(PRINT_FMT.format("  Volumes:", ""))
@@ -247,6 +254,8 @@ class Task(object):
                 print_blob("     [{}]".format(count), "{}={}".format(k, v))
                 count += 1
 
+        if self.cwd:
+            print_blob("Working directory:", self.cwd)
         if len(self.commands) == 0:
             print("NOTICE: No commands defined for task")
             return
