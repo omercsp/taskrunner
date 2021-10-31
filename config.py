@@ -17,7 +17,7 @@ class Config(object):
         CWD = "CWD"
         CWD_REL_CONF = "CWD_REL_CONF"
 
-    _CONF_FILE_NAME = "task_runner.json"
+    _CONF_FILE_NAME = "tasks.json"
     _MAJOR_VER: int = 0
     _MINOR_VER: int = 1
 
@@ -44,12 +44,12 @@ class Config(object):
 
     def _read_local_conf_file(self) -> typing.Tuple[dict, str]:
         directory = os.getcwd()
-        f = directory + "/" + Config._CONF_FILE_NAME
+        f = directory + "/." + Config._CONF_FILE_NAME
         while not os.path.exists(f):
             if directory == "/":
                 return {}, ""
             directory = os.path.dirname(directory)
-            f = directory + "/" + Config._CONF_FILE_NAME
+            f = directory + "/." + Config._CONF_FILE_NAME
         data = Config._read_tasks_file(f)
         Config._check_config_file_version(data, local=True)
         return data, f
@@ -67,7 +67,11 @@ class Config(object):
         self.local_conf, self.local_conf_path = self._read_local_conf_file()
 
         self.global_tasks = self.global_conf.get(ConfigSchema.Keys.Tasks, {})
+        for task in self.global_tasks.values():
+            task[TaskSchema.Keys.Global] = True
         self.local_tasks = self.local_conf.get(ConfigSchema.Keys.Tasks, {})
+        for task in self.local_tasks.values():
+            task[TaskSchema.Keys.Global] = False
 
         self.defs = self.global_conf.get(ConfigSchema.Keys.Definitions, {})
         self.defs.update(self.local_conf.get(ConfigSchema.Keys.Definitions, {}))
@@ -80,6 +84,10 @@ class Config(object):
 
         self.containers = self.global_conf.get(ConfigSchema.Keys.Containers, {})
         self.containers.update(self.local_conf.get(ConfigSchema.Keys.Containers, {}))
+
+    def allow_global(self):
+        return self.local_conf.get(ConfigSchema.Keys.AllowGlobal, True) and \
+               self.global_conf.get(ConfigSchema.Keys.AllowGlobal, True)
 
     def local_setting(self, path: str):
         return dict_value(self.local_conf, path)
@@ -122,15 +130,12 @@ class Config(object):
             except (jsonschema.ValidationError) as e:
                 raise TaskException("Error parsing task '{}' - {}".format(name, e))
 
-        if name.startswith("global/"):
+        if name.startswith(TaskSchema.Keys.Global + "/"):
             main_task = self.global_tasks.get(name[7:], None)
-            global_task = True
         else:
             main_task = self.local_tasks.get(name, self.global_tasks.get(name, None))
-            global_task = False
         if main_task is None:
             raise TaskException("No such task '{}'".format(name))
-        main_task[TaskSchema.Keys.Global] = global_task
         if TaskSchema.Keys.Abstract not in main_task:
             main_task[TaskSchema.Keys.Abstract] = False
         if raw:

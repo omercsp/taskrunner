@@ -80,6 +80,7 @@ class ConfigSchema(object):
         DfltShellPath = "defult_shell_path"
         DfltContainerTool = "default_container_tool"
         Containers = "containers"
+        AllowGlobal = "allow_global"
     schema = {
         "type": "object",
         "properties": {
@@ -101,7 +102,8 @@ class ConfigSchema(object):
                 "type": "string",
                 "minLength": 1
             },
-            Keys.DfltContainerTool: {"type": "string", "minLength": 1}
+            Keys.DfltContainerTool: {"type": "string", "minLength": 1},
+            Keys.AllowGlobal: {"type": "boolean"}
         },
         "required": [Keys.Version],
         "additionalProperties": False

@@ -171,7 +171,10 @@ class Task(object):
 
     def execute(self) -> int:
         if self.abstract:
-            print("Task '{}' is abstract, and can't be ran directly")
+            raise TaskException("Task '{}' is abstract, and can't be ran directly")
+        if self.global_task and not self.config.setting(ConfigSchema.Keys.AllowGlobal, True):
+            raise TaskException("Global tasks aren't allowed from this location")
+
         if not self.c_image and len(self.commands) == 0:
             print("No commands defined for task '{}'. Nothing to do.".format(self.name))
             return 0
@@ -214,6 +217,7 @@ class Task(object):
 
         print_val("Task name:", self.name)
         print_bool("Abstract", self.abstract)
+        print_bool("Global:", self.global_task)
         if full_details:
             print_val("Short description:", self.short_desc)
             if self.long_desc:

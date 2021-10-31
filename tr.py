@@ -70,7 +70,9 @@ def list_tasks(config: Config):
     local_tasks = config.local_tasks.keys()
 
     def print_task(name: str, task: dict, local: bool):
-        # Don't show supressed tasks and global tasks overridden by local tasks
+        #  Don't show :
+        #  1. Abstract tasks
+        #  2. Global tasks overridden by local tasks
         if task.get(TaskSchema.Keys.Abstract, False) or (not local and name in local_tasks):
             return
         default = name == default_task_name
@@ -84,6 +86,8 @@ def list_tasks(config: Config):
     print(PRINT_FMT.format("----", "--", "-----------"))
     for task_name in local_tasks:
         print_task(task_name, config.task(task_name), local=True)
+    if not config.setting(ConfigSchema.Keys.AllowGlobal, True):
+        return
     for task_name in config.global_tasks.keys():
         print_task(task_name, config.task(task_name), local=False)
 

@@ -26,14 +26,12 @@ def _dict_path_elements(path: str) -> list:
     return elements
 
 
-def dict_value(d: dict, path: str, require=False, default=None, val_type=str) -> typing.Any:
+def dict_value(d: dict, path: str, require=False, default=None) -> typing.Any:
     elements = _dict_path_elements(path)
     field = d
     try:
         for element in elements:
             field = field[element]
-        if val_type is not None and type(field) is not val_type:
-            raise TaskException("Value type of '{}' isn't a {}".format(path, val_type))
         return field
 
     except (KeyError, IndexError):
