@@ -8,45 +8,55 @@ from Task import Task
 
 def _parse_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument("task", nargs='?', metavar='TASK', default=None, help='Set task to run')
-    show_group = parser.add_mutually_exclusive_group(required=False)
-    show_group.add_argument("-l", "--list", action='store_true', help='List tasks')
-    show_group.add_argument("-i", "--info", action='store_true', help='Show task info')
-    show_group.add_argument("-d", "--dump", action='store_true', help=argparse.SUPPRESS)
-    parser.add_argument("-x", "--exapnd",  action='store_true', default=False,
-                        help=argparse.SUPPRESS)
-    parser.add_argument("-c", "--command", metavar='CMD', default=None, action='append',
+    subparsers = parser.add_subparsers(help='commands', dest='subparsers_name')
+    subparsers.required = True
+
+    task_base_parser = argparse.ArgumentParser(add_help=False)
+    task_base_parser.add_argument('-c', '--command', metavar='CMD', default=None, action='append',
                         help='Set command to run')
-    parser.add_argument("--cwd", metavar='DIR', default=None, help='Set working direcotry')
-    parser.add_argument("--shell", action=argparse.BooleanOptionalAction, default=None,
+    task_base_parser.add_argument('--cwd', metavar='DIR', default=None, help='Set working direcotry')
+    task_base_parser.add_argument('--shell', action=argparse.BooleanOptionalAction, default=None,
                         help='Set shell usage')
-    parser.add_argument("--shell-path", metavar='PATH', help='Set shell path', default=None)
-    parser.add_argument("--stop-on-error", action=argparse.BooleanOptionalAction,
+    task_base_parser.add_argument('--shell-path', metavar='PATH', help='Set shell path', default=None)
+    task_base_parser.add_argument('--stop-on-error', action=argparse.BooleanOptionalAction,
                         help='Set stop on first error behavior')
 
-    parser.add_argument("-e", "--env", metavar='ENV', default=None, action='append',
+    task_base_parser.add_argument('-e', '--env', metavar='ENV', default=None, action='append',
                         help='Set environment variable')
-    parser.add_argument("-a", "--args", metavar='ARGS', action='append', default=[],
+    task_base_parser.add_argument('-a', '--args', metavar='ARGS', action='append', default=[],
                         help='Set args for commands')
 
     #  Container specific arguments
-    parser.add_argument("--c-image", metavar='IMAGE',
+    task_base_parser.add_argument('--c-image', metavar='IMAGE',
                         help='Set image or container to run the task in')
-    parser.add_argument("--c-tool", metavar='TOOL',
+    task_base_parser.add_argument('--c-tool', metavar='TOOL',
                         help='Set container tool to use')
-    parser.add_argument("--c-volume", metavar='VOLUME', action='append', default=None,
+    task_base_parser.add_argument('--c-volume', metavar='VOLUME', action='append', default=None,
                         help='Set container volume')
-    parser.add_argument("--c-tty", action=argparse.BooleanOptionalAction, default=None,
+    task_base_parser.add_argument('--c-tty', action=argparse.BooleanOptionalAction, default=None,
                         help='Set container tty allocation')
-    parser.add_argument("--c-interactive", action=argparse.BooleanOptionalAction, default=None,
+    task_base_parser.add_argument('--c-interactive', action=argparse.BooleanOptionalAction, default=None,
                         help='Set container interactive mode')
 
-    cont_run_type_grp = parser.add_mutually_exclusive_group()
-    cont_run_type_grp.add_argument("--c-rm", action=argparse.BooleanOptionalAction, default=None,
+    cont_run_type_grp = task_base_parser.add_mutually_exclusive_group()
+    cont_run_type_grp.add_argument('--c-rm', action=argparse.BooleanOptionalAction, default=None,
                                    help='Set container removal after run')
-    cont_run_type_grp.add_argument("--c-exec", action="store_true", default=False,
+    cont_run_type_grp.add_argument('--c-exec', action='store_true', default=False,
                                    help='Run command in existing container')
-    parser.add_argument("--c-flags", metavar='FLAGS', default=None, help='Set Container flags')
+    task_base_parser.add_argument('--c-flags', metavar='FLAGS', default=None, help='Set Container flags')
+
+    task_base_parser.add_argument('task', nargs='?', metavar='TASK', default=None, help='Set task to run')
+    show_group = task_base_parser.add_mutually_exclusive_group(required=False)
+    show_group.add_argument('-l', '--list', action='store_true', help='List tasks')
+    show_group.add_argument('-i', '--info', action='store_true', help='Show task info')
+    show_group.add_argument('-d', '--dump', action='store_true', help=argparse.SUPPRESS)
+
+    subparsers.add_parser('exec', help='Execute a task', parents=[task_base_parser])
+    subparsers.add_parser('info', help='Show task info', parents=[task_base_parser])
+    subparsers.add_parser('list', help='List tasks')
+    subparsers.add_parser('dump', help='Dump a task', parents=[task_base_parser])
+    task_base_parser.add_argument('-x', '--exapnd',  action='store_true', default=False,
+                                  help='expand variables in json')
 
     return parser.parse_args()
 
@@ -108,11 +118,12 @@ if __name__ == "__main__":
     try:
         config = Config()
         args = _parse_arguments()
-        if args.list:
+
+        if args.subparsers_name == "list":
             list_tasks(config)
-        elif args.info:
+        elif args.subparsers_name == "info":
             show_task_info(config, args)
-        elif args.dump:
+        elif args.subparsers_name == "dump":
             dump_task(config, args)
         else:
             exit(execute_task(config, args))
