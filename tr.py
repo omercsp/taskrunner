@@ -35,15 +35,24 @@ def _parse_arguments():
                         help='Set container volume')
     task_base_parser.add_argument('--c-tty', action=argparse.BooleanOptionalAction, default=None,
                         help='Set container tty allocation')
-    task_base_parser.add_argument('--c-interactive', action=argparse.BooleanOptionalAction, default=None,
-                        help='Set container interactive mode')
+    task_base_parser.add_argument('--c-interactive', action=argparse.BooleanOptionalAction,
+                                  default=None, help='Set container interactive mode')
 
     cont_run_type_grp = task_base_parser.add_mutually_exclusive_group()
     cont_run_type_grp.add_argument('--c-rm', action=argparse.BooleanOptionalAction, default=None,
                                    help='Set container removal after run')
     cont_run_type_grp.add_argument('--c-exec', action='store_true', default=False,
                                    help='Run command in existing container')
-    task_base_parser.add_argument('--c-flags', metavar='FLAGS', default=None, help='Set Container flags')
+    task_base_parser.add_argument('--c-flags', metavar='FLAGS', default=None,
+                                  help='Set Container flags')
+    task_base_parser.add_argument('--c-shell', action='store_true', default=False,
+                                  help='Wrap container command in shell')
+    task_base_parser.add_argument('--c-shell-path', action='store_true', default=None,
+                                  help='Set container shell path')
+    task_base_parser.add_argument('--c-env', metavar='ENV', default=None, action='append',
+                                  help='Set container environment variable')
+    task_base_parser.add_argument('--c-cwd', metavar='DIR', default=None,
+                                  help='Set container working direcotry')
 
     task_base_parser.add_argument('task', nargs='?', metavar='TASK', default=None, help='Set task to run')
     show_group = task_base_parser.add_mutually_exclusive_group(required=False)

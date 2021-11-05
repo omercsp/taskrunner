@@ -47,18 +47,13 @@ class Task(object):
             self.cwd = expand_string(self.cwd, self.cmd_args, config.defs)
             self._check_empty_setting(self.cwd, "CWD")
 
-        if args.shell:
-            self.shell = args.shell
-        else:
-            self.shell = task.get(TaskSchema.Keys.Shell, False)
-
-        if self.shell:
+        if args.shell or task.get(TaskSchema.Keys.Shell, False):
             if args.shell_path:
-                self.shell_path = args.shell_path
+                self.shell = args.shell_path
             else:
-                self.shell_path = task.get(TaskSchema.Keys.ShellPath, config.default_shell_path())
+                self.shell = task.get(TaskSchema.Keys.ShellPath, config.default_shell_path())
         else:
-            self.shell_path = None
+            self.shell = None
 
         if args.env:
             self.env = {}
@@ -66,7 +61,7 @@ class Task(object):
                 e_name, e_value = Task._parse_assignmet_str(e)
                 self.env[e_name] = e_value
         else:
-            self.env = task.get(TaskSchema.Keys.Env, {})
+            self.env = task.get(TaskSchema.Keys.Env, None)
 
         c_settings = task.get(TaskSchema.Keys.Container, {})
         if args.c_image:
@@ -111,11 +106,22 @@ class Task(object):
             self.c_tool = c_settings.get(ContSchema.Keys.Tool,
                                          self.config.default_container_tool())
 
+        if args.c_shell or c_settings.get(ContSchema.Keys.Shell, False):
+            if args.c_shell_path:
+                self.c_shell = args.c_shell_path
+            else:
+                self.c_shell = c_settings.get(ContSchema.Keys.ShellPath,
+                                            self.config.default_container_shell_path())
+        if args.c_cwd:
+            self.c_cwd = args.c_cwd
+        else:
+            self.c_cwd = c_settings.get(ContSchema.Keys.Cwd, None)
+
     def _container_execute(self, command: str) -> int:
         cmd_array = [self.c_tool]
         cmd_array.append("exec" if self.c_exec else "run")
-        if self.cwd:
-            cmd_array += ["-w", self.cwd]
+        if self.c_cwd:
+            cmd_array += ["-w", expand_string(self.c_cwd, self.cmd_args, self.config.defs)]
         if self.c_interactive:
             cmd_array.append("-i")
         if self.c_tty:
@@ -130,12 +136,9 @@ class Task(object):
             cmd_array += self.args.c_flags.split()
 
         cmd_array.append(self.c_image)
-        if self.shell:
-            shell = "/usr/bin/sh" if self.shell_path is None else self.shell_path
-            command = "\"{}\"".format(command)
-            cmd_array += [shell, "-c", "\"{}\"".format(command)]
-        else:
-            cmd_array += [command]
+        if self.c_shell:
+            cmd_array += ["/usr/bin/sh" if self.c_shell is None else self.c_shell, "-c"]
+        cmd_array += [command]
         print(" ".join(cmd_array))
         p = subprocess.Popen(cmd_array, stdout=sys.stdout, stderr=sys.stderr)
         return p.wait()
@@ -162,7 +165,7 @@ class Task(object):
             else:
                 penv = os.environ.copy()
                 penv.update(self.env)
-            p = subprocess.Popen(cmd_array, shell=self.shell, executable=self.shell_path,
+            p = subprocess.Popen(cmd_array, shell=self.shell is not None, executable=self.shell,
                                  stdout=sys.stdout, stderr=sys.stderr, env=penv, cwd=self.cwd)
             return p.wait()
 
@@ -223,6 +226,13 @@ class Task(object):
             if self.long_desc:
                 print_blob("Description:", self.long_desc)
             print_val("Locality:", "Global" if self.global_task else "Local")
+        print_bool("Shell: ", self.shell is not None)
+        if self.shell:
+            shell_title = "Shell path:"
+            if self.shell:
+                print_val(shell_title, self.shell)
+            else:
+                print_val(shell_title, "default (/usr/bin/sh)")
 
         if self.c_image:
             print_val("Container details:", "")
@@ -233,6 +243,9 @@ class Task(object):
                 print_bool("  Remove:", self.c_rm)
             print_bool("  Interactive:", self.c_interactive)
             print_bool("  Allocate tty:", self.c_tty)
+            print_bool("  Shell: ", self.c_shell is not None)
+            if self.c_shell:
+                print_val( "  Shell path:", self.c_shell)
             if self.c_flags:
                 print_blob("  Run/Exec flags:", self.c_flags)
             if len(self.c_volumes) == 1:
@@ -244,12 +257,6 @@ class Task(object):
                     print_blob("     [{}]".format(count), vol)
                     count += 1
 
-        if self.shell:
-            shell_title = "Container shell:" if self.c_image else "Shell:"
-            if self.shell_path:
-                print_val(shell_title, self.shell_path)
-            else:
-                print_val(shell_title, "default (/usr/bin/sh)")
 
         count = 0
         if self.env:

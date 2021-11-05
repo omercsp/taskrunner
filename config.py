@@ -101,8 +101,11 @@ class Config(object):
     def default_container_tool(self) -> str:
         return self.setting(ConfigSchema.Keys.DfltContainerTool, default="/usr/bin/docker")
 
+    def default_container_shell_path(self) -> str:
+        return self.setting(ConfigSchema.Keys.DfltContainerShellPath, default="/usr/bin/sh")
+
     def default_shell_path(self) -> typing.Union[str, None]:
-        return self.setting(ConfigSchema.Keys.DfltShellPath)
+        return self.setting(ConfigSchema.Keys.DfltShellPath, None)
 
     #  Return anything. Types is forced by schema validations.
     def setting(self, path: str, default=None) -> typing.Any:

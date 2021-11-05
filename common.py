@@ -81,3 +81,9 @@ class StringVarExpander(object):
 
 def expand_string(s: str, args: list, defs: dict):
     return StringVarExpander(args, defs, []).expand(s)
+
+def parse_assignmet_str(s: str):
+    parts = s.split('=', maxsplit=1)
+    if len(parts) == 1:
+        return s, ""
+    return parts[0], str(parts[1])

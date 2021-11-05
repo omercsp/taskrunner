@@ -1,3 +1,9 @@
+class CommonKeys(object):
+    Shell = "shell"
+    ShellPath = "shell_path"
+    Env = "env"
+    Cwd = "cwd"
+
 class ContSchema(object):
     class Keys(object):
         Image = "image"
@@ -8,6 +14,11 @@ class ContSchema(object):
         Flags = "flags"
         Exec = "exec"
         Keep = "keep"
+        Shell = CommonKeys.Shell
+        ShellPath = CommonKeys.ShellPath
+        Env = CommonKeys.Env
+        Cwd = CommonKeys.Cwd
+
     schema = {
         "type": "object",
         "properties": {
@@ -21,6 +32,15 @@ class ContSchema(object):
             Keys.Tty: {"type": "boolean"},
             Keys.Flags: {"type": "string"},
             Keys.Exec: {"type": "boolean"},
+            Keys.Cwd: {"type": "string", "minLength": 1},
+            Keys.Shell: {"type": "boolean"},
+            Keys.ShellPath: {"type": "string", "minLength": 1},
+            Keys.Env: {
+                "type": "object",
+                "additionalProperties": {
+                    "type": "string"
+                }
+            },
         },
         "additionalProperties": False,
         "required": [Keys.Image]
@@ -30,14 +50,14 @@ class ContSchema(object):
 class TaskSchema(object):
     class Keys(object):
         Include = "include"
+        Shell = CommonKeys.Shell
+        ShellPath = CommonKeys.ShellPath
+        Env = CommonKeys.Env
+        Cwd = CommonKeys.Cwd
         ShortDesc = "short_desc"
         LongDesc = "description"
         Commands = "commands"
-        Shell = "shell"
-        ShellPath = "shell_path"
         StopOnError = "stop_on_error"
-        Env = "env"
-        Cwd = "cwd"
         Container = "container"
         Abstract = "abstract"
         Global = "global"
@@ -81,6 +101,7 @@ class ConfigSchema(object):
         Definitions = "definitions"
         DfltTask = "default_task"
         DfltShellPath = "defult_shell_path"
+        DfltContainerShellPath = "defult_container_shell_path"
         DfltContainerTool = "default_container_tool"
         Containers = "containers"
         AllowGlobal = "allow_global"
