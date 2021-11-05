@@ -73,6 +73,9 @@ class TaskSchema(object):
 
 class ConfigSchema(object):
     class Keys(object):
+        class Ver(object):
+            Major = "major"
+            Minor = "minor"
         Version = "version"
         Tasks = "tasks"
         Definitions = "definitions"
@@ -87,8 +90,8 @@ class ConfigSchema(object):
             Keys.Version: {
                 "type": "object",
                 "properties": {
-                    "major": {"type": "number", "minValue": 0},
-                    "minor": {"type": "number", "minValue": 1}
+                    Keys.Ver.Major: {"type": "number", "minValue": 0},
+                    Keys.Ver.Minor: {"type": "number", "minValue": 1}
                 }
             },
             Keys.Tasks: {"type": "object"},
