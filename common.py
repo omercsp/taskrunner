@@ -48,9 +48,9 @@ def init_logging():
 class StringVarExpander(object):
     var_re = re.compile(r'{{\S*?}}')
 
-    def __init__(self, args: list, defs: dict, previous_expansions: list):
+    def __init__(self, args: list, defs: dict, previous_expansions: set = None):
         self.args = args
-        self.previous_expansions = previous_expansions
+        self.previous_expansions = set() if previous_expansions is None else previous_expansions
         self.defs = defs
 
     def expand(self, s: str) -> str:
@@ -75,12 +75,17 @@ class StringVarExpander(object):
         value = self.defs.get(var, "")
         if type(value) is list or type(value) is dict:
             raise TaskException("Var expanded path '{}' doesn't refer to valid type".format(var))
-        next_expander = StringVarExpander(self.args, self.defs, self.previous_expansions + [var])
+        self.previous_expansions.add(var)
+        next_expander = StringVarExpander(self.args, self.defs, self.previous_expansions)
         return re.sub(StringVarExpander.var_re, next_expander._expand_re, str(value))
 
 
-def expand_string(s: str, args: list, defs: dict):
-    return StringVarExpander(args, defs, []).expand(s)
+def expand_string(s: str, args: typing.Union[list, None], defs: dict):
+    if args is None:
+        s = re.sub(r'({{)(\$\S*?)(}})', r"\2", s)
+        args = []
+    return StringVarExpander(args, defs, set()).expand(s)
+
 
 def parse_assignmet_str(s: str):
     parts = s.split('=', maxsplit=1)
