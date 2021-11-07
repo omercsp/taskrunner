@@ -92,11 +92,18 @@ class Task(object):
         if args.arg:
             self.cli_args = args.arg
 
-
     def _expand(self, s: str) -> str:
         return expand_string(s, self.cli_args, self.config.defs)
 
-    def _container_run(self, command: str) -> int:
+    def _simple_cmd_array(self, cmd) -> list:
+        if self.shell:
+            return [cmd]
+        try:
+            return shlex.split(cmd)
+        except ValueError as e:
+            raise TaskException("Illegal command '{}' for task '{}' - {}".format(cmd, self.name, e))
+
+    def _container_cmd_array(self, cmd) -> list:
         cmd_array = [self.c_tool]
         cmd_array.append("exec" if self.c_exec else "run")
         if self.c_cwd:
@@ -116,31 +123,23 @@ class Task(object):
         cmd_array.append(self.c_image)
         if self.c_shell:
             cmd_array += ["/usr/bin/sh" if self.c_shell is None else self.c_shell, "-c"]
-        cmd_array += [command]
-        p = subprocess.Popen(cmd_array, stdout=sys.stdout, stderr=sys.stderr)
-        return p.wait()
+        cmd_array += [cmd]
+        return cmd_array
 
-    def _system_run(self, cmd_str: str) -> int:
-        if self.shell:
-            cmd_array = [cmd_str]
-        else:
-            try:
-                cmd_array = shlex.split(cmd_str)
-            except ValueError as e:
-                raise TaskException("Illegal command '{}' for task '{}' - {}".format(
-                    cmd_str, self.name, e))
+    def _run_cmd(self, cmd: list, cmd_str: str) -> int:
         try:
             if self.env is None:
                 penv = None
             else:
                 penv = os.environ.copy()
                 penv.update(self.env)
-            p = subprocess.Popen(cmd_array, shell=self.shell is not None, executable=self.shell,
+            p = subprocess.Popen(cmd, shell=self.shell is not None, executable=self.shell,
                                  stdout=sys.stdout, stderr=sys.stderr, env=penv, cwd=self.cwd)
             return p.wait()
 
         except (OSError, FileNotFoundError) as e:
             raise TaskException("Error occured running command '{}' - {}".format(cmd_str, e))
+
 
     def run(self) -> int:
         if self.abstract:
@@ -155,10 +154,8 @@ class Task(object):
         rc = 0
         for cmd in self.commands:
             cmd = self._expand(cmd)
-            if self.c_image:
-                cmd_rc = self._container_run(cmd)
-            else:
-                cmd_rc = self._system_run(cmd)
+            cmd_array = self._container_cmd_array(cmd) if self.c_image else self._simple_cmd_array(cmd)
+            cmd_rc = self._run_cmd(cmd_array, cmd)
             if cmd_rc == 0:
                 continue
             if self.stop_on_error:
