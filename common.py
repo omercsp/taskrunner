@@ -4,6 +4,7 @@ import re
 import typing
 import os
 import traceback
+import json
 
 
 debug=0
@@ -96,5 +97,10 @@ def parse_assignmet_str(s: str):
         return s, ""
     return parts[0], str(parts[1])
 
+
 def bt():
     traceback.print_stack(file=sys.stdout)
+
+
+def print_dict(d: dict):
+    print(json.dumps(d, indent=4))

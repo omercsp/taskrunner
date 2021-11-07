@@ -6,10 +6,6 @@ import json
 import jsonschema
 
 
-def print_dict(d: dict):
-    print(json.dumps(d, indent=4))
-
-
 class Config(object):
     class _AutoDefsKeys(object):
         # Auto defintiosn keys
@@ -82,9 +78,6 @@ class Config(object):
             self.defs[Config._AutoDefsKeys.CWD_REL_CONF] = os.path.relpath(
                     self.defs[Config._AutoDefsKeys.CWD], self.defs[Config._AutoDefsKeys.CONF_PATH])
 
-        self.containers = self.global_conf.get(ConfigSchema.Keys.Containers, {})
-        self.containers.update(self.local_conf.get(ConfigSchema.Keys.Containers, {}))
-
     def allow_global(self):
         return self.local_conf.get(ConfigSchema.Keys.AllowGlobal, True) and \
                self.global_conf.get(ConfigSchema.Keys.AllowGlobal, True)
@@ -114,50 +107,40 @@ class Config(object):
             setting = self.global_setting(path)
         return default if setting is None else setting
 
-    def _include(self, name: str, task: dict, to_include: list, included_list: list):
-        for inc_task_name in to_include:
-            if inc_task_name in included_list:
-                continue
-            task_search_name, glbl = task_name_and_global(inc_task_name)
-            t = self.task(task_search_name, glbl=glbl, raw=True)
-            if t is None:
-                raise TaskException("Error parsing '{}' - unknown included task '{}'".format(
-                    name, inc_task_name))
-            t = t.copy()
-            included_list.append(inc_task_name)
-            self._include(name, t, t.get(TaskSchema.Keys.Include, []), included_list)
-            task.update(t)
-
-    def task(self, name: str, glbl: bool = False, raw: bool = False) -> dict:
-        def _validate_task(task):
-            try:
-                jsonschema.validate(task, schema=TaskSchema.schema)
-            except (jsonschema.ValidationError) as e:
-                raise TaskException("Error parsing task '{}' - {}".format(name, e))
-
-        if glbl:
-            base_task = self.global_tasks.get(name, None)
+    def raw_task(self, name:str) -> dict:
+        if name.startswith(Config.__G_PREFIX):
+            return self.global_tasks.get(name[len(Config.__G_PREFIX):], None)
         else:
-            base_task = self.local_tasks.get(name, self.global_tasks.get(name, None))
+            return self.local_tasks.get(name, self.global_tasks.get(name, None))
+
+    def _task(self, name: str, included_list: set):
+        if name in included_list:
+            raise TaskException("Include loop detected for task '{}'".format(name))
+
+        base_task = self.raw_task(name)
+        included_list.add(Config.__G_PREFIX + name if name.startswith(Config.__G_PREFIX) else name)
 
         if base_task is None:
             raise TaskException("No such task '{}'".format(name))
-        if raw:
+
+        included_task_name = base_task.get(TaskSchema.Keys.Include, None)
+        if included_task_name is None:
             return base_task
 
-        task = {}
-        self._include(name, task, base_task.get(TaskSchema.Keys.Include, []), [])
-        task.update(base_task)
+        # We about to modify the included task, so deep copy it
+        included_task = self._task(included_task_name, included_list=included_list).copy()
+        included_task.update(base_task)
+        included_task[TaskSchema.Keys.Abstract] = base_task.get(TaskSchema.Keys.Abstract, False)
+        return included_task
 
-        task.pop(TaskSchema.Keys.Include, None)
-        if TaskSchema.Keys.Abstract not in base_task:
-            task[TaskSchema.Keys.Abstract] = False
-        _validate_task(task)
+    def task(self, name: str, glbl: bool = False) -> dict:
+        if glbl and not name.startswith(Config.__G_PREFIX):
+            name = Config.__G_PREFIX + name
+        task = self._task(name, set())
+        try:
+            jsonschema.validate(task, schema=TaskSchema.schema)
+        except (jsonschema.ValidationError, TaskException) as e:
+            raise TaskException("Error parsing task '{}' - {}".format(name, e))
         return task
 
-def task_name_and_global(name) -> typing.Tuple[str, bool]:
-    if name.startswith(TaskSchema.Keys.Global + "/"):
-        return name[7:], True
-    else:
-        return name, False
-
+    __G_PREFIX = "g/"

@@ -64,10 +64,7 @@ class TaskSchema(object):
     schema = {
         "type": "object",
         "properties": {
-            Keys.Include: {
-                "type": "array",
-                "items": {"type": "string", "minLength": 1}
-            },
+            Keys.Include: { "type": "string", "minLength": 1},
             Keys.ShortDesc: {"type": "string", "maxLength": 75},
             Keys.LongDesc: {"type": "string"},
             Keys.Commands: {
@@ -103,7 +100,6 @@ class ConfigSchema(object):
         DfltShellPath = "defult_shell_path"
         DfltContainerShellPath = "defult_container_shell_path"
         DfltContainerTool = "default_container_tool"
-        Containers = "containers"
         AllowGlobal = "allow_global"
     schema = {
         "type": "object",
@@ -116,10 +112,6 @@ class ConfigSchema(object):
                 }
             },
             Keys.Tasks: {"type": "object"},
-            Keys.Containers:  {
-                "type": "object",
-                "additionalProperties": ContSchema.schema
-            },
             Keys.Definitions: {"type": "object"},
             Keys.DfltTask: {"type": "string"},
             Keys.DfltShellPath: {

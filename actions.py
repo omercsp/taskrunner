@@ -108,12 +108,7 @@ def list_tasks(config: Config, show_all: bool):
 
     def print_task(name: str, task: dict):
         t = Task(task, name, config=config)
-        #  print("{} - {}".format(name, t.global_task))
-        #  return
-        #  Don't show:
-        #  1. Abstract tasks
-        #  2. Global tasks overridden by local tasks
-        if not show_all and (t.abstract or (t.global_task and name in local_tasks)):
+        if not show_all and t.abstract:
             return
         desc = "" if t.short_desc is None else t.short_desc
         if len(desc) > 55:
@@ -135,6 +130,8 @@ def list_tasks(config: Config, show_all: bool):
     if not config.setting(ConfigSchema.Keys.AllowGlobal, True):
         return
     for task_name in config.global_tasks.keys():
+        if not show_all and task_name in local_tasks:
+            continue
         print_task(task_name, config.task(task_name, glbl=True))
 
 
@@ -146,4 +143,4 @@ def run_task(config: Config, args: Args) -> int:
 
 def dump_task(config: Config, args: Args):
     task_name = _active_task_name(config, args)
-    print(json.dumps(config.task(task_name, glbl=args.global_task, raw=True), indent=4))
+    print(json.dumps(config.raw_task(task_name), indent=4))
