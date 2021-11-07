@@ -10,7 +10,8 @@ def _active_task_name(config: Config, args) -> str:
 
 
 __PRINT_FMT = "{:<24}{:<80}"
-def show_task_info(args: Args, config: Config, full_details: bool) -> None:
+
+def _show_task(task: Task, config: Config, full_details: bool) -> None:
     def print_val(title: str, value: typing.Any):
         print(__PRINT_FMT.format("{}".format(title), value))
 
@@ -36,8 +37,6 @@ def show_task_info(args: Args, config: Config, full_details: bool) -> None:
             return "[n/a - empty string)]"
         return ret
 
-    task_name = _active_task_name(config, args)
-    task = Task(config.task(task_name, glbl=args.global_task), task_name, config)
     print_val("Task name:", task.name)
     if full_details:
         print_val("Short description:", task.short_desc if task.short_desc else "")
@@ -103,6 +102,11 @@ def show_task_info(args: Args, config: Config, full_details: bool) -> None:
         print_blob("     [{}]".format(count), info_expanded_str(cmd))
         count += 1
 
+def show_task_info(args: Args, config: Config) -> None:
+    task_name = _active_task_name(config, args)
+    task = Task(config.task(task_name, glbl=args.global_task), task_name, config)
+    _show_task(task, config, True)
+
 def list_tasks(config: Config, show_all: bool):
     PRINT_FMT = "{:<24}{:<6}{:<55}"
     default_task_name = config.default_task_name()
@@ -141,6 +145,9 @@ def run_task(config: Config, args: Args) -> int:
     task_name = _active_task_name(config, args)
     task = Task(config.task(task_name), task_name, config)
     task.args_update(args)
+    if args.summary:
+        _show_task(task, config, False)
+        print("-" * 70)
     return task.run()
 
 def dump_task(config: Config, args: Args):

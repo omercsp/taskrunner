@@ -26,6 +26,8 @@ def _parse_arguments():
                         help='Set an environment variable')
     run_parser.add_argument('-a', '--arg', metavar='ARG', action='append', default=[],
                         help='Set an argument')
+    run_parser.add_argument('-s', '--summary', action='store_true', default=False,
+                            help='show task summary before run')
 
     #  Container specific arguments
     run_parser.add_argument('--c-image', metavar='IMAGE',
@@ -76,7 +78,7 @@ if __name__ == "__main__":
         if args.subparsers_name == "list":
             actions.list_tasks(config, args.all)
         elif args.subparsers_name == "info":
-            actions.show_task_info(args=args, config=config, full_details=True)
+            actions.show_task_info(args=args, config=config)
         elif args.subparsers_name == "dump":
             actions.dump_task(config, args)
         else:

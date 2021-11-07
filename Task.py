@@ -117,7 +117,6 @@ class Task(object):
         if self.c_shell:
             cmd_array += ["/usr/bin/sh" if self.c_shell is None else self.c_shell, "-c"]
         cmd_array += [command]
-        print(cmd_array)
         p = subprocess.Popen(cmd_array, stdout=sys.stdout, stderr=sys.stderr)
         return p.wait()
 
