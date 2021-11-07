@@ -71,8 +71,8 @@ def _parse_arguments():
 if __name__ == "__main__":
     init_logging()
     try:
-        config = Config()
         args = _parse_arguments()
+        config = Config()
         if args.subparsers_name == "list":
             actions.list_tasks(config, args.all)
         elif args.subparsers_name == "info":

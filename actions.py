@@ -33,7 +33,7 @@ def show_task_info(args: Args, config: Config, full_details: bool) -> None:
     def info_expanded_str(cmd_str: str) -> str:
         ret = expand_string(cmd_str, None, config.defs).strip()
         if len(ret) == 0:
-            return "n/a (empty command)"
+            return "[n/a - empty string)]"
         return ret
 
     task_name = _active_task_name(config, args)
@@ -75,6 +75,8 @@ def show_task_info(args: Args, config: Config, full_details: bool) -> None:
             print_val( "  Shell path:", task.c_shell)
         if task.c_flags:
             print_blob("  Run/Exec flags:", task.c_flags)
+        if task.c_cwd:
+            print_blob("  Working directory:", info_expanded_str(task.c_cwd))
         if len(task.c_volumes) == 1:
             print_blob("  Volume:", info_expanded_str(task.c_volumes[0]))
         elif len(task.c_volumes) > 1:

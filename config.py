@@ -9,9 +9,9 @@ import jsonschema
 class Config(object):
     class _AutoDefsKeys(object):
         # Auto defintiosn keys
-        CONF_PATH = "CONF_PATH"
+        TASK_ROOT = "TASK_ROOT"
         CWD = "CWD"
-        CWD_REL_CONF = "CWD_REL_CONF"
+        CWD_REL_TASK_ROOT = "CWD_REL_TASK_ROOT"
 
     _CONF_FILE_NAME = "tasks.json"
     _MAJOR_VER: int = 0
@@ -29,8 +29,8 @@ class Config(object):
     @staticmethod
     def _check_config_file_version(data: dict, local: bool) -> None:
         conf_file_type = "local" if local else "global"
-        major = data["version"]["major"]
-        minor = data["version"]["minor"]
+        major = data[ConfigSchema.Keys.Version][ConfigSchema.Keys.Ver.Major]
+        minor = data[ConfigSchema.Keys.Version][ConfigSchema.Keys.Ver.Minor]
         if major != Config._MAJOR_VER or minor > Config._MINOR_VER:
             raise TaskException(("Incompatible {} configuration file version: " +
                                  "Found:{}.{}, expected <= {}.{}").format(
@@ -74,9 +74,9 @@ class Config(object):
 
         self.defs[Config._AutoDefsKeys.CWD] = os.getcwd()
         if self.local_conf:
-            self.defs[Config._AutoDefsKeys.CONF_PATH] = os.path.dirname(self.local_conf_path)
-            self.defs[Config._AutoDefsKeys.CWD_REL_CONF] = os.path.relpath(
-                    self.defs[Config._AutoDefsKeys.CWD], self.defs[Config._AutoDefsKeys.CONF_PATH])
+            self.defs[Config._AutoDefsKeys.TASK_ROOT] = os.path.dirname(self.local_conf_path)
+            self.defs[Config._AutoDefsKeys.CWD_REL_TASK_ROOT] = os.path.relpath(
+                    self.defs[Config._AutoDefsKeys.CWD], self.defs[Config._AutoDefsKeys.TASK_ROOT])
 
     def allow_global(self):
         return self.local_conf.get(ConfigSchema.Keys.AllowGlobal, True) and \
