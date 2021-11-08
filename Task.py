@@ -24,10 +24,8 @@ class Task(object):
         self.stop_on_error = task.get(TaskSchema.Keys.StopOnError, True)
         self.commands = task.get(TaskSchema.Keys.Commands, [])
         self.cwd = task.get(TaskSchema.Keys.Cwd, None)
-        if task.get(TaskSchema.Keys.Shell, False):
-            self.shell = task.get(TaskSchema.Keys.ShellPath, config.default_shell_path())
-        else:
-            self.shell = None
+        self.shell = task.get(TaskSchema.Keys.Shell, False)
+        self.shell_path = task.get(TaskSchema.Keys.ShellPath, config.default_shell_path())
         self.env = task.get(TaskSchema.Keys.Env, None)
 
         self.c_settings = task.get(TaskSchema.Keys.Container, {})
@@ -40,12 +38,9 @@ class Task(object):
         self.c_rm = task.get(ContSchema.Keys.Keep, True)
         self.c_tool = self.c_settings.get(ContSchema.Keys.Tool,
                                           self.config.default_container_tool())
-
-        if self.c_settings.get(ContSchema.Keys.Shell, False):
-            self.c_shell = self.c_settings.get(ContSchema.Keys.ShellPath,
-                                               self.config.default_container_shell_path())
-        else:
-            self.c_shell = None
+        self.c_shell = self.c_settings.get(ContSchema.Keys.Shell, False)
+        self.c_shell_path = self.c_settings.get(ContSchema.Keys.ShellPath,
+                                                self.config.default_container_shell_path())
         self.c_cwd = self.c_settings.get(ContSchema.Keys.Cwd, None)
         self.cli_args = None
 
@@ -56,9 +51,10 @@ class Task(object):
             self.commands = args.command
         if args.cwd:
             self.cwd = args.cwd
-        if args.shell:
-            self.shell = args.shell_path if args.shell_path else \
-                self._task.get(TaskSchema.Keys.ShellPath, self.config.default_shell_path())
+        if args.shell is not None:
+            self.shell = args.shell
+        if args.shell_path:
+            self.shell_path = args.shell_path
         if args.env:
             self.env = {}
             for e in args.env:
@@ -81,12 +77,10 @@ class Task(object):
             self.c_rm = args.c_rm
         if args.c_tool:
             self.c_tool = args.container_tool
-        if args.c_shell:
-            if args.c_shell_path:
-                self.c_shell = args.c_shell_path
-            else:
-                self.c_shell = self.c_settings.get(ContSchema.Keys.ShellPath,
-                                                   self.config.default_container_shell_path())
+        if args.c_shell is not None:
+            self.c_shell = args.c_shell
+        if args.c_shell_path:
+            self.c_shell_path = args.c_shell_path
         if args.c_cwd:
             self.c_cwd = args.c_cwd
         if args.args:
@@ -122,9 +116,10 @@ class Task(object):
 
         cmd_array.append(self.c_image)
         if self.c_shell and cmd is not None:
-            cmd_array += ["/usr/bin/sh" if self.c_shell is None else self.c_shell, "-c"]
+            cmd_array += [self.c_shell_path, "-c"]
         if cmd:
             cmd_array += [cmd]
+        print(cmd_array)
         return cmd_array
 
     def _run_cmd(self, cmd: list, cmd_str: str) -> int:
@@ -134,7 +129,7 @@ class Task(object):
             else:
                 penv = os.environ.copy()
                 penv.update(self.env)
-            p = subprocess.Popen(cmd, shell=self.shell is not None, executable=self.shell,
+            p = subprocess.Popen(cmd, shell=self.shell, executable=self.shell_path,
                                  stdout=sys.stdout, stderr=sys.stderr, env=penv, cwd=self.cwd)
             return p.wait()
 
