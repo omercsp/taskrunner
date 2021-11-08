@@ -44,7 +44,7 @@ def _show_task(task: Task, config: Config, full_details: bool) -> None:
         print_val("Short description:", task.short_desc if task.short_desc else "")
         if task.long_desc:
             print_blob("Description:", task.long_desc)
-        print_bool("Abstract", task.abstract)
+        print_bool("Hidden", task.hidden)
         print_bool("Global:", task.global_task)
     print_bool("Use shell: ", task.shell is not None)
     if task.shell:
@@ -118,16 +118,16 @@ def list_tasks(config: Config, show_all: bool):
 
     def print_task(name: str, task: dict):
         t = Task(task, name, config=config)
-        if not show_all and t.abstract:
+        if not show_all and t.hidden:
             return
         desc = "" if t.short_desc is None else t.short_desc
         if len(desc) > 55:
             desc = t.short_desc[:52] + "..."
         flags = "G" if t.global_task else "L"
-        if t.abstract:
-            flags += "A"
-        if t.global_task and name in local_tasks:
+        if t.hidden:
             flags += "H"
+        if t.global_task and name in local_tasks:
+            flags += "S"
         elif name == default_task_name:
             flags += "*"
 

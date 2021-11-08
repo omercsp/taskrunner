@@ -18,7 +18,7 @@ class Task(object):
         self.config = config
         self.short_desc = task.get(TaskSchema.Keys.ShortDesc, None)
         self.long_desc = task.get(TaskSchema.Keys.LongDesc, None)
-        self.abstract = task.get(TaskSchema.Keys.Abstract, False)
+        self.hidden = task.get(TaskSchema.Keys.Hidden, False)
         self.global_task = task[TaskSchema.Keys.Global]
 
         self.stop_on_error = task.get(TaskSchema.Keys.StopOnError, True)
@@ -141,8 +141,6 @@ class Task(object):
             raise TaskException("Error occured running command '{}' - {}".format(cmd_str, e))
 
     def run(self) -> int:
-        if self.abstract:
-            raise TaskException("Task '{}' is abstract, and can't be ran directly")
         if self.global_task and not self.config.setting(ConfigSchema.Keys.AllowGlobal, True):
             raise TaskException("Global tasks aren't allowed from this location")
 

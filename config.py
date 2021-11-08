@@ -78,6 +78,9 @@ class Config(object):
             self.defs[Config._AutoDefsKeys.CWD_REL_TASK_ROOT] = os.path.relpath(
                     self.defs[Config._AutoDefsKeys.CWD], self.defs[Config._AutoDefsKeys.TASK_ROOT])
 
+        self.local_containers = self.global_conf.get(ConfigSchema.Keys.Containers, {})
+        self.global_containers = self.local_conf.get(ConfigSchema.Keys.Containers, {})
+
     def allow_global(self):
         return self.local_conf.get(ConfigSchema.Keys.AllowGlobal, True) and \
                self.global_conf.get(ConfigSchema.Keys.AllowGlobal, True)
@@ -107,38 +110,59 @@ class Config(object):
             setting = self.global_setting(path)
         return default if setting is None else setting
 
-    def raw_task(self, name: str) -> dict:
+    @staticmethod
+    def _raw_object(name, local_objects: dict, global_objects: dict):
         if name.startswith(Config.__G_PREFIX):
-            return self.global_tasks.get(name[len(Config.__G_PREFIX):], None)
+            return global_objects[name[len(Config.__G_PREFIX):]]
         else:
-            return self.local_tasks.get(name, self.global_tasks.get(name, None))
+            return local_objects[name] if name in local_objects else global_objects[name]
 
-    def _task(self, name: str, included_list: set):
-        if name in included_list:
-            raise TaskException("Include loop detected for task '{}'".format(name))
-
-        base_task = self.raw_task(name)
-        included_list.add(Config.__G_PREFIX + name if name.startswith(Config.__G_PREFIX) else name)
-
-        if base_task is None:
+    def raw_task(self, name: str) -> dict:
+        try:
+            return Config._raw_object(name, self.local_tasks, self.global_tasks)
+        except KeyError:
+            bt()
             raise TaskException("No such task '{}'".format(name))
 
-        included_task_name = base_task.get(TaskSchema.Keys.Include, None)
-        if included_task_name is None:
-            return base_task
+    def _raw_container(self, name: str) -> dict:
+        try:
+            return Config._raw_object(name, self.local_containers, self.global_containers)
+        except KeyError:
+            raise TaskException("No such task '{}'".format(name))
 
-        # We about to modify the included task, so deep copy it
-        included_task = self._task(included_task_name, included_list=included_list).copy()
-        included_task.update(base_task)
-        included_task[TaskSchema.Keys.Abstract] = base_task.get(TaskSchema.Keys.Abstract, False)
-        return included_task
+    @staticmethod
+    def _include_obj(name, search_func, included_list: set):
+        if name in included_list:
+            raise TaskException("Include loop detected for '{}'".format(name))
+
+        base_obj = search_func(name)
+        included_list.add(Config.__G_PREFIX + name if name.startswith(Config.__G_PREFIX) else name)
+
+        included_obj_name = base_obj.get(CommonKeys.Include, None)
+        if included_obj_name is None:
+            return base_obj
+
+        # We about to modify the included object, so deep copy it
+        included_obj_name = Config._include_obj(included_obj_name, search_func,
+                                                   included_list=included_list).copy()
+        included_obj_name.update(base_obj)
+        return included_obj_name
 
     def task(self, name: str, glbl: bool = False) -> dict:
         if glbl and not name.startswith(Config.__G_PREFIX):
             name = Config.__G_PREFIX + name
-        task = self._task(name, set())
+        hidden = self.raw_task(name).get(TaskSchema.Keys.Hidden, False)
+        task = self._include_obj(name, self.raw_task, set())
+        task[TaskSchema.Keys.Hidden] = hidden
         try:
             jsonschema.validate(task, schema=TaskSchema.schema)
+            if TaskSchema.Keys.Container in task:
+                task[TaskSchema.Keys.Container] = \
+                    self._include_obj(task[TaskSchema.Keys.Container], self._raw_container, set())
+                if ContSchema.Keys.Image not in task[TaskSchema.Keys.Container]:
+                    raise TaskException("container setting must define an image property".format(
+                                name))
+
         except (jsonschema.ValidationError, TaskException) as e:
             raise TaskException("Error parsing task '{}' - {}".format(name, e))
         return task
