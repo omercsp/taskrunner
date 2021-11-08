@@ -46,13 +46,13 @@ def _show_task(task: Task, config: Config, full_details: bool) -> None:
             print_blob("Description:", task.long_desc)
         print_bool("Hidden", task.hidden)
         print_bool("Global:", task.global_task)
-    print_bool("Use shell: ", task.shell is not None)
+    print_bool("Use shell: ", task.shell)
     if task.shell:
         shell_title = "Shell path:"
-        if task.shell:
-            print_val(shell_title, task.shell)
+        if task.shell_path is None:
+            print_val(shell_title, "/usr/bin/sh")
         else:
-            print_val(shell_title, "default (/usr/bin/sh)")
+            print_val(shell_title, task.shell_path)
     count = 0
     if task.env:
         print(__PRINT_FMT.format("Environment:", ""))
@@ -71,9 +71,9 @@ def _show_task(task: Task, config: Config, full_details: bool) -> None:
             print_bool("  Remove:", task.c_rm)
         print_bool("  Interactive:", task.c_interactive)
         print_bool("  Allocate tty:", task.c_tty)
-        print_bool("  Use shell: ", task.c_shell is not None)
+        print_bool("  Use shell: ", task.c_shell)
         if task.c_shell:
-            print_val("  Shell path:", task.c_shell)
+            print_val("  Shell path:", task.c_shell_path)
         if task.c_flags:
             print_blob("  Run/Exec flags:", task.c_flags)
         if task.c_cwd:

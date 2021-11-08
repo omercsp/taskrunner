@@ -107,9 +107,6 @@ class Config(object):
     def default_shell_path(self) -> typing.Union[str, None]:
         return self.setting(ConfigSchema.Keys.DfltShellPath, None)
 
-    def update_defintions(self, definitions: list) -> None:
-        pass
-
     #  Return anything. Types is forced by schema validations.
     def setting(self, path: str, default=None) -> typing.Any:
         setting = self.local_setting(path)

@@ -51,9 +51,9 @@ def _parse_arguments():
                                    help='Run command in existing container')
     run_parser.add_argument('--c-flags', metavar='FLAGS', default=None,
                             help='Set Container flags')
-    run_parser.add_argument('--c-shell', action='store_true', default=False,
+    run_parser.add_argument('--c-shell', action=argparse.BooleanOptionalAction, default=None,
                             help='Wrap container command in shell')
-    run_parser.add_argument('--c-shell-path', action='store_true', default=None,
+    run_parser.add_argument('--c-shell-path', metavar='PATH', default=None,
                             help='Set container shell path')
     run_parser.add_argument('--c-env', metavar='ENV', default=None, action='append',
                             help='Set container environment variable')
