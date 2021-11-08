@@ -50,44 +50,29 @@ def init_logging():
 class StringVarExpander(object):
     var_re = re.compile(r'{{\S*?}}')
 
-    def __init__(self, args: typing.Union[list, None], defs: dict, previous_expansions: set = None):
-        self.args = args
+    def __init__(self, defs: dict, previous_expansions: set = None):
         self.previous_expansions = set() if previous_expansions is None else previous_expansions
         self.defs = defs
 
     def expand(self, s: str) -> str:
         return re.sub(StringVarExpander.var_re, self._expand_re, s)
 
-    def _expand_var(self, var: str) -> str:
-        if len(var) == 1:
-            raise TaskException("Empty definition")
-        if var == "*":
-            return "$*" if self.args is None else " ".join(self.args)
-        if var.isdigit():
-            if self.args is None:
-                return "$" + var
-            try:
-                return self.args[int(var)]
-            except IndexError:
-                raise TaskException("Unknown argument index '{}'".format(int(var)))
-        return os.getenv(var, "")
-
     def _expand_re(self, match) -> str:
         var = match.group()[2:-2]
         if var in self.previous_expansions:
             raise TaskException("Recursive expanded var '{}'".format(var))
         if var.startswith("$"):
-            return self._expand_var(var[1:])
+            return os.getenv(var[1:], "")
         value = self.defs.get(var, "")
         if type(value) is list or type(value) is dict:
             raise TaskException("Var expanded path '{}' doesn't refer to valid type".format(var))
         self.previous_expansions.add(var)
-        next_expander = StringVarExpander(self.args, self.defs, self.previous_expansions)
+        next_expander = StringVarExpander(self.defs, self.previous_expansions)
         return re.sub(StringVarExpander.var_re, next_expander._expand_re, str(value))
 
 
-def expand_string(s: str, args: typing.Union[list, None], defs: dict):
-    return StringVarExpander(args, defs, set()).expand(s)
+def expand_string(s: str, defs: dict):
+    return StringVarExpander(defs, set()).expand(s)
 
 
 def parse_assignmet_str(s: str):

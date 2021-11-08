@@ -34,7 +34,7 @@ def _show_task(task: Task, config: Config, full_details: bool) -> None:
                 print(__PRINT_FMT.format("", in_line))
 
     def info_expanded_str(cmd_str: str) -> str:
-        ret = expand_string(cmd_str, None, config.defs).strip()
+        ret = expand_string(cmd_str, config.defs).strip()
         if len(ret) == 0:
             return "[n/a - empty string)]"
         return ret
@@ -91,7 +91,7 @@ def _show_task(task: Task, config: Config, full_details: bool) -> None:
         if task.c_image is None:
             print("NOTICE: No commands defined for task")
         else:
-            print("NOTICE: Task only command is the default container command")
+            print("NOTICE: Will run the image/container default command")
         return
     if len(task.commands) == 1:
         print_blob("Command:", info_expanded_str(task.commands[0]))

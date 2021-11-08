@@ -25,8 +25,8 @@ def _parse_arguments():
 
     run_parser.add_argument('-e', '--env', metavar='ENV', default=None, action='append',
                             help='Set an environment variable')
-    run_parser.add_argument('-a', '--arg', metavar='ARG', action='append', default=[],
-                            help='Set an argument')
+    run_parser.add_argument('-a', '--args', metavar='ARGS', default=None,
+                            help='Set command arguments')
     run_parser.add_argument('-s', '--summary', action='store_true', default=False,
                             help='show task summary before run')
 

@@ -47,7 +47,7 @@ class Task(object):
         else:
             self.c_shell = None
         self.c_cwd = self.c_settings.get(ContSchema.Keys.Cwd, None)
-        self.cli_args = []
+        self.cli_args = None
 
     def args_update(self, args: Args) -> None:
         if args.stop_on_error:
@@ -89,11 +89,11 @@ class Task(object):
                                                    self.config.default_container_shell_path())
         if args.c_cwd:
             self.c_cwd = args.c_cwd
-        if args.arg:
-            self.cli_args = args.arg
+        if args.args:
+            self.cli_args = args.args
 
     def _expand(self, s: str) -> str:
-        return expand_string(s, self.cli_args, self.config.defs)
+        return expand_string(s, self.config.defs)
 
     def _simple_cmd_arr(self, cmd) -> list:
         if self.shell:
@@ -121,9 +121,10 @@ class Task(object):
         cmd_array += self.c_flags.split()
 
         cmd_array.append(self.c_image)
-        if self.c_shell:
+        if self.c_shell and cmd is not None:
             cmd_array += ["/usr/bin/sh" if self.c_shell is None else self.c_shell, "-c"]
-        cmd_array += [cmd]
+        if cmd:
+            cmd_array += [cmd]
         return cmd_array
 
     def _run_cmd(self, cmd: list, cmd_str: str) -> int:
@@ -144,13 +145,18 @@ class Task(object):
         if self.global_task and not self.config.setting(ConfigSchema.Keys.AllowGlobal, True):
             raise TaskException("Global tasks aren't allowed from this location")
 
-        if not self.c_image and len(self.commands) == 0:
+        cmds = self.commands
+        if len(cmds) == 0:
+            if self.c_image:
+                return self._run_cmd(self._container_cmd_arr(None), "<CONTAINER_DEFAULT>")
             print("No commands defined for task '{}'. Nothing to do.".format(self.name))
             return 0
 
         rc = 0
         for cmd in self.commands:
             cmd = self._expand(cmd)
+            if self.cli_args:
+                cmd += " " + self.cli_args
             cmd_arr = self._container_cmd_arr(cmd) if self.c_image else self._simple_cmd_arr(cmd)
             cmd_rc = self._run_cmd(cmd_arr, cmd)
             if cmd_rc == 0:
