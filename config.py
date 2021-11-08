@@ -58,7 +58,7 @@ class Config(object):
         Config._check_config_file_version(data, local=False)
         return data, f
 
-    def __init__(self):
+    def __init__(self, defs: list):
         self.global_conf, self.global_conf_path = self._read_global_conf_file()
         self.local_conf, self.local_conf_path = self._read_local_conf_file()
 
@@ -77,6 +77,10 @@ class Config(object):
             self.defs[Config._AutoDefsKeys.TASK_ROOT] = os.path.dirname(self.local_conf_path)
             self.defs[Config._AutoDefsKeys.CWD_REL_TASK_ROOT] = os.path.relpath(
                     self.defs[Config._AutoDefsKeys.CWD], self.defs[Config._AutoDefsKeys.TASK_ROOT])
+        if defs:
+            for define in defs:
+                key, val = parse_assignmet_str(define)
+                self.defs[key] = val
 
         self.local_containers = self.global_conf.get(ConfigSchema.Keys.Containers, {})
         self.global_containers = self.local_conf.get(ConfigSchema.Keys.Containers, {})
@@ -102,6 +106,9 @@ class Config(object):
 
     def default_shell_path(self) -> typing.Union[str, None]:
         return self.setting(ConfigSchema.Keys.DfltShellPath, None)
+
+    def update_defintions(self, definitions: list) -> None:
+        pass
 
     #  Return anything. Types is forced by schema validations.
     def setting(self, path: str, default=None) -> typing.Any:

@@ -79,7 +79,7 @@ def parse_assignmet_str(s: str):
     parts = s.split('=', maxsplit=1)
     if len(parts) == 1:
         return s, ""
-    return parts[0], str(parts[1])
+    return parts[0], parts[1]
 
 
 def bt():

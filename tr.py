@@ -7,6 +7,8 @@ import actions
 
 def _parse_arguments():
     parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--define', metavar='DEFINE', default=None, action='append',
+                        help='Set a deinifion')
     subparsers = parser.add_subparsers(help='commands', dest='subparsers_name')
     subparsers.required = True
 
@@ -76,7 +78,7 @@ if __name__ == "__main__":
     init_logging()
     try:
         args = _parse_arguments()
-        config = Config()
+        config = Config(args.define)
         if args.subparsers_name == "list":
             actions.list_tasks(config, args.all)
         elif args.subparsers_name == "info":
