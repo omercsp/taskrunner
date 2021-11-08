@@ -3,6 +3,7 @@ class CommonKeys(object):
     ShellPath = "shell_path"
     Env = "env"
     Cwd = "cwd"
+    Include = "include"
 
 
 class ContSchema(object):
@@ -19,11 +20,13 @@ class ContSchema(object):
         ShellPath = CommonKeys.ShellPath
         Env = CommonKeys.Env
         Cwd = CommonKeys.Cwd
+        Include = CommonKeys.Include
 
     schema = {
         "type": "object",
         "properties": {
-            Keys.Image: {"type": "string", "maxLength": 64},
+            Keys.Include: {"type": "string", "minLength": 1},
+            Keys.Image: {"type": "string", "minLength": 1},
             Keys.Tool: {"type": "string"},
             Keys.Volumes: {
                 "type": "array",
@@ -43,14 +46,13 @@ class ContSchema(object):
                 }
             },
         },
-        "additionalProperties": False,
-        "required": [Keys.Image]
+        "additionalProperties": False
     }
 
 
 class TaskSchema(object):
     class Keys(object):
-        Include = "include"
+        Include = CommonKeys.Include
         Shell = CommonKeys.Shell
         ShellPath = CommonKeys.ShellPath
         Env = CommonKeys.Env
@@ -60,7 +62,7 @@ class TaskSchema(object):
         Commands = "commands"
         StopOnError = "stop_on_error"
         Container = "container"
-        Abstract = "abstract"
+        Hidden = "hidden"
         Global = "global"
     schema = {
         "type": "object",
@@ -81,8 +83,8 @@ class TaskSchema(object):
                     "type": "string"
                 }
             },
-            Keys.Container: ContSchema.schema,
-            Keys.Abstract: {"type": "boolean"},
+            Keys.Container: {"type": "string", "minLength": 1},
+            Keys.Hidden: {"type": "boolean"},
             Keys.Global: {"type": "boolean"},
         },
         "additionalProperties": False
@@ -96,6 +98,7 @@ class ConfigSchema(object):
             Minor = "minor"
         Version = "version"
         Tasks = "tasks"
+        Containers = "containers"
         Definitions = "definitions"
         DfltTask = "default_task"
         DfltShellPath = "defult_shell_path"
@@ -113,6 +116,10 @@ class ConfigSchema(object):
                 }
             },
             Keys.Tasks: {"type": "object"},
+            Keys.Containers:  {
+                "type": "object",
+                "additionalProperties": ContSchema.schema
+            },
             Keys.Definitions: {"type": "object"},
             Keys.DfltTask: {"type": "string"},
             Keys.DfltShellPath: {

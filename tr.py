@@ -67,7 +67,7 @@ def _parse_arguments():
                           parents=[task_target_parser, global_opt_parser])
     list_parser = subparsers.add_parser('list', help='List tasks')
     list_parser.add_argument('-a', '--all', action='store_true', default=False,
-                             help='Show hidden and abstract tasks')
+                             help='Show hidden and shadowed tasks')
 
     return parser.parse_args()
 
