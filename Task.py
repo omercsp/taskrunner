@@ -51,8 +51,8 @@ class Task(object):
             self.commands = args.command
         if args.cwd:
             self.cwd = args.cwd
-        if args.shell is not None:
-            self.shell = args.shell
+        if args.shell:
+            self.shell = (args.shell == TASK_YES_TOKEN)
         if args.shell_path:
             self.shell_path = args.shell_path
         if args.env:
@@ -65,10 +65,10 @@ class Task(object):
             self.c_image = args.c_image
         if args.c_volume:
             self.c_volumes = args.c_volume
-        if args.c_interactive is not None:
-            self.c_interactive = args.c_interactive
-        if args.c_tty is not None:
-            self.c_tty = args.c_tty
+        if args.c_interactive:
+            self.c_interactive = (args.c_interactive == TASK_YES_TOKEN)
+        if args.c_tty:
+            self.c_tty = (args.c_tty == TASK_YES_TOKEN)
         if args.c_flags:
             self.c_flags = args.c_flags
         if args.c_exec:
@@ -77,8 +77,8 @@ class Task(object):
             self.c_rm = args.c_rm
         if args.c_tool:
             self.c_tool = args.container_tool
-        if args.c_shell is not None:
-            self.c_shell = args.c_shell
+        if args.c_shell:
+            self.c_shell = (args.c_shell == TASK_YES_TOKEN)
         if args.c_shell_path:
             self.c_shell_path = args.c_shell_path
         if args.c_cwd:
