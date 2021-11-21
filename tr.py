@@ -6,6 +6,7 @@ import actions
 
 
 def _parse_arguments():
+    yes_no: typing.List[str] = [TASK_YES_TOKEN, TASK_NO_TOKEN]
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--define', metavar='DEFINE', default=None, action='append',
                         help='Set a deinifion')
@@ -19,13 +20,12 @@ def _parse_arguments():
     run_parser.add_argument('-c', '--command', metavar='CMD', default=None, action='append',
                             help='Set command to run')
     run_parser.add_argument('--cwd', metavar='DIR', default=None, help='Set working direcotry')
-    run_parser.add_argument('--shell', action=argparse.BooleanOptionalAction, default=None,
+    run_parser.add_argument('--shell', type=str, choices=yes_no, action='store', default=None,
                             help='Set shell usage')
     run_parser.add_argument('--shell-path', metavar='PATH', help='Set shell path', default=None)
-    run_parser.add_argument('--stop-on-error', action=argparse.BooleanOptionalAction,
-                            help='Set stop on first error behavior')
-
-    run_parser.add_argument('-e', '--env', metavar='ENV', default=None, action='append',
+    run_parser.add_argument('--stop-on-error', choices=yes_no, action='store', default=None,
+                            help='Set stop behavior on command error')
+    run_parser.add_argument('--env', metavar='ENV=VAL', default=None, action='append',
                             help='Set an environment variable')
     run_parser.add_argument('-a', '--args', metavar='ARGS', default=None,
                             help='Set command arguments')
@@ -39,23 +39,23 @@ def _parse_arguments():
                             help='Set container tool to use')
     run_parser.add_argument('--c-volume', metavar='VOLUME', action='append', default=None,
                             help='Set container volume')
-    run_parser.add_argument('--c-tty', action=argparse.BooleanOptionalAction, default=None,
+    run_parser.add_argument('--c-tty', choices=yes_no, action='store', default=None,
                             help='Set container tty allocation')
-    run_parser.add_argument('--c-interactive', action=argparse.BooleanOptionalAction,
-                            default=None, help='Set container interactive mode')
+    run_parser.add_argument('--c-interactive', choices=yes_no, action='store', default=None,
+                            help='Set container interactive mode')
 
     cont_run_type_grp = run_parser.add_mutually_exclusive_group()
-    cont_run_type_grp.add_argument('--c-rm', action=argparse.BooleanOptionalAction, default=None,
+    cont_run_type_grp.add_argument('--c-rm', type=str, choices=yes_no, action='store', default=None,
                                    help='Set container removal after run')
     cont_run_type_grp.add_argument('--c-exec', action='store_true', default=False,
                                    help='Run command in existing container')
     run_parser.add_argument('--c-flags', metavar='FLAGS', default=None,
                             help='Set Container flags')
-    run_parser.add_argument('--c-shell', action=argparse.BooleanOptionalAction, default=None,
+    run_parser.add_argument('--c-shell', type=str, choices=yes_no, action='store', default=None,
                             help='Wrap container command in shell')
     run_parser.add_argument('--c-shell-path', metavar='PATH', default=None,
                             help='Set container shell path')
-    run_parser.add_argument('--c-env', metavar='ENV', default=None, action='append',
+    run_parser.add_argument('--c-env', metavar='ENV=VAL', default=None, action='append',
                             help='Set container environment variable')
     run_parser.add_argument('--c-cwd', metavar='DIR', default=None,
                             help='Set container working direcotry')

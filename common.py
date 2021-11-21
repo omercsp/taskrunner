@@ -6,6 +6,8 @@ import os
 import traceback
 import json
 
+TASK_YES_TOKEN = 'yes'
+TASK_NO_TOKEN = 'no'
 
 class TaskException(Exception):
     def __init__(self, error):
