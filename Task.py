@@ -128,8 +128,8 @@ class Task(object):
             else:
                 penv = os.environ.copy()
                 penv.update(self.env)
-            p = subprocess.Popen(cmd, shell=self.shell, executable=self.shell_path,
-                                 stdout=sys.stdout, stderr=sys.stderr, env=penv, cwd=self.cwd)
+            p = subprocess.Popen(cmd, shell=self.shell, executable=self.shell_path, env=penv,
+                                 cwd=self.cwd)
             return p.wait()
 
         except (OSError, FileNotFoundError) as e:
