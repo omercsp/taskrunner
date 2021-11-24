@@ -1,4 +1,4 @@
-name: Taskrunner test suite
+name: test
 on:
   push:
     branches:
