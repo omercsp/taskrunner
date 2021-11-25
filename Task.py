@@ -121,15 +121,10 @@ class Task(object):
             cmd_array += [cmd]
         return cmd_array
 
-    def _run_cmd(self, cmd: list, cmd_str: str) -> int:
+    def _run_cmd(self, cmd: list, cmd_str: str, env: typing.Union[dict, None]) -> int:
         p = None
         try:
-            if self.env is None:
-                penv = None
-            else:
-                penv = os.environ.copy()
-                penv.update(self.env)
-            p = subprocess.Popen(cmd, shell=self.shell, executable=self.shell_path, env=penv,
+            p = subprocess.Popen(cmd, shell=self.shell, executable=self.shell_path, env=env,
                                  cwd=self.cwd)
             return p.wait()
 
@@ -145,10 +140,16 @@ class Task(object):
         if self.global_task and not self.config.setting(ConfigSchema.Keys.AllowGlobal, True):
             raise TaskException("Global tasks aren't allowed from this location")
 
+        if self.env is None:
+            penv = None
+        else:
+            penv = os.environ.copy()
+            penv.update(self.env)
+
         cmds = self.commands
         if len(cmds) == 0:
             if self.c_image:
-                return self._run_cmd(self._container_cmd_arr(None), "<CONTAINER_DEFAULT>")
+                return self._run_cmd(self._container_cmd_arr(None), "<CONTAINER_DEFAULT>", penv)
             print("No commands defined for task '{}'. Nothing to do.".format(self.name))
             return 0
 
@@ -158,7 +159,7 @@ class Task(object):
             if self.cli_args:
                 cmd += " " + self.cli_args
             cmd_arr = self._container_cmd_arr(cmd) if self.c_image else self._simple_cmd_arr(cmd)
-            cmd_rc = self._run_cmd(cmd_arr, cmd)
+            cmd_rc = self._run_cmd(cmd_arr, cmd, penv)
             if cmd_rc == 0:
                 continue
             if self.stop_on_error:
