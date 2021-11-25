@@ -3,6 +3,7 @@ from config import *
 from argparse import Namespace as Args
 import shlex
 import subprocess
+import signal
 
 
 class Task(object):
@@ -121,6 +122,7 @@ class Task(object):
         return cmd_array
 
     def _run_cmd(self, cmd: list, cmd_str: str) -> int:
+        p = None
         try:
             if self.env is None:
                 penv = None
@@ -133,6 +135,11 @@ class Task(object):
 
         except (OSError, FileNotFoundError) as e:
             raise TaskException("Error occured running command '{}' - {}".format(cmd_str, e))
+        except KeyboardInterrupt:
+            if p:
+                p.send_signal(signal.SIGINT)
+                p.wait()
+            raise TaskException("User interrupt")
 
     def run(self) -> int:
         if self.global_task and not self.config.setting(ConfigSchema.Keys.AllowGlobal, True):
