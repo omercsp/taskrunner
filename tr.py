@@ -3,6 +3,19 @@ from common import *
 from config import *
 import argparse
 import actions
+import argcomplete
+
+
+def _tasks_complete(**kwargs):
+    try:
+        parsed_args: argparse.Namespace = kwargs['parsed_args']
+        parser_name = parsed_args.subparsers_name
+    except (KeyError, AttributeError):
+        return []
+    if (parser_name == "run" or parser_name == "info" or parser_name == "dump") \
+       and parsed_args.task is None:
+        return Config([]).visible_tasks()
+    return []
 
 
 def _parse_arguments():
@@ -71,6 +84,8 @@ def _parse_arguments():
     list_parser.add_argument('-a', '--all', action='store_true', default=False,
                              help='Show hidden and shadowed tasks')
 
+    argcomplete.autocomplete(parser, always_complete_options=False,
+                             default_completer=_tasks_complete)
     return parser.parse_args()
 
 

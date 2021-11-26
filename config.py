@@ -107,6 +107,16 @@ class Config(object):
     def default_shell_path(self) -> typing.Union[str, None]:
         return self.setting(ConfigSchema.Keys.DfltShellPath, None)
 
+    def visible_tasks(self) -> typing.List[str]:
+        tasks = set()
+        for name, task in self.global_tasks.items():
+            if not task.get(TaskSchema.Keys.Hidden, False):
+                tasks.add(name)
+        for name, task in self.local_tasks.items():
+            if not task.get(TaskSchema.Keys.Hidden, False):
+                tasks.add(name)
+        return list(tasks)
+
     #  Return anything. Types is forced by schema validations.
     def setting(self, path: str, default=None) -> typing.Any:
         setting = self.local_setting(path)
