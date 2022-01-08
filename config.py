@@ -3,7 +3,6 @@ from schemas import *
 import os
 import pathlib
 import json
-import jsonschema
 
 
 class Config(object):
@@ -21,10 +20,10 @@ class Config(object):
     def _read_tasks_file(file_path: str) -> dict:
         try:
             data: dict = json.load(open(file_path, 'r'))
-            jsonschema.validate(data, schema=ConfigSchema.schema)
-            return data
-        except (IOError, TypeError, ValueError, jsonschema.ValidationError) as e:
+            ConfigSchema.validate(data)
+        except (IOError, TypeError, ValueError, TaskException) as e:
             raise TaskException("Error parsing {} - {}".format(file_path, e))
+        return data
 
     @staticmethod
     def _check_config_file_version(data: dict, local: bool) -> None:
@@ -167,17 +166,12 @@ class Config(object):
         hidden = self.raw_task(name).get(TaskSchema.Keys.Hidden, False)
         task = self._include_obj(name, self.raw_task, set())
         task[TaskSchema.Keys.Hidden] = hidden
-        try:
-            jsonschema.validate(task, schema=TaskSchema.schema)
-            if TaskSchema.Keys.Container in task:
-                task[TaskSchema.Keys.Container] = \
-                    self._include_obj(task[TaskSchema.Keys.Container], self._raw_container, set())
-                if ContSchema.Keys.Image not in task[TaskSchema.Keys.Container]:
-                    raise TaskException("container setting must define an image property".format(
-                                name))
-
-        except (jsonschema.ValidationError, TaskException) as e:
-            raise TaskException("Error parsing task '{}' - {}".format(name, e))
+        if TaskSchema.Keys.Container in task:
+            task[TaskSchema.Keys.Container] = \
+                self._include_obj(task[TaskSchema.Keys.Container], self._raw_container, set())
+            if ContSchema.Keys.Image not in task[TaskSchema.Keys.Container]:
+                raise TaskException("container setting must define an image property".format(
+                            name))
         return task
 
     __G_PREFIX = "g/"

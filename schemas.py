@@ -1,3 +1,7 @@
+from common import *
+import jsonschema
+
+
 class CommonKeys(object):
     Shell = "shell"
     ShellPath = "shell_path"
@@ -116,7 +120,10 @@ class ConfigSchema(object):
                     Keys.Ver.Minor: {"type": "number", "minValue": 1}
                 }
             },
-            Keys.Tasks: {"type": "object"},
+            Keys.Tasks: {
+                "type": "object",
+                "additionalProperties": TaskSchema.schema
+             },
             Keys.Containers:  {
                 "type": "object",
                 "additionalProperties": ContSchema.schema
@@ -133,3 +140,10 @@ class ConfigSchema(object):
         "required": [Keys.Version],
         "additionalProperties": False
     }
+
+    @staticmethod
+    def validate(data: dict) -> None:
+        try:
+            jsonschema.validate(data, ConfigSchema.schema)
+        except (jsonschema.ValidationError) as e:
+            raise TaskException(str(e))
