@@ -121,11 +121,11 @@ class Task(object):
             cmd_array += [cmd]
         return cmd_array
 
-    def _run_cmd(self, cmd: list, cmd_str: str, env: typing.Union[dict, None]) -> int:
+    def _run_cmd(self, cmd: list, cmd_str: str, env: typing.Union[dict, None], cwd) -> int:
         p = None
         try:
             p = subprocess.Popen(cmd, shell=self.shell, executable=self.shell_path, env=env,
-                                 cwd=self.cwd)
+                                 cwd=cwd)
             return p.wait()
 
         except (OSError, FileNotFoundError) as e:
@@ -145,11 +145,12 @@ class Task(object):
         else:
             penv = os.environ.copy()
             penv.update(self.env)
+        cwd = self._expand(self.cwd) if self.cwd else None
 
         cmds = self.commands
         if len(cmds) == 0:
             if self.c_image:
-                return self._run_cmd(self._container_cmd_arr(None), "<CONTAINER_DEFAULT>", penv)
+                return self._run_cmd(self._container_cmd_arr(None), "<CONTAINER_DEFAULT>", penv, cwd)
             print("No commands defined for task '{}'. Nothing to do.".format(self.name))
             return 0
 
@@ -159,7 +160,7 @@ class Task(object):
             if self.cli_args:
                 cmd += " " + self.cli_args
             cmd_arr = self._container_cmd_arr(cmd) if self.c_image else self._simple_cmd_arr(cmd)
-            cmd_rc = self._run_cmd(cmd_arr, cmd, penv)
+            cmd_rc = self._run_cmd(cmd_arr, cmd, penv, cwd)
             if cmd_rc == 0:
                 continue
             if self.stop_on_error:
