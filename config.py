@@ -160,7 +160,7 @@ class Config(object):
         included_obj_name.update(base_obj)
         return included_obj_name
 
-    def task(self, name: str, glbl: bool = False) -> dict:
+    def task_descriptor(self, name: str, glbl: bool = False) -> dict:
         if glbl and not name.startswith(Config.__G_PREFIX):
             name = Config.__G_PREFIX + name
         hidden = self.raw_task(name).get(TaskSchema.Keys.Hidden, False)

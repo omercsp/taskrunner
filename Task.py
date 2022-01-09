@@ -12,30 +12,30 @@ class Task(object):
             return
         raise TaskException("Expanded {} for task '{}' is empty".format(title, self.name))
 
-    def __init__(self, task: dict, name: str, config: Config) -> None:
+    def __init__(self, task_descriptor: dict, name: str, config: Config) -> None:
         super().__init__()
         self.name = name
         self.config = config
-        self.short_desc = task.get(TaskSchema.Keys.ShortDesc, None)
-        self.long_desc = task.get(TaskSchema.Keys.LongDesc, None)
-        self.hidden = task.get(TaskSchema.Keys.Hidden, False)
-        self.global_task = task[TaskSchema.Keys.Global]
+        self.short_desc = task_descriptor.get(TaskSchema.Keys.ShortDesc, None)
+        self.long_desc = task_descriptor.get(TaskSchema.Keys.LongDesc, None)
+        self.hidden = task_descriptor.get(TaskSchema.Keys.Hidden, False)
+        self.global_task = task_descriptor[TaskSchema.Keys.Global]
 
-        self.stop_on_error = task.get(TaskSchema.Keys.StopOnError, True)
-        self.commands = task.get(TaskSchema.Keys.Commands, [])
-        self.cwd = task.get(TaskSchema.Keys.Cwd, None)
-        self.shell = task.get(TaskSchema.Keys.Shell, False)
-        self.shell_path = task.get(TaskSchema.Keys.ShellPath, config.default_shell_path())
-        self.env = task.get(TaskSchema.Keys.Env, None)
+        self.stop_on_error = task_descriptor.get(TaskSchema.Keys.StopOnError, True)
+        self.commands = task_descriptor.get(TaskSchema.Keys.Commands, [])
+        self.cwd = task_descriptor.get(TaskSchema.Keys.Cwd, None)
+        self.shell = task_descriptor.get(TaskSchema.Keys.Shell, False)
+        self.shell_path = task_descriptor.get(TaskSchema.Keys.ShellPath, config.default_shell_path())
+        self.env = task_descriptor.get(TaskSchema.Keys.Env, None)
 
-        self.c_settings = task.get(TaskSchema.Keys.Container, {})
+        self.c_settings = task_descriptor.get(TaskSchema.Keys.Container, {})
         self.c_image = self.c_settings.get(ContSchema.Keys.Image)
         self.c_volumes = self.c_settings.get(ContSchema.Keys.Volumes, [])
         self.c_interactive = self.c_settings.get(ContSchema.Keys.Interactive, False)
         self.c_tty = self.c_settings.get(ContSchema.Keys.Tty, False)
-        self.c_flags = task.get(ContSchema.Keys.Flags, "")
-        self.c_exec = task.get(ContSchema.Keys.Exec, False)
-        self.c_rm = task.get(ContSchema.Keys.Keep, True)
+        self.c_flags = task_descriptor.get(ContSchema.Keys.Flags, "")
+        self.c_exec = task_descriptor.get(ContSchema.Keys.Exec, False)
+        self.c_rm = task_descriptor.get(ContSchema.Keys.Keep, True)
         self.c_tool = self.c_settings.get(ContSchema.Keys.Tool,
                                           self.config.default_container_tool())
         self.c_shell = self.c_settings.get(ContSchema.Keys.Shell, False)

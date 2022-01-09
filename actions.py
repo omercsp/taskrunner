@@ -107,7 +107,7 @@ def _show_task(task: Task, config: Config, full_details: bool) -> None:
 
 def show_task_info(args: Args, config: Config) -> None:
     task_name = _active_task_name(config, args)
-    task = Task(config.task(task_name, glbl=args.global_task), task_name, config)
+    task = Task(config.task_descriptor(task_name, glbl=args.global_task), task_name, config)
     _show_task(task, config, True)
 
 
@@ -136,18 +136,18 @@ def list_tasks(config: Config, show_all: bool):
     print(PRINT_FMT.format("Name", "Flags", "Description"))
     print(PRINT_FMT.format("----", "-----", "-----------"))
     for task_name in local_tasks:
-        print_task(task_name, config.task(task_name))
+        print_task(task_name, config.task_descriptor(task_name))
     if not config.setting(ConfigSchema.Keys.AllowGlobal, True):
         return
     for task_name in config.global_tasks.keys():
         if not show_all and task_name in local_tasks:
             continue
-        print_task(task_name, config.task(task_name, glbl=True))
+        print_task(task_name, config.task_descriptor(task_name, glbl=True))
 
 
 def run_task(config: Config, args: Args) -> int:
     task_name = _active_task_name(config, args)
-    task = Task(config.task(task_name), task_name, config)
+    task = Task(config.task_descriptor(task_name), task_name, config)
     task.args_update(args)
     if args.summary:
         _show_task(task, config, False)
