@@ -5,6 +5,11 @@ import pathlib
 import json
 
 
+# None schema keys
+class ExtKeys(object):
+    Global = "global"
+
+
 class Config(object):
     class _AutoDefsKeys(object):
         # Auto defintiosn keys
@@ -126,10 +131,16 @@ class Config(object):
 
     @staticmethod
     def _raw_object(name, local_objects: dict, global_objects: dict):
-        if name.startswith(Config.__G_PREFIX):
-            return global_objects[name[len(Config.__G_PREFIX):]]
+        global_prefix = name.startswith(Config.__G_PREFIX)
+        if global_prefix or name not in local_objects:
+            if global_prefix:
+                name = name[len(Config.__G_PREFIX):]
+            obj = global_objects[name]
+            obj[ExtKeys.Global] = True
         else:
-            return local_objects[name] if name in local_objects else global_objects[name]
+            obj = local_objects[name]
+            obj[ExtKeys.Global] = False
+        return obj
 
     def raw_task(self, name: str) -> dict:
         try:
