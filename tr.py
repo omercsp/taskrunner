@@ -83,6 +83,8 @@ def _parse_arguments():
     list_parser = subparsers.add_parser('list', help='list tasks')
     list_parser.add_argument('-a', '--all', action='store_true', default=False,
                              help='show hidden and shadowed tasks')
+    list_parser.add_argument('--names-only', action='store_true', default=False,
+                             help=argparse.SUPPRESS)
 
     argcomplete.autocomplete(parser, always_complete_options=False,
                              default_completer=_tasks_complete)
@@ -95,7 +97,7 @@ if __name__ == "__main__":
         args = _parse_arguments()
         config = Config(args.define)
         if args.subparsers_name == "list":
-            actions.list_tasks(config, args.all)
+            actions.list_tasks(config, args.all, args.names_only)
         elif args.subparsers_name == "info":
             actions.show_task_info(args=args, config=config)
         elif args.subparsers_name == "dump":

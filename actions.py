@@ -111,10 +111,11 @@ def show_task_info(args: Args, config: Config) -> None:
     _show_task(task, config, True)
 
 
-def list_tasks(config: Config, show_all: bool):
+def list_tasks(config: Config, show_all: bool, names_only:bool):
     PRINT_FMT = "{:<24}{:<6}{:<55}"
     default_task_name = config.default_task_name()
     local_tasks = config.local_tasks.keys()
+    global_tasks = config.global_tasks.keys()
 
     def print_task(name: str, task: dict):
         t = Task(task, name, config=config)
@@ -133,13 +134,21 @@ def list_tasks(config: Config, show_all: bool):
 
         print(PRINT_FMT.format(task_name, flags, desc[-55:]))
 
+    allow_global = config.setting(ConfigSchema.Keys.AllowGlobal, True)
+    if names_only:
+        print(" ".join(local_tasks), end='')
+        if allow_global:
+            print(" ".join(global_tasks), end='')
+        print()
+        return
+
     print(PRINT_FMT.format("Name", "Flags", "Description"))
     print(PRINT_FMT.format("----", "-----", "-----------"))
     for task_name in local_tasks:
         print_task(task_name, config.task_descriptor(task_name))
     if not config.setting(ConfigSchema.Keys.AllowGlobal, True):
         return
-    for task_name in config.global_tasks.keys():
+    for task_name in global_tasks:
         if not show_all and task_name in local_tasks:
             continue
         print_task(task_name, config.task_descriptor(task_name, glbl=True))
