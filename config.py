@@ -12,6 +12,7 @@ class Config(object):
         CWD = "CWD"
         CWD_REL_TASK_ROOT = "CWD_REL_TASK_ROOT"
 
+    __G_PREFIX = "g/"
     _CONF_FILE_NAME = "tasks.json"
     _MAJOR_VER: int = 0
     _MINOR_VER: int = 1
@@ -174,4 +175,3 @@ class Config(object):
                             name))
         return task
 
-    __G_PREFIX = "g/"
