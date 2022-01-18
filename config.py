@@ -160,6 +160,7 @@ class Config(object):
             raise TaskException("Include loop detected for '{}'".format(name))
 
         base_obj = search_func(name)
+        hidden = base_obj.get(CommonKeys.Hidden, False)
         included_list.add(Config.__G_PREFIX + name if name.startswith(Config.__G_PREFIX) else name)
 
         included_obj_name = base_obj.get(CommonKeys.Include, None)
@@ -170,14 +171,13 @@ class Config(object):
         included_obj_name = Config._include_obj(included_obj_name, search_func,
                                                 included_list=included_list).copy()
         included_obj_name.update(base_obj)
+        included_obj_name[CommonKeys.Hidden] = hidden
         return included_obj_name
 
     def task_descriptor(self, name: str, glbl: bool = False) -> dict:
         if glbl and not name.startswith(Config.__G_PREFIX):
             name = Config.__G_PREFIX + name
-        hidden = self.raw_task(name).get(TaskSchema.Keys.Hidden, False)
         task = self._include_obj(name, self.raw_task, set())
-        task[TaskSchema.Keys.Hidden] = hidden
         if TaskSchema.Keys.Container in task:
             task[TaskSchema.Keys.Container] = \
                 self._include_obj(task[TaskSchema.Keys.Container], self._raw_container, set())
