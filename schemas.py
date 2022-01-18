@@ -8,6 +8,7 @@ class CommonKeys(object):
     Env = "env"
     Cwd = "cwd"
     Include = "include"
+    Hidden = "hidden"
 
 
 class ContSchema(object):
@@ -61,12 +62,12 @@ class TaskSchema(object):
         ShellPath = CommonKeys.ShellPath
         Env = CommonKeys.Env
         Cwd = CommonKeys.Cwd
+        Hidden = CommonKeys.Hidden
         ShortDesc = "short_desc"
         LongDesc = "description"
         Commands = "commands"
         StopOnError = "stop_on_error"
         Container = "container"
-        Hidden = "hidden"
         Global = "global"
     schema = {
         "type": "object",
