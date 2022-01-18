@@ -1,4 +1,3 @@
-from common import *
 from config import *
 from argparse import Namespace as Args
 import shlex
@@ -7,8 +6,8 @@ import signal
 
 
 class Task(object):
-    def _check_empty_setting(self, str, title):
-        if len(str) > 0:
+    def _check_empty_setting(self, s, title):
+        if len(s) > 0:
             return
         raise TaskException("Expanded {} for task '{}' is empty".format(title, self.name))
 
@@ -58,7 +57,7 @@ class Task(object):
         if args.env:
             self.env = {}
             for e in args.env:
-                e_name, e_value = parse_assignmet_str(e)
+                e_name, e_value = parse_assignment_str(e)
                 self.env[e_name] = e_value
 
         if args.c_image:
@@ -98,8 +97,7 @@ class Task(object):
             raise TaskException("Illegal command '{}' for task '{}' - {}".format(cmd, self.name, e))
 
     def _container_cmd_arr(self, cmd) -> list:
-        cmd_array = [self.c_tool]
-        cmd_array.append("exec" if self.c_exec else "run")
+        cmd_array = [self.c_tool, "exec" if self.c_exec else "run"]
         if self.c_cwd:
             cmd_array += ["-w", self._expand(self.c_cwd)]
         if self.c_interactive:
@@ -129,7 +127,7 @@ class Task(object):
             return p.wait()
 
         except (OSError, FileNotFoundError) as e:
-            raise TaskException("Error occured running command '{}' - {}".format(cmd_str, e))
+            raise TaskException("Error occurred running command '{}' - {}".format(cmd_str, e))
         except KeyboardInterrupt:
             if p:
                 p.send_signal(signal.SIGINT)

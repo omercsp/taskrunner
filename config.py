@@ -1,4 +1,3 @@
-from common import *
 from schemas import *
 import os
 import pathlib
@@ -12,7 +11,7 @@ class ExtKeys(object):
 
 class Config(object):
     class _AutoDefsKeys(object):
-        # Auto defintiosn keys
+        # Auto definitions keys
         TASK_ROOT = "TASK_ROOT"
         CWD = "CWD"
         CWD_REL_TASK_ROOT = "CWD_REL_TASK_ROOT"
@@ -48,7 +47,7 @@ class Config(object):
         f = directory + "/." + Config._CONF_FILE_NAME
         while not os.path.exists(f):
             if directory == "/":
-                self.local_conf  = {}
+                self.local_conf = {}
                 self.local_conf_path = ""
                 return
             directory = os.path.dirname(directory)
@@ -88,7 +87,7 @@ class Config(object):
                     self.defs[Config._AutoDefsKeys.CWD], self.defs[Config._AutoDefsKeys.TASK_ROOT])
         if defs:
             for define in defs:
-                key, val = parse_assignmet_str(define)
+                key, val = parse_assignment_str(define)
                 self.defs[key] = val
 
         self.local_containers = self.local_conf.get(ConfigSchema.Keys.Containers, {})
@@ -189,4 +188,3 @@ class Config(object):
                 raise TaskException("container setting must define an image property".format(
                             name))
         return task
-

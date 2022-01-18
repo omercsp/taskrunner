@@ -1,4 +1,3 @@
-from common import *
 from Task import *
 import textwrap
 
@@ -111,8 +110,8 @@ def show_task_info(args: Args, config: Config) -> None:
     _show_task(task, config, True)
 
 
-def list_tasks(config: Config, show_all: bool, names_only:bool):
-    PRINT_FMT = "{:<24}{:<6}{:<55}"
+def list_tasks(config: Config, show_all: bool, names_only: bool):
+    print_fmt = "{:<24}{:<6}{:<55}"
     default_task_name = config.default_task_name()
     local_tasks = config.local_tasks.keys()
     global_tasks = config.global_tasks.keys()
@@ -132,7 +131,7 @@ def list_tasks(config: Config, show_all: bool, names_only:bool):
         elif name == default_task_name:
             flags += "*"
 
-        print(PRINT_FMT.format(task_name, flags, desc[-55:]))
+        print(print_fmt.format(task_name, flags, desc[-55:]))
 
     allow_global = config.setting(ConfigSchema.Keys.AllowGlobal, True)
     if names_only:
@@ -142,8 +141,8 @@ def list_tasks(config: Config, show_all: bool, names_only:bool):
         print()
         return
 
-    print(PRINT_FMT.format("Name", "Flags", "Description"))
-    print(PRINT_FMT.format("----", "-----", "-----------"))
+    print(print_fmt.format("Name", "Flags", "Description"))
+    print(print_fmt.format("----", "-----", "-----------"))
     for task_name in local_tasks:
         print_task(task_name, config.task_descriptor(task_name))
     if not config.setting(ConfigSchema.Keys.AllowGlobal, True):
