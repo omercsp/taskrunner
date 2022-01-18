@@ -107,8 +107,8 @@ class ConfigSchema(object):
         Containers = "containers"
         Definitions = "definitions"
         DfltTask = "default_task"
-        DfltShellPath = "defult_shell_path"
-        DfltContainerShellPath = "defult_container_shell_path"
+        DfltShellPath = "default_shell_path"
+        DfltContainerShellPath = "default_container_shell_path"
         DfltContainerTool = "default_container_tool"
         AllowGlobal = "allow_global"
     schema = {
@@ -146,5 +146,5 @@ class ConfigSchema(object):
     def validate(data: dict) -> None:
         try:
             jsonschema.validate(data, ConfigSchema.schema)
-        except (jsonschema.ValidationError) as e:
+        except jsonschema.ValidationError as e:
             raise TaskException(str(e))

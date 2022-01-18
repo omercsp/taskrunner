@@ -78,7 +78,7 @@ def expand_string(s: str, defs: dict):
     return StringVarExpander(defs, set()).expand(s)
 
 
-def parse_assignmet_str(s: str):
+def parse_assignment_str(s: str):
     parts = s.split('=', maxsplit=1)
     if len(parts) == 1:
         return s, ""

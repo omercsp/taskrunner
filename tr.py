@@ -1,5 +1,4 @@
 #!/bin/python3
-from common import *
 from config import *
 import argparse
 import actions
@@ -22,7 +21,7 @@ def _parse_arguments():
     yes_no: typing.List[str] = [TASK_YES_TOKEN, TASK_NO_TOKEN]
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--define', metavar='DEFINE', default=None, action='append',
-                        help='set a deinifion')
+                        help='set a definition')
     subparsers = parser.add_subparsers(help='commands', dest='subparsers_name')
     subparsers.required = True
 
@@ -32,7 +31,7 @@ def _parse_arguments():
     run_parser = subparsers.add_parser('run', help='execute a task', parents=[task_target_parser])
     run_parser.add_argument('-c', '--command', metavar='CMD', default=None, action='append',
                             help='set command to run')
-    run_parser.add_argument('--cwd', metavar='DIR', default=None, help='set working direcotry')
+    run_parser.add_argument('--cwd', metavar='DIR', default=None, help='set working directory')
     run_parser.add_argument('--shell', type=str, choices=yes_no, action='store', default=None,
                             help='set shell usage')
     run_parser.add_argument('--shell-path', metavar='PATH', help='set shell path', default=None)
@@ -71,7 +70,7 @@ def _parse_arguments():
     run_parser.add_argument('--c-env', metavar='ENV=VAL', default=None, action='append',
                             help='set container environment variable')
     run_parser.add_argument('--c-cwd', metavar='DIR', default=None,
-                            help='set container working direcotry')
+                            help='set container working directory')
 
     global_opt_parser = argparse.ArgumentParser(add_help=False)
     global_opt_parser.add_argument('-g', '--global_task', action='store_true', default=False,
