@@ -87,8 +87,8 @@ class Config(object):
                 key, val = parse_assignmet_str(define)
                 self.defs[key] = val
 
-        self.local_containers = self.global_conf.get(ConfigSchema.Keys.Containers, {})
-        self.global_containers = self.local_conf.get(ConfigSchema.Keys.Containers, {})
+        self.local_containers = self.local_conf.get(ConfigSchema.Keys.Containers, {})
+        self.global_containers = self.global_conf.get(ConfigSchema.Keys.Containers, {})
 
     def allow_global(self):
         return self.local_conf.get(ConfigSchema.Keys.AllowGlobal, True) and \
@@ -152,7 +152,7 @@ class Config(object):
         try:
             return Config._raw_object(name, self.local_containers, self.global_containers)
         except KeyError:
-            raise TaskException("No such task '{}'".format(name))
+            raise TaskException("No such container '{}'".format(name))
 
     @staticmethod
     def _include_obj(name, search_func, included_list: set):
