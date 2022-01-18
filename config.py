@@ -43,29 +43,33 @@ class Config(object):
         if minor != Config._MINOR_VER:
             print("Incompatible {} configuration file minor version".format(conf_file_type))
 
-    def _read_local_conf_file(self) -> typing.Tuple[dict, str]:
+    def _read_local_conf_file(self) -> None:
         directory = os.getcwd()
         f = directory + "/." + Config._CONF_FILE_NAME
         while not os.path.exists(f):
             if directory == "/":
-                return {}, ""
+                self.local_conf  = {}
+                self.local_conf_path = ""
+                return
             directory = os.path.dirname(directory)
             f = directory + "/." + Config._CONF_FILE_NAME
-        data = Config._read_tasks_file(f)
-        Config._check_config_file_version(data, local=True)
-        return data, f
+        self.local_conf_path = f
+        self.local_conf = Config._read_tasks_file(f)
+        Config._check_config_file_version(self.local_conf, local=True)
 
-    def _read_global_conf_file(self):
+    def _read_global_conf_file(self) -> None:
         f = str(pathlib.Path.home()) + "/.config/" + Config._CONF_FILE_NAME
         if not os.path.isfile(f):
-            return {}, ""
-        data = Config._read_tasks_file(f)
-        Config._check_config_file_version(data, local=False)
-        return data, f
+            self.global_conf = {}
+            self.global_conf_path = ""
+            return
+        self.global_conf_path = f
+        self.global_conf = Config._read_tasks_file(f)
+        Config._check_config_file_version(self.global_conf, local=False)
 
     def __init__(self, defs: list):
-        self.global_conf, self.global_conf_path = self._read_global_conf_file()
-        self.local_conf, self.local_conf_path = self._read_local_conf_file()
+        self._read_global_conf_file()
+        self._read_local_conf_file()
 
         self.global_tasks = self.global_conf.get(ConfigSchema.Keys.Tasks, {})
         for task in self.global_tasks.values():
