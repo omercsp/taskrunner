@@ -112,12 +112,17 @@ def show_task_info(args: Args, config: Config) -> None:
 
 def list_tasks(config: Config, show_all: bool, names_only: bool):
     print_fmt = "{:<24}{:<6}{:<55}"
+    err_print_fmt = "{:<24}{:<59}"
     default_task_name = config.default_task_name()
     local_tasks = config.local_tasks.keys()
     global_tasks = config.global_tasks.keys()
 
-    def print_task(name: str, task: dict):
-        t = Task(task, name, config=config)
+    def print_task(task_name: str, glbl: bool) -> None:
+        try:
+            t = Task(config.task_descriptor(task_name, glbl=glbl), task_name, config=config)
+        except TaskException as e:
+            print(err_print_fmt.format(task_name, "<error: {}>".format(str(e))))
+            return
         if not show_all and t.hidden:
             return
         desc = "" if t.short_desc is None else t.short_desc
@@ -126,9 +131,9 @@ def list_tasks(config: Config, show_all: bool, names_only: bool):
         flags = "G" if t.global_task else "L"
         if t.hidden:
             flags += "H"
-        if t.global_task and name in local_tasks:
+        if t.global_task and task_name in local_tasks:
             flags += "S"
-        elif name == default_task_name:
+        elif task_name == default_task_name:
             flags += "*"
 
         print(print_fmt.format(task_name, flags, desc[-55:]))
@@ -144,13 +149,13 @@ def list_tasks(config: Config, show_all: bool, names_only: bool):
     print(print_fmt.format("Name", "Flags", "Description"))
     print(print_fmt.format("----", "-----", "-----------"))
     for task_name in local_tasks:
-        print_task(task_name, config.task_descriptor(task_name))
+        print_task(task_name, False)
     if not config.setting(ConfigSchema.Keys.AllowGlobal, True):
         return
     for task_name in global_tasks:
         if not show_all and task_name in local_tasks:
             continue
-        print_task(task_name, config.task_descriptor(task_name, glbl=True))
+        print_task(task_name, True)
 
 
 def run_task(config: Config, args: Args) -> int:
