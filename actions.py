@@ -127,9 +127,12 @@ def list_tasks(config: Config, show_all: bool, names_only: bool):
         if names_only:
             print(task_name, end=' ')
             return
-        desc = "" if t.short_desc is None else t.short_desc
-        if len(desc) > 55:
-            desc = t.short_desc[:52] + "..."
+
+        if t.short_desc:
+            desc = t.short_desc if len(t.short_desc) <= 55 else t.short_desc[:52] + "..."
+        else:
+            desc  = ""
+
         flags = "G" if t.global_task else "L"
         if t.hidden:
             flags += "H"
