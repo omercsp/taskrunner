@@ -1,4 +1,5 @@
 *.swp
 pyrightconfig.json
+.vimspector.json
 .idea/
 __pycache__/
