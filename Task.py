@@ -11,8 +11,9 @@ class Task(object):
             return
         raise TaskException("Expanded {} for task '{}' is empty".format(title, self.name))
 
-    def __init__(self, task_descriptor: dict, name: str, config: Config) -> None:
+    def __init__(self, name: str, glbl: bool, config: Config) -> None:
         super().__init__()
+        task_descriptor = config.task_descriptor(name, force_global=glbl)
         self.name = name
         self.config = config
         self.short_desc = task_descriptor.get(TaskSchema.Keys.ShortDesc, None)

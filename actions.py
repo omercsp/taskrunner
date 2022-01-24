@@ -106,7 +106,7 @@ def _show_task(task: Task, config: Config, full_details: bool) -> None:
 
 def show_task_info(args: Args, config: Config) -> None:
     task_name = _active_task_name(config, args)
-    task = Task(config.task_descriptor(task_name, glbl=args.global_task), task_name, config)
+    task = Task(task_name, args.global_task, config)
     _show_task(task, config, True)
 
 
@@ -118,7 +118,7 @@ def list_tasks(config: Config, show_all: bool, names_only: bool):
 
     def print_task(task_name: str, glbl: bool) -> None:
         try:
-            t = Task(config.task_descriptor(task_name, glbl=glbl), task_name, config=config)
+            t = Task(task_name, glbl, config=config)
         except TaskException as e:
             print(err_print_fmt.format(task_name, "<error: {}>".format(str(e))))
             return
@@ -155,7 +155,7 @@ def list_tasks(config: Config, show_all: bool, names_only: bool):
 
 def run_task(config: Config, args: Args) -> int:
     task_name = _active_task_name(config, args)
-    task = Task(config.task_descriptor(task_name), task_name, config)
+    task = Task(task_name, False, config)
     task.args_update(args)
     if args.summary:
         _show_task(task, config, False)
