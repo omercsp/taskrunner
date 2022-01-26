@@ -177,14 +177,10 @@ class Config(object):
         included_obj_name[CommonKeys.Hidden] = hidden
         return included_obj_name
 
+    def container_descriptor(self, name: str) -> dict:
+        return self._include_obj(name, self._raw_container, set())
+
     def task_descriptor(self, name: str, force_global: bool = False) -> dict:
         if force_global and not name.startswith(Config.__G_PREFIX):
             name = Config.__G_PREFIX + name
-        task = self._include_obj(name, self.raw_task, set())
-        if TaskSchema.Keys.Container in task:
-            task[TaskSchema.Keys.Container] = \
-                self._include_obj(task[TaskSchema.Keys.Container], self._raw_container, set())
-            if ContSchema.Keys.Image not in task[TaskSchema.Keys.Container]:
-                raise TaskException("container setting must define an image property".format(
-                            name))
-        return task
+        return self._include_obj(name, self.raw_task, set())

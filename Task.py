@@ -29,8 +29,15 @@ class Task(object):
             TaskSchema.Keys.ShellPath, config.default_shell_path())
         self.env = task_descriptor.get(TaskSchema.Keys.Env, None)
 
-        self.c_settings = task_descriptor.get(TaskSchema.Keys.Container, {})
-        self.c_image = self.c_settings.get(ContSchema.Keys.Image)
+        self.c_name = task_descriptor.get(TaskSchema.Keys.Container, None)
+        if self.c_name:
+            self.expected_container = True
+            self.c_settings = config.container_descriptor(self.c_name)
+        else:
+            self.expected_container = False
+            self.c_settings = {}
+
+        self.c_image = self.c_settings.get(ContSchema.Keys.Image, None)
         self.c_volumes = self.c_settings.get(ContSchema.Keys.Volumes, [])
         self.c_interactive = self.c_settings.get(ContSchema.Keys.Interactive, False)
         self.c_tty = self.c_settings.get(ContSchema.Keys.Tty, False)
@@ -139,6 +146,9 @@ class Task(object):
     def run(self) -> int:
         if self.global_task and not self.config.setting(ConfigSchema.Keys.AllowGlobal, True):
             raise TaskException("Global tasks aren't allowed from this location")
+
+        if self.expected_container and self.c_image is None:
+            raise TaskException("Task included a container reference, but now image was defined")
 
         if self.env is None:
             penv = None
