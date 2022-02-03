@@ -1,4 +1,3 @@
-#!/bin/python3
 from config import *
 import argparse
 import actions
