@@ -41,9 +41,9 @@ class Task(object):
         self.c_volumes = self.c_settings.get(ContSchema.Keys.Volumes, [])
         self.c_interactive = self.c_settings.get(ContSchema.Keys.Interactive, False)
         self.c_tty = self.c_settings.get(ContSchema.Keys.Tty, False)
-        self.c_flags = task_descriptor.get(ContSchema.Keys.Flags, "")
-        self.c_exec = task_descriptor.get(ContSchema.Keys.Exec, False)
-        self.c_rm = task_descriptor.get(ContSchema.Keys.Keep, True)
+        self.c_flags = self.c_settings.get(ContSchema.Keys.Flags, "")
+        self.c_exec = self.c_settings.get(ContSchema.Keys.Exec, False)
+        self.c_rm = self.c_settings.get(ContSchema.Keys.Remove, True)
         self.c_tool = self.c_settings.get(ContSchema.Keys.Tool,
                                           self.config.default_container_tool())
         self.c_shell = self.c_settings.get(ContSchema.Keys.Shell, False)
