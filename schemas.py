@@ -148,4 +148,5 @@ class ConfigSchema(object):
         try:
             jsonschema.validate(data, ConfigSchema.schema)
         except jsonschema.ValidationError as e:
-            raise TaskException(str(e))
+            raise TaskException("Schema validation error at '{}': {}".format(
+                "/".join(str(v) for v in list(e.absolute_path)), e.message))
