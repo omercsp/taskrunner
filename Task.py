@@ -32,24 +32,24 @@ class Task(object):
         self.c_name = task_descriptor.get(TaskSchema.Keys.Container, None)
         if self.c_name:
             self.expected_container = True
-            self.c_settings = config.container_descriptor(self.c_name)
+            c_settings = config.container_descriptor(self.c_name)
         else:
             self.expected_container = False
-            self.c_settings = {}
+            c_settings = {}
 
-        self.c_image = self.c_settings.get(ContSchema.Keys.Image, None)
-        self.c_volumes = self.c_settings.get(ContSchema.Keys.Volumes, [])
-        self.c_interactive = self.c_settings.get(ContSchema.Keys.Interactive, False)
-        self.c_tty = self.c_settings.get(ContSchema.Keys.Tty, False)
-        self.c_flags = task_descriptor.get(ContSchema.Keys.Flags, "")
-        self.c_exec = task_descriptor.get(ContSchema.Keys.Exec, False)
-        self.c_rm = task_descriptor.get(ContSchema.Keys.Keep, True)
-        self.c_tool = self.c_settings.get(ContSchema.Keys.Tool,
+        self.c_image = c_settings.get(ContSchema.Keys.Image, None)
+        self.c_volumes = c_settings.get(ContSchema.Keys.Volumes, [])
+        self.c_interactive = c_settings.get(ContSchema.Keys.Interactive, False)
+        self.c_tty = c_settings.get(ContSchema.Keys.Tty, False)
+        self.c_flags = c_settings.get(ContSchema.Keys.Flags, "")
+        self.c_exec = c_settings.get(ContSchema.Keys.Exec, False)
+        self.c_rm = c_settings.get(ContSchema.Keys.Remove, True)
+        self.c_tool = c_settings.get(ContSchema.Keys.Tool,
                                           self.config.default_container_tool())
-        self.c_shell = self.c_settings.get(ContSchema.Keys.Shell, False)
-        self.c_shell_path = self.c_settings.get(ContSchema.Keys.ShellPath,
+        self.c_shell = c_settings.get(ContSchema.Keys.Shell, False)
+        self.c_shell_path = c_settings.get(ContSchema.Keys.ShellPath,
                                                 self.config.default_container_shell_path())
-        self.c_cwd = self.c_settings.get(ContSchema.Keys.Cwd, None)
+        self.c_cwd = c_settings.get(ContSchema.Keys.Cwd, None)
         self.cli_args = None
 
     def args_update(self, args: Args) -> None:

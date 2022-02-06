@@ -20,7 +20,7 @@ class ContSchema(object):
         Tty = "tty"
         Flags = "flags"
         Exec = "exec"
-        Keep = "keep"
+        Remove = "remove"
         Shell = CommonKeys.Shell
         ShellPath = CommonKeys.ShellPath
         Env = CommonKeys.Env
@@ -39,6 +39,7 @@ class ContSchema(object):
             },
             Keys.Interactive: {"type": "boolean"},
             Keys.Tty: {"type": "boolean"},
+            Keys.Remove: {"type": "boolean"},
             Keys.Flags: {"type": "string"},
             Keys.Exec: {"type": "boolean"},
             Keys.Cwd: {"type": "string", "minLength": 1},
