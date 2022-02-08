@@ -50,6 +50,7 @@ class Task(object):
         self.c_shell_path = c_settings.get(ContSchema.Keys.ShellPath,
                                            self.config.default_container_shell_path())
         self.c_cwd = c_settings.get(ContSchema.Keys.Cwd, None)
+        self.c_sudo = c_settings.get(ContSchema.Keys.Sudo, False)
         self.cli_args = None
 
     def args_update(self, args: Args) -> None:
@@ -106,7 +107,8 @@ class Task(object):
             raise TaskException("Illegal command '{}' for task '{}' - {}".format(cmd, self.name, e))
 
     def _container_cmd_arr(self, cmd) -> list:
-        cmd_array = [self.c_tool, "exec" if self.c_exec else "run"]
+        cmd_array = ["sudo", self.c_tool] if self.c_sudo else [self.c_tool]
+        cmd_array.append("exec" if self.c_exec else "run")
         if self.c_cwd:
             cmd_array += ["-w", self._expand(self.c_cwd)]
         if self.c_interactive:

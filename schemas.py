@@ -21,6 +21,7 @@ class ContSchema(object):
         Flags = "flags"
         Exec = "exec"
         Remove = "remove"
+        Sudo = "sudo"
         Shell = CommonKeys.Shell
         ShellPath = CommonKeys.ShellPath
         Env = CommonKeys.Env
@@ -45,6 +46,7 @@ class ContSchema(object):
             Keys.Cwd: {"type": "string", "minLength": 1},
             Keys.Shell: {"type": "boolean"},
             Keys.ShellPath: {"type": "string", "minLength": 1},
+            Keys.Sudo: {"type": "boolean"},
             Keys.Env: {
                 "type": "object",
                 "additionalProperties": {
