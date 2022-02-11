@@ -1,5 +1,6 @@
 from config import *
 from argparse import Namespace as Args
+from schemas import Schema
 import shlex
 import subprocess
 import signal
@@ -16,20 +17,20 @@ class Task(object):
         task_descriptor = config.task_descriptor(name, force_global=glbl)
         self.name = name
         self.config = config
-        self.short_desc = task_descriptor.get(TaskSchema.Keys.ShortDesc, None)
-        self.long_desc = task_descriptor.get(TaskSchema.Keys.LongDesc, None)
-        self.hidden = task_descriptor.get(TaskSchema.Keys.Hidden, False)
-        self.global_task = task_descriptor[TaskSchema.Keys.Global]
+        self.short_desc = task_descriptor.get(Schema.Keys.Task.ShortDesc, None)
+        self.long_desc = task_descriptor.get(Schema.Keys.Task.LongDesc, None)
+        self.hidden = task_descriptor.get(Schema.Keys.Task.Hidden, False)
+        self.global_task = task_descriptor[Schema.Keys.Task.Global]
 
-        self.stop_on_error = task_descriptor.get(TaskSchema.Keys.StopOnError, True)
-        self.commands = task_descriptor.get(TaskSchema.Keys.Commands, [])
-        self.cwd = task_descriptor.get(TaskSchema.Keys.Cwd, None)
-        self.shell = task_descriptor.get(TaskSchema.Keys.Shell, False)
+        self.stop_on_error = task_descriptor.get(Schema.Keys.Task.StopOnError, True)
+        self.commands = task_descriptor.get(Schema.Keys.Task.Commands, [])
+        self.cwd = task_descriptor.get(Schema.Keys.Task.Cwd, None)
+        self.shell = task_descriptor.get(Schema.Keys.Task.Shell, False)
         self.shell_path = task_descriptor.get(
-            TaskSchema.Keys.ShellPath, config.default_shell_path())
-        self.env = task_descriptor.get(TaskSchema.Keys.Env, None)
+            Schema.Keys.Task.ShellPath, config.default_shell_path())
+        self.env = task_descriptor.get(Schema.Keys.Task.Env, None)
 
-        self.c_name = task_descriptor.get(TaskSchema.Keys.Container, None)
+        self.c_name = task_descriptor.get(Schema.Keys.Task.Container, None)
         if self.c_name:
             self.expected_container = True
             c_settings = config.container_descriptor(self.c_name)
@@ -37,20 +38,20 @@ class Task(object):
             self.expected_container = False
             c_settings = {}
 
-        self.c_image = c_settings.get(ContSchema.Keys.Image, None)
-        self.c_volumes = c_settings.get(ContSchema.Keys.Volumes, [])
-        self.c_interactive = c_settings.get(ContSchema.Keys.Interactive, False)
-        self.c_tty = c_settings.get(ContSchema.Keys.Tty, False)
-        self.c_flags = c_settings.get(ContSchema.Keys.Flags, "")
-        self.c_exec = c_settings.get(ContSchema.Keys.Exec, False)
-        self.c_rm = c_settings.get(ContSchema.Keys.Remove, True)
-        self.c_tool = c_settings.get(ContSchema.Keys.Tool,
+        self.c_image = c_settings.get(Schema.Keys.Container.Image, None)
+        self.c_volumes = c_settings.get(Schema.Keys.Container.Volumes, [])
+        self.c_interactive = c_settings.get(Schema.Keys.Container.Interactive, False)
+        self.c_tty = c_settings.get(Schema.Keys.Container.Tty, False)
+        self.c_flags = c_settings.get(Schema.Keys.Container.Flags, "")
+        self.c_exec = c_settings.get(Schema.Keys.Container.Exec, False)
+        self.c_rm = c_settings.get(Schema.Keys.Container.Remove, True)
+        self.c_tool = c_settings.get(Schema.Keys.Container.Tool,
                                      self.config.default_container_tool())
-        self.c_shell = c_settings.get(ContSchema.Keys.Shell, False)
-        self.c_shell_path = c_settings.get(ContSchema.Keys.ShellPath,
+        self.c_shell = c_settings.get(Schema.Keys.Container.Shell, False)
+        self.c_shell_path = c_settings.get(Schema.Keys.Container.ShellPath,
                                            self.config.default_container_shell_path())
-        self.c_cwd = c_settings.get(ContSchema.Keys.Cwd, None)
-        self.c_sudo = c_settings.get(ContSchema.Keys.Sudo, False)
+        self.c_cwd = c_settings.get(Schema.Keys.Container.Cwd, None)
+        self.c_sudo = c_settings.get(Schema.Keys.Container.Sudo, False)
         self.cli_args = None
 
     def args_update(self, args: Args) -> None:
@@ -146,7 +147,7 @@ class Task(object):
             raise TaskException("User interrupt")
 
     def run(self) -> int:
-        if self.global_task and not self.config.setting(ConfigSchema.Keys.AllowGlobal, True):
+        if self.global_task and not self.config.setting(Schema.Keys.AllowGlobal, True):
             raise TaskException("Global tasks aren't allowed from this location")
 
         if self.expected_container and self.c_image is None:

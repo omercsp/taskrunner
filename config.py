@@ -1,4 +1,5 @@
-from schemas import *
+from schemas import Schema
+from common import *
 import os
 import pathlib
 import json
@@ -25,7 +26,7 @@ class Config(object):
     def _read_tasks_file(file_path: str) -> dict:
         try:
             data: dict = json.load(open(file_path, 'r'))
-            ConfigSchema.validate(data)
+            Schema.validate(data)
         except (IOError, TypeError, ValueError, TaskException) as e:
             raise TaskException("Error parsing {} - {}".format(file_path, e))
         return data
@@ -33,8 +34,8 @@ class Config(object):
     @staticmethod
     def _check_config_file_version(data: dict, local: bool) -> None:
         conf_file_type = "local" if local else "global"
-        major = data[ConfigSchema.Keys.Version][ConfigSchema.Keys.Ver.Major]
-        minor = data[ConfigSchema.Keys.Version][ConfigSchema.Keys.Ver.Minor]
+        major = data[Schema.Keys.Version][Schema.Keys.Ver.Major]
+        minor = data[Schema.Keys.Version][Schema.Keys.Ver.Minor]
         if major != Config._MAJOR_VER or minor > Config._MINOR_VER:
             raise TaskException(("Incompatible {} configuration file version: " +
                                  "Found:{}.{}, expected <= {}.{}").format(
@@ -70,15 +71,15 @@ class Config(object):
         self._read_global_conf_file()
         self._read_local_conf_file()
 
-        self.global_tasks = self.global_conf.get(ConfigSchema.Keys.Tasks, {})
+        self.global_tasks = self.global_conf.get(Schema.Keys.Tasks, {})
         for task in self.global_tasks.values():
-            task[TaskSchema.Keys.Global] = True
-        self.local_tasks = self.local_conf.get(ConfigSchema.Keys.Tasks, {})
+            task[Schema.Keys.Task.Global] = True
+        self.local_tasks = self.local_conf.get(Schema.Keys.Tasks, {})
         for task in self.local_tasks.values():
-            task[TaskSchema.Keys.Global] = False
+            task[Schema.Keys.Task.Global] = False
 
-        self.defs = self.global_conf.get(ConfigSchema.Keys.Definitions, {})
-        self.defs.update(self.local_conf.get(ConfigSchema.Keys.Definitions, {}))
+        self.defs = self.global_conf.get(Schema.Keys.Definitions, {})
+        self.defs.update(self.local_conf.get(Schema.Keys.Definitions, {}))
 
         self.defs[Config._AutoDefsKeys.CWD] = os.getcwd()
         if self.local_conf:
@@ -90,12 +91,12 @@ class Config(object):
                 key, val = parse_assignment_str(define)
                 self.defs[key] = val
 
-        self.local_containers = self.local_conf.get(ConfigSchema.Keys.Containers, {})
-        self.global_containers = self.global_conf.get(ConfigSchema.Keys.Containers, {})
+        self.local_containers = self.local_conf.get(Schema.Keys.Containers, {})
+        self.global_containers = self.global_conf.get(Schema.Keys.Containers, {})
 
     def allow_global(self):
-        return self.local_conf.get(ConfigSchema.Keys.AllowGlobal, True) and \
-               self.global_conf.get(ConfigSchema.Keys.AllowGlobal, True)
+        return self.local_conf.get(Schema.Keys.AllowGlobal, True) and \
+               self.global_conf.get(Schema.Keys.AllowGlobal, True)
 
     def local_setting(self, path: str):
         return dict_value(self.local_conf, path)
@@ -104,24 +105,24 @@ class Config(object):
         return dict_value(self.global_conf, path)
 
     def default_task_name(self) -> typing.Union[str, None]:
-        return self.setting(ConfigSchema.Keys.DfltTask)
+        return self.setting(Schema.Keys.DfltTask)
 
     def default_container_tool(self) -> str:
-        return self.setting(ConfigSchema.Keys.DfltContainerTool, default="/usr/bin/docker")
+        return self.setting(Schema.Keys.DfltContainerTool, default="/usr/bin/docker")
 
     def default_container_shell_path(self) -> str:
-        return self.setting(ConfigSchema.Keys.DfltContainerShellPath, default="/usr/bin/sh")
+        return self.setting(Schema.Keys.DfltContainerShellPath, default="/usr/bin/sh")
 
     def default_shell_path(self) -> typing.Union[str, None]:
-        return self.setting(ConfigSchema.Keys.DfltShellPath, None)
+        return self.setting(Schema.Keys.DfltShellPath, None)
 
     def visible_tasks(self) -> typing.List[str]:
         tasks = set()
         for name, task in self.global_tasks.items():
-            if not task.get(TaskSchema.Keys.Hidden, False):
+            if not task.get(Schema.Keys.Task.Hidden, False):
                 tasks.add(name)
         for name, task in self.local_tasks.items():
-            if not task.get(TaskSchema.Keys.Hidden, False):
+            if not task.get(Schema.Keys.Task.Hidden, False):
                 tasks.add(name)
         return list(tasks)
 
@@ -163,10 +164,10 @@ class Config(object):
             raise TaskException("Include loop detected for '{}'".format(name))
 
         base_obj = search_func(name)
-        hidden = base_obj.get(CommonKeys.Hidden, False)
+        hidden = base_obj.get(Schema.Keys.Task.Hidden, False)
         included_list.add(Config.__G_PREFIX + name if name.startswith(Config.__G_PREFIX) else name)
 
-        included_obj_name = base_obj.get(CommonKeys.Include, None)
+        included_obj_name = base_obj.get(Schema.Keys.Task.Include, None)
         if included_obj_name is None:
             return base_obj
 
@@ -174,7 +175,7 @@ class Config(object):
         included_obj_name = Config._include_obj(included_obj_name, search_func,
                                                 included_list=included_list).copy()
         included_obj_name.update(base_obj)
-        included_obj_name[CommonKeys.Hidden] = hidden
+        included_obj_name[Schema.Keys.Task.Hidden] = hidden
         return included_obj_name
 
     def container_descriptor(self, name: str) -> dict:

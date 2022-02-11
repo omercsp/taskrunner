@@ -85,6 +85,8 @@ def _parse_arguments():
     list_parser.add_argument('--names-only', action='store_true', default=False,
                              help=argparse.SUPPRESS)
 
+    subparsers.add_parser('schema', help='dump configuration schema')
+
     argcomplete.autocomplete(parser, always_complete_options=False,
                              default_completer=_tasks_complete)
     return parser.parse_args()
@@ -94,6 +96,11 @@ if __name__ == "__main__":
     init_logging()
     try:
         args = _parse_arguments()
+
+        if args.subparsers_name == "schema":
+            Schema.dump()
+            exit(0)
+
         config = Config(args.define)
         if args.subparsers_name == "list":
             actions.list_tasks(config, args.all, args.names_only)

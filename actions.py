@@ -148,7 +148,7 @@ def list_tasks(config: Config, show_all: bool, names_only: bool):
         print(print_fmt.format("----", "-----", "-----------"))
     for task_name in local_tasks:
         print_task(task_name, False)
-    if not config.setting(ConfigSchema.Keys.AllowGlobal, True):
+    if not config.setting(Schema.Keys.AllowGlobal, True):
         return
     for task_name in config.global_tasks.keys():
         if not show_all and task_name in local_tasks:
