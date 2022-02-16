@@ -111,6 +111,7 @@ def show_task_info(args: Args, config: Config) -> None:
 
 
 def list_tasks(config: Config, show_all: bool, names_only: bool):
+    info("Listing tasks show_all={} names_only={}".format(show_all, names_only))
     print_fmt = "{:<24}{:<6}{:<55}"
     err_print_fmt = "{:<24}{:<59}"
     default_task_name = config.default_task_name()
@@ -158,6 +159,7 @@ def list_tasks(config: Config, show_all: bool, names_only: bool):
 
 def run_task(config: Config, args: Args) -> int:
     task_name = _active_task_name(config, args)
+    info("Running task '{}'", task_name)
     task = Task(task_name, False, config)
     task.args_update(args)
     if args.summary:

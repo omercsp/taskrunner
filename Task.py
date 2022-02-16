@@ -14,6 +14,7 @@ class Task(object):
 
     def __init__(self, name: str, glbl: bool, config: Config) -> None:
         super().__init__()
+        info("Initializing task '{}'", name)
         task_descriptor = config.task_descriptor(name, force_global=glbl)
         self.name = name
         self.config = config
@@ -32,6 +33,7 @@ class Task(object):
 
         self.c_name = task_descriptor.get(Schema.Keys.Task.Container, None)
         if self.c_name:
+            info("Task is set to use container '{}'", self.c_name)
             self.expected_container = True
             c_settings = config.container_descriptor(self.c_name)
         else:
@@ -100,6 +102,7 @@ class Task(object):
         return expand_string(s, self.config.defs)
 
     def _simple_cmd_arr(self, cmd) -> list:
+        info("Preparing simple command")
         if self.shell:
             return [cmd]
         try:
@@ -108,6 +111,7 @@ class Task(object):
             raise TaskException("Illegal command '{}' for task '{}' - {}".format(cmd, self.name, e))
 
     def _container_cmd_arr(self, cmd) -> list:
+        info("Preparing conatiner command")
         cmd_array = ["sudo", self.c_tool] if self.c_sudo else [self.c_tool]
         cmd_array.append("exec" if self.c_exec else "run")
         if self.c_cwd:
@@ -132,6 +136,8 @@ class Task(object):
         return cmd_array
 
     def _run_cmd(self, cmd: list, cmd_str: str, env: typing.Union[dict, None], cwd) -> int:
+        info("Running command (joined):")
+        raw_msg(cmd_str)
         p = None
         try:
             p = subprocess.Popen(cmd, shell=self.shell, executable=self.shell_path, env=env,
@@ -154,15 +160,23 @@ class Task(object):
             raise TaskException("Task included a container reference, but now image was defined")
 
         if self.env is None:
+            info("no special environment variables were set for task")
             penv = None
         else:
+            for k, v in self.env.items():
+                info("Environment variable will be set '{}={}'", k, v)
             penv = os.environ.copy()
             penv.update(self.env)
         cwd = self._expand(self.cwd) if self.cwd else None
+        if cwd:
+            info("Working directory will be set to '{}'", cwd)
+        else:
+            info("No working directory will be set")
 
         cmds = self.commands
         if len(cmds) == 0:
             if self.c_image:
+                info("Running container's default command")
                 return self._run_cmd(self._container_cmd_arr(None), "<CONTAINER_DEFAULT>", penv,
                                      cwd)
             print("No commands defined for task '{}'. Nothing to do.".format(self.name))
@@ -170,14 +184,19 @@ class Task(object):
 
         rc = 0
         for cmd in self.commands:
+            info("Raw command is '{}'", cmd)
             cmd = self._expand(cmd)
+            info("Expanded command is '{}'", cmd)
             if self.cli_args:
                 cmd += " " + self.cli_args
+                info("Expanded command with cli args is '{}'", cmd)
             cmd_arr = self._container_cmd_arr(cmd) if self.c_image else self._simple_cmd_arr(cmd)
             cmd_rc = self._run_cmd(cmd_arr, cmd, penv, cwd)
             if cmd_rc == 0:
                 continue
+            info("Command had failed")
             if self.stop_on_error:
+                info("Stopping of first error")
                 return cmd_rc
             if rc == 0:
                 rc = cmd_rc
