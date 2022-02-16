@@ -2,6 +2,7 @@ from config import *
 import argparse
 import actions
 import argcomplete
+import sys
 
 
 def _tasks_complete(**kwargs):
@@ -96,6 +97,8 @@ def _parse_arguments():
 if __name__ == "__main__":
     args = _parse_arguments()
     init_logging(args.log_file, args.verbose)
+
+    info("args='{}'", sys.argv[1:])
     try:
 
         if args.subparsers_name == "schema":
@@ -113,5 +116,5 @@ if __name__ == "__main__":
             exit(actions.run_task(config, args))
 
     except TaskException as e:
-        print(str(e))
+        error_and_print(str(e))
         exit(1)

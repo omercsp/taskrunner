@@ -46,6 +46,7 @@ class Config(object):
     def _read_local_conf_file(self) -> None:
         directory = os.getcwd()
         f = directory + "/." + Config._CONF_FILE_NAME
+        info("Reading '{}'".format(f))
         while not os.path.exists(f):
             if directory == "/":
                 self.local_conf = {}
@@ -59,6 +60,7 @@ class Config(object):
 
     def _read_global_conf_file(self) -> None:
         f = str(pathlib.Path.home()) + "/.config/" + Config._CONF_FILE_NAME
+        info("Reading '{}'".format(f))
         if not os.path.isfile(f):
             self.global_conf = {}
             self.global_conf_path = ""
@@ -90,6 +92,12 @@ class Config(object):
             for define in defs:
                 key, val = parse_assignment_str(define)
                 self.defs[key] = val
+        if logging_enabled_for(logging.DEBUG):
+            verbose("Definitions settings are (unexpanded):")
+            start_raw_logging()
+            for k,v in self.defs.items():
+                verbose("{}='{}'", k, v)
+            stop_raw_logging()
 
         self.local_containers = self.local_conf.get(Schema.Keys.Containers, {})
         self.global_containers = self.global_conf.get(Schema.Keys.Containers, {})
@@ -179,9 +187,11 @@ class Config(object):
         return included_obj_name
 
     def container_descriptor(self, name: str) -> dict:
+        verbose("Container '{}' requested", name)
         return self._include_obj(name, self._raw_container, set())
 
     def task_descriptor(self, name: str, force_global: bool = False) -> dict:
+        verbose("Task '{}' requested. force_global={}", name, force_global)
         if force_global and not name.startswith(Config.__G_PREFIX):
             name = Config.__G_PREFIX + name
         return self._include_obj(name, self.raw_task, set())
