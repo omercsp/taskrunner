@@ -1,4 +1,4 @@
-import logging
+from logTools import *
 import sys
 import re
 import typing
@@ -43,11 +43,6 @@ def dict_value(d: dict, path: str, require=False, default=None) -> typing.Any:
         if require:
             raise TaskException("No '{}' setting was found".format(path))
     return default
-
-
-def init_logging():
-    logging.basicConfig(stream=sys.stdout, level=logging.DEBUG,
-                        format='%(filename)s:%(lineno)d %(levelname)s - %(message)s')
 
 
 class StringVarExpander(object):

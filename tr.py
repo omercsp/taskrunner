@@ -19,6 +19,8 @@ def _tasks_complete(**kwargs):
 def _parse_arguments():
     yes_no: typing.List[str] = [TASK_YES_TOKEN, TASK_NO_TOKEN]
     parser = argparse.ArgumentParser()
+    parser.add_argument('-v', '--verbose', action='count', help='log file verbosity', default=0)
+    parser.add_argument('--log_file', metavar='FILE', help='set log file', default='')
     parser.add_argument('-d', '--define', metavar='DEFINE', default=None, action='append',
                         help='set a definition')
     subparsers = parser.add_subparsers(help='commands', dest='subparsers_name')
@@ -91,11 +93,10 @@ def _parse_arguments():
                              default_completer=_tasks_complete)
     return parser.parse_args()
 
-
 if __name__ == "__main__":
-    init_logging()
+    args = _parse_arguments()
+    init_logging(args.log_file, args.verbose)
     try:
-        args = _parse_arguments()
 
         if args.subparsers_name == "schema":
             Schema.dump()
