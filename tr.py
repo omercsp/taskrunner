@@ -90,9 +90,11 @@ def _parse_arguments():
 
     subparsers.add_parser('schema', help='dump configuration schema')
 
+    # TODO: Not sure what pyright wants with this type ignore
     argcomplete.autocomplete(parser, always_complete_options=False,
-                             default_completer=_tasks_complete)
+                             default_completer=_tasks_complete)  # type: ignore
     return parser.parse_args()
+
 
 if __name__ == "__main__":
     args = _parse_arguments()

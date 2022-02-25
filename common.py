@@ -48,7 +48,7 @@ def dict_value(d: dict, path: str, require=False, default=None) -> typing.Any:
 class StringVarExpander(object):
     var_re = re.compile(r'{{\S*?}}')
 
-    def __init__(self, defs: dict, previous_expansions: set = None):
+    def __init__(self, defs: dict, previous_expansions: typing.Union[None, set] = None):
         self.previous_expansions = set() if previous_expansions is None else previous_expansions
         self.defs = defs
 

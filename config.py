@@ -180,11 +180,11 @@ class Config(object):
         included_obj_name[Schema.Keys.Task.Hidden] = hidden
         return included_obj_name
 
-    def container_descriptor(self, name: str) -> dict:
+    def get_cont_desc(self, name: str) -> dict:
         verbose("Container '{}' requested", name)
         return self._include_obj(name, self._raw_container, set())
 
-    def task_descriptor(self, name: str, force_global: bool = False) -> dict:
+    def get_task_desc(self, name: str, force_global: bool = False) -> dict:
         verbose("Task '{}' requested. force_global={}", name, force_global)
         if force_global and not name.startswith(Config.__G_PREFIX):
             name = Config.__G_PREFIX + name

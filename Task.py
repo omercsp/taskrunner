@@ -15,7 +15,7 @@ class Task(object):
     def __init__(self, name: str, glbl: bool, config: Config) -> None:
         super().__init__()
         info("Initializing task '{}'", name)
-        task_descriptor = config.task_descriptor(name, force_global=glbl)
+        task_descriptor = config.get_task_desc(name, force_global=glbl)
         self.name = name
         self.config = config
         self.short_desc = task_descriptor.get(Schema.Keys.Task.ShortDesc, None)
@@ -35,7 +35,7 @@ class Task(object):
         if self.c_name:
             info("Task is set to use container '{}'", self.c_name)
             self.expected_container = True
-            c_settings = config.container_descriptor(self.c_name)
+            c_settings = config.get_cont_desc(self.c_name)
         else:
             self.expected_container = False
             c_settings = {}
