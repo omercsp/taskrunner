@@ -132,7 +132,7 @@ def list_tasks(config: Config, show_all: bool, names_only: bool):
         if t.short_desc:
             desc = t.short_desc if len(t.short_desc) <= 55 else t.short_desc[:52] + "..."
         else:
-            desc  = ""
+            desc = ""
 
         flags = "G" if t.global_task else "L"
         if t.hidden:
@@ -174,4 +174,4 @@ def dump_task(config: Config, args: Args):
     if args.raw:
         print(json.dumps(config.raw_task(task_name), indent=4))
     else:
-        print(json.dumps(config.task_descriptor(task_name), indent=4))
+        print(json.dumps(config.get_task_desc(task_name), indent=4))

@@ -1,3 +1,0 @@
-* json skeleton file (?)
-* Replace json path with library
-* Bash autocomplete
