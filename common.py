@@ -48,29 +48,27 @@ def dict_value(d: dict, path: str, require=False, default=None) -> typing.Any:
 class StringVarExpander(object):
     var_re = re.compile(r'{{\S*?}}')
 
-    def __init__(self, defs: dict, previous_expansions: typing.Union[None, set] = None):
-        self.previous_expansions = set() if previous_expansions is None else previous_expansions
+    def __init__(self, defs: dict):
+        self.curr_expansion_stack = []
         self.defs = defs
 
-    def expand(self, s: str) -> str:
+    def __call__(self, s: str) -> str:
+        self.curr_expansion_stack = []
         return re.sub(StringVarExpander.var_re, self._expand_re, s)
 
     def _expand_re(self, match) -> str:
         var = match.group()[2:-2]
-        if var in self.previous_expansions:
+        if var in self.curr_expansion_stack:
             raise TaskException("Recursive expanded var '{}'".format(var))
         if var.startswith("$"):
             return os.getenv(var[1:], "")
         value = self.defs.get(var, "")
         if type(value) is list or type(value) is dict:
             raise TaskException("Var expanded path '{}' doesn't refer to valid type".format(var))
-        self.previous_expansions.add(var)
-        next_expander = StringVarExpander(self.defs, self.previous_expansions)
-        return re.sub(StringVarExpander.var_re, next_expander._expand_re, str(value))
-
-
-def expand_string(s: str, defs: dict):
-    return StringVarExpander(defs, set()).expand(s)
+        self.curr_expansion_stack.append(var)
+        s = re.sub(StringVarExpander.var_re, self._expand_re, str(value))
+        self.curr_expansion_stack.pop()
+        return s
 
 
 def parse_assignment_str(s: str):

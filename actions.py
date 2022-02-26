@@ -12,7 +12,7 @@ def _active_task_name(config: Config, args) -> str:
 __PRINT_FMT = "{:<24}{:<80}"
 
 
-def _show_task(task: Task, config: Config, full_details: bool) -> None:
+def _show_task(task: Task, expander: StringVarExpander, full_details: bool) -> None:
     def print_val(title: str, value: typing.Any):
         print(__PRINT_FMT.format("{}".format(title), value))
 
@@ -33,7 +33,7 @@ def _show_task(task: Task, config: Config, full_details: bool) -> None:
                 print(__PRINT_FMT.format("", in_line))
 
     def info_expanded_str(cmd_str: str) -> str:
-        ret = expand_string(cmd_str, config.defs).strip()
+        ret = expander(cmd_str).strip()
         if len(ret) == 0:
             return "[n/a - empty string)]"
         return ret
@@ -107,7 +107,7 @@ def _show_task(task: Task, config: Config, full_details: bool) -> None:
 def show_task_info(args: Args, config: Config) -> None:
     task_name = _active_task_name(config, args)
     task = Task(task_name, args.global_task, config)
-    _show_task(task, config, True)
+    _show_task(task, StringVarExpander(config.defs), True)
 
 
 def list_tasks(config: Config, show_all: bool, names_only: bool):
@@ -162,11 +162,12 @@ def run_task(config: Config, args: Args) -> int:
     info("Running task '{}'", task_name)
     task = Task(task_name, False, config)
     task.args_update(args)
+    expander = StringVarExpander(config.defs)
     if args.summary:
-        _show_task(task, config, False)
+        _show_task(task, expander, False)
         print("-" * 70)
         sys.stdout.flush()
-    return task.run()
+    return task.run(expander)
 
 
 def dump_task(config: Config, args: Args):
