@@ -98,9 +98,6 @@ class Task(object):
         if args.args:
             self.cli_args = args.args
 
-    def _expand(self, s: str) -> str:
-        return expand_string(s, self.config.defs)
-
     def _simple_cmd_arr(self, cmd) -> list:
         info("Preparing simple command")
         if self.shell:
@@ -110,12 +107,12 @@ class Task(object):
         except ValueError as e:
             raise TaskException("Illegal command '{}' for task '{}' - {}".format(cmd, self.name, e))
 
-    def _container_cmd_arr(self, cmd) -> list:
+    def _container_cmd_arr(self, cmd, expander: StringVarExpander) -> list:
         info("Preparing conatiner command")
         cmd_array = ["sudo", self.c_tool] if self.c_sudo else [self.c_tool]
         cmd_array.append("exec" if self.c_exec else "run")
         if self.c_cwd:
-            cmd_array += ["-w", self._expand(self.c_cwd)]
+            cmd_array += ["-w", expander(self.c_cwd)]
         if self.c_interactive:
             cmd_array.append("-i")
         if self.c_tty:
@@ -124,7 +121,7 @@ class Task(object):
             cmd_array.append("--rm")
 
         for v in self.c_volumes:
-            cmd_array += ["-v", self._expand(v)]
+            cmd_array += ["-v", expander(v)]
 
         cmd_array += self.c_flags.split()
 
@@ -152,7 +149,7 @@ class Task(object):
                 p.wait()
             raise TaskException("User interrupt")
 
-    def run(self) -> int:
+    def run(self, expander: StringVarExpander) -> int:
         if self.global_task and not self.config.setting(Schema.Keys.AllowGlobal, True):
             raise TaskException("Global tasks aren't allowed from this location")
 
@@ -167,7 +164,7 @@ class Task(object):
                 info("Environment variable will be set '{}={}'", k, v)
             penv = os.environ.copy()
             penv.update(self.env)
-        cwd = self._expand(self.cwd) if self.cwd else None
+        cwd = expander(self.cwd) if self.cwd else None
         if cwd:
             info("Working directory will be set to '{}'", cwd)
         else:
@@ -177,20 +174,21 @@ class Task(object):
         if len(cmds) == 0:
             if self.c_image:
                 info("Running container's default command")
-                return self._run_cmd(self._container_cmd_arr(None), "<CONTAINER_DEFAULT>", penv,
-                                     cwd)
+                return self._run_cmd(self._container_cmd_arr(None, expander), "<CONTAINER_DEFAULT>",
+                                     penv, cwd)
             print("No commands defined for task '{}'. Nothing to do.".format(self.name))
             return 0
 
         rc = 0
         for cmd in self.commands:
             info("Raw command is '{}'", cmd)
-            cmd = self._expand(cmd)
+            cmd = expander(cmd)
             info("Expanded command is '{}'", cmd)
             if self.cli_args:
                 cmd += " " + self.cli_args
                 info("Expanded command with cli args is '{}'", cmd)
-            cmd_arr = self._container_cmd_arr(cmd) if self.c_image else self._simple_cmd_arr(cmd)
+            cmd_arr = self._container_cmd_arr(cmd, expander) if self.c_image else \
+                self._simple_cmd_arr(cmd)
             cmd_rc = self._run_cmd(cmd_arr, cmd, penv, cwd)
             if cmd_rc == 0:
                 continue
