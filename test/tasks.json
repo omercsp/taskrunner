@@ -3,5 +3,141 @@
 		"major": 0,
 		"minor": 1
 	},
-	"tasks": {}
+	"definitions": {
+		"aux_dir": "{{TASK_ROOT}}/aux",
+		"define0": "define0",
+		"define1": "define1",
+		"define2": "define2",
+		"define0_1_2": "{{define0}} {{define1}} {{define2}}"
+	},
+	"containers": {
+		"ubuntu": {
+			"image": "docker.io/library/ubuntu:latest",
+			"interactive": true,
+			"tty": true,
+			"shell": true,
+			"env": {
+				"CENV0": "value0"
+			}
+		}
+	},
+	"tasks": {
+		"001_simple": {
+			"short_desc": "Simple echo",
+			"commands": [ "echo \"XXX\"" ]
+		},
+		"002_simple": {
+			"short_desc": "Simple echo with environment variable",
+			"env": {"V0": "42"},
+			"shell": true,
+			"commands": ["echo $V0"]
+		},
+		"003_stop_on_error": {
+			"short_desc": "Check stop on error behavior",
+			"commands": [
+				"true",
+				"echo message1",
+				"false",
+				"echo message2"
+			],
+			"meta": {
+				"should_fail": true
+			}
+		},
+		"004_continue_on_error": {
+			"short_desc": "Check continue on error behavior",
+			"stop_on_error": false,
+			"commands": [
+				"true",
+				"echo message1",
+				"false",
+				"echo message2"],
+			"meta": {
+				"should_fail": true
+			}
+
+		},
+		"005_bash_multi_cmds_no_fail": {
+			"short_desc": "Check mulit bash commands that are not allowed to fail",
+			"shell": true,
+			"commands":  ["true && echo message1 && false && echo message2"],
+			"meta": {
+				"should_fail": true
+			}
+
+		},
+		"006_bash_multi_cmds_allow_fail": {
+			"short_desc": "Check mulit bash commands that are allowed to fail",
+			"shell": true,
+			"commands":  ["true; echo message1; false; echo message2"]
+		},
+		"020_workdir_root": {
+			"short_desc": "Check stop on error behavior",
+			"shell": true,
+			"cwd": "/",
+			"commands":  ["pwd"]
+		},
+		"021_workdir_opt": {
+			"short_desc": "Check stop on error behavior",
+			"shell": true,
+			"cwd": "/opt",
+			"commands":  ["pwd"]
+		},
+		"022_workdir_taskroot": {
+			"short_desc": "Check stop on error behavior",
+			"cwd": "{{TASK_ROOT}}",
+			"env": {
+				"EXPECTED_PWD": "{{TASK_ROOT}}"
+			},
+			"commands": ["{{aux_dir}}/check_cwd.sh"]
+		},
+		"023_def_expansion": {
+			"short_desc": "Check stop on error behavior",
+			"env": {
+				"MY_ENV": "{{define2}}"
+			},
+			"commands": [
+				"echo {{define0}} {{define0}}",
+				"echo __{{define1}}__",
+				"echo __{{define0_1_2}}__"
+			]
+		},
+		"024_def_expansion_env": {
+			"short_desc": "Validate definitions expansion behavior",
+			"env": {
+				"MY_ENV0": "{{define0}}",
+				"MY_ENV1": "{{define1}}",
+				"MY_ENV2": "{{define2}}"
+			},
+			"shell": true,
+			"commands": [
+				"echo __$MY_ENV0 XX $MY_ENV1 __${MY_ENV2}"
+			],
+			"meta": {
+				"1": "echo __$MY_ENV0 XX $MY_ENV1 __${MY_ENV2}"
+			}
+		},
+		"025_env_whitespace": {
+			"short_desc": "Check weird environment configrations",
+			"env": {
+				"ENV0": "   value0",
+				"ENV1   ": "value1",
+				"ENV2": "\tvalue2",
+				"ENV3": "\"value3\"",
+				"ENV4": "'value4'",
+				"ENV5": "'\\tvalue5\\t x'"
+			},
+			"shell": true,
+			"commands": [
+				"echo $ENV0; echo $ENV1; echo $ENV2; echo $ENV3; echo $ENV4; echo -e $ENV5"
+			]
+		},
+		"050_contaier_env": {
+			"container": "ubuntu",
+			"commands": [
+				"echo $CENV0"
+			]
+		}
+	},
+	"default_container_tool": "/usr/bin/podman"
 }
