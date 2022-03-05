@@ -70,6 +70,10 @@ def run_test_tasks(tasks: dict, diff_output: bool, stop_on_failure: bool,
     for t_name in tasks_list:
         task = tasks[t_name]
         t_meta = task.get("meta", {})
+        #  Abstract tasks are never ran, and shouldn't be even considered to be ran. Usually used
+        #  for inheritance and so.
+        if t_meta.get("abstract", False):
+            continue
         print_t_name = "{:<40}".format(Colors.BOLD + t_name + Colors.RESET if show_colors else t_name)
         print(print_t_name, end='')
 
