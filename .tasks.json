@@ -1,0 +1,15 @@
+{
+	"version": {
+		"major": 0,
+		"minor": 1
+	},
+	"tasks": {
+		"test": {
+			"short_desc": "Run test",
+			"commands": ["test/test.sh"],
+			"cwd": "{{TASK_ROOT}}"
+		}
+	},
+	"default_task": "test",
+	"allow_global": false
+}
