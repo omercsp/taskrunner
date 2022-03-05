@@ -30,6 +30,7 @@ class Schema(object):
             StopOnError = "stop_on_error"
             Container = "container"
             Global = "global"
+            Meta = "meta"
 
         class Container(object):
             Image = "image"
@@ -79,6 +80,7 @@ class Schema(object):
             Keys.Task.Container: {"type": "string", "minLength": 1},
             Keys.Task.Hidden: {"type": "boolean"},
             Keys.Task.Global: {"type": "boolean"},
+            Keys.Task.Meta: {"type": "object"},
         },
         "additionalProperties": False
     }
