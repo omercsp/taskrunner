@@ -160,8 +160,11 @@ class Task(object):
             info("no special environment variables were set for task")
             penv = None
         else:
+
             for k, v in self.env.items():
-                info("Environment variable will be set '{}={}'", k, v)
+                expanded_v = expander(v)
+                self.env[k] = expanded_v
+                info("Environment variable will be set '{}={}'", k, expanded_v)
             penv = os.environ.copy()
             penv.update(self.env)
         cwd = expander(self.cwd) if self.cwd else None
