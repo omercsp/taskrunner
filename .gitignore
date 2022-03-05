@@ -3,7 +3,8 @@ pyrightconfig.json
 .vimspector.json
 .idea/
 __pycache__/
-test/tr.log
+test/output
+test/intermediate.expected
 
 # Virtual Environments
 .env/
