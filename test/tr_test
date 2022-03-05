@@ -1,0 +1,16 @@
+#!/bin/bash
+SCRIPT_FILE="$(readlink -f ${BASH_SOURCE[0]})"
+SCRIPT_DIR="$(dirname $SCRIPT_FILE)"
+
+# Source virtual environment file if such exist
+if [[ -z ${VENV_ACTIVATE} ]]; then
+	for e in env venv .env .venv; do
+		activate_file=${SCRIPT_DIR}/${e}/bin/activate
+		if [[ -e ${activate_file} ]]; then
+			source ${activate_file}
+			break
+		fi
+	done
+fi
+
+python3 ${SCRIPT_DIR}/tr_test.py "$@"
