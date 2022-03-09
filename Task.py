@@ -53,6 +53,7 @@ class Task(object):
         self.c_shell_path = c_settings.get(Schema.Keys.Container.ShellPath,
                                            self.config.default_container_shell_path())
         self.c_cwd = c_settings.get(Schema.Keys.Container.Cwd, None)
+        self.c_env = c_settings.get(Schema.Keys.Container.Env, {})
         self.c_sudo = c_settings.get(Schema.Keys.Container.Sudo, False)
         self.cli_args = None
 
@@ -95,6 +96,11 @@ class Task(object):
             self.c_shell_path = args.c_shell_path
         if args.c_cwd:
             self.c_cwd = args.c_cwd
+        if args.c_env:
+            self.c_env = {}
+            for e in args.c_env:
+                e_name, e_value = parse_assignment_str(e)
+                self.c_env[e_name] = e_value
         if args.args:
             self.cli_args = args.args
 
@@ -123,6 +129,12 @@ class Task(object):
         for v in self.c_volumes:
             cmd_array += ["-v", expander(v)]
 
+        for k, v in self.c_env.items():
+            expanded_k = expander(k)
+            expanded_v = expander(v)
+            cmd_array += ["-e", "{}={}".format(expanded_k, expanded_v)]
+            info("Setting container environment variable will '{}={}'", expanded_k, expanded_v)
+
         cmd_array += self.c_flags.split()
 
         cmd_array.append(self.c_image)
@@ -130,6 +142,7 @@ class Task(object):
             cmd_array += [self.c_shell_path, "-c"]
         if cmd:
             cmd_array += [cmd]
+        info("Command is {}", cmd_array)
         return cmd_array
 
     def _run_cmd(self, cmd: list, cmd_str: str, env: typing.Union[dict, None], cwd) -> int:
