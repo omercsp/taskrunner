@@ -113,7 +113,7 @@ if __name__ == "__main__":
             Schema.dump()
             exit(0)
 
-        config = Config(args.define, cmd_args)
+        config = Config(args.define, cmds_args)
         if args.subparsers_name == "list":
             actions.list_tasks(config, args.all, args.names_only)
         elif args.subparsers_name == "info":

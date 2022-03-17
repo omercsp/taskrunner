@@ -99,9 +99,9 @@ def run_test_tasks(tasks: dict, diff_output: bool, stop_on_failure: bool,
                 if output_gen_cmd_rc:
                     raise TaskTestException(
                         "Error running expected outout generation command for task '{}'".format(t_name))
-
+        run_task_cmd = "{} {} -- {}".format(base_cmd, t_name, t_meta.get("args", ""))
         if diff_output:
-            run_task_cmd = "{} {} &> {}/{}.out".format(base_cmd, t_name, OUTPUT_DIR, t_name)
+            run_task_cmd += " &> {}/{}.out".format(OUTPUT_DIR, t_name)
         else:
             run_task_cmd = "{} {}".format(base_cmd, t_name)
         try:
