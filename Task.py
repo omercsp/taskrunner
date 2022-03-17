@@ -46,7 +46,6 @@ class Task(object):
         self.c_cwd = task_descriptor.get(Schema.Keys.Task.CCwd, None)
         self.c_env = task_descriptor.get(Schema.Keys.Task.CEnv, {})
         self.c_sudo = task_descriptor.get(Schema.Keys.Task.CSudo, False)
-        self.cli_args = None
 
     def args_update(self, args: Args) -> None:
         if args.stop_on_error:
@@ -92,8 +91,6 @@ class Task(object):
             for e in args.c_env:
                 e_name, e_value = parse_assignment_str(e)
                 self.c_env[e_name] = e_value
-        if args.args:
-            self.cli_args = args.args
 
     def _simple_cmd_arr(self, cmd) -> list:
         info("Preparing simple command")
@@ -188,9 +185,6 @@ class Task(object):
             info("Raw command is '{}'", cmd)
             cmd = expander(cmd)
             info("Expanded command is '{}'", cmd)
-            if self.cli_args:
-                cmd += " " + self.cli_args
-                info("Expanded command with cli args is '{}'", cmd)
             cmd_arr = self._container_cmd_arr(cmd, expander) if self.c_image else \
                 self._simple_cmd_arr(cmd)
             cmd_rc = self._run_cmd(cmd_arr, cmd, penv, cwd)

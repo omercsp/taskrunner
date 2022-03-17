@@ -16,6 +16,7 @@ class Config(object):
         TASK_ROOT = "TASK_ROOT"
         CWD = "CWD"
         CWD_REL_TASK_ROOT = "CWD_REL_TASK_ROOT"
+        ARGS = "ARGS"
 
     __G_PREFIX = "g/"
     _CONF_FILE_NAME = "tasks.json"
@@ -69,7 +70,7 @@ class Config(object):
         self.global_conf = Config._read_tasks_file(f)
         Config._check_config_file_version(self.global_conf, local=False)
 
-    def __init__(self, defs: list):
+    def __init__(self, defs: list, cli_args: list[str]):
         self._read_global_conf_file()
         self._read_local_conf_file()
 
@@ -88,6 +89,7 @@ class Config(object):
             self.defs[Config._AutoDefsKeys.TASK_ROOT] = os.path.dirname(self.local_conf_path)
             self.defs[Config._AutoDefsKeys.CWD_REL_TASK_ROOT] = os.path.relpath(
                     self.defs[Config._AutoDefsKeys.CWD], self.defs[Config._AutoDefsKeys.TASK_ROOT])
+        self.defs[Config._AutoDefsKeys.ARGS] = " ".join(cli_args)
         if defs:
             for define in defs:
                 key, val = parse_assignment_str(define)

@@ -13,11 +13,18 @@ def _tasks_complete(**kwargs):
         return []
     if (parser_name == "run" or parser_name == "info" or parser_name == "dump") \
        and parsed_args.task is None:
-        return Config([]).visible_tasks()
+        return Config([], []).visible_tasks()
     return []
 
 
 def _parse_arguments():
+    try:
+        ex_args_idx = sys.argv.index('--')
+        tr_argv = sys.argv[1:ex_args_idx]
+        cmds_argv = sys.argv[ex_args_idx + 1:]
+    except ValueError:
+        tr_argv = sys.argv[1:]
+        cmds_argv = []
     yes_no: typing.List[str] = [TASK_YES_TOKEN, TASK_NO_TOKEN]
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--verbose', action='count', help='log file verbosity', default=0)
@@ -41,8 +48,6 @@ def _parse_arguments():
                             help='set stop behavior on command error')
     run_parser.add_argument('--env', metavar='ENV=VAL', default=None, action='append',
                             help='set an environment variable')
-    run_parser.add_argument('-a', '--args', metavar='ARGS', default=None,
-                            help='set command arguments')
     run_parser.add_argument('-s', '--summary', action='store_true', default=False,
                             help='show task summary before run')
 
@@ -93,21 +98,22 @@ def _parse_arguments():
     # TODO: Not sure what pyright wants with this type ignore
     argcomplete.autocomplete(parser, always_complete_options=False,
                              default_completer=_tasks_complete)  # type: ignore
-    return parser.parse_args()
+    return parser.parse_args(tr_argv), cmds_argv
 
 
 if __name__ == "__main__":
-    args = _parse_arguments()
+    args, cmds_args = _parse_arguments()
     init_logging(args.log_file, args.verbose)
 
     info("args='{}'", sys.argv[1:])
+    info("cmd_args={}", cmds_args)
     try:
 
         if args.subparsers_name == "schema":
             Schema.dump()
             exit(0)
 
-        config = Config(args.define)
+        config = Config(args.define, cmd_args)
         if args.subparsers_name == "list":
             actions.list_tasks(config, args.all, args.names_only)
         elif args.subparsers_name == "info":
