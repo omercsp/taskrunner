@@ -125,6 +125,17 @@
 				"echo $ENV0; echo $ENV1; echo $ENV2; echo $ENV3; echo $ENV4; echo -e $ENV5"
 			]
 		},
+		"030_args_handling": {
+			"short_desc": "Check arguments handling",
+			"commands": [
+				"echo {{ARGS}}",
+				"echo \"no args\"",
+				"echo {{ARGS}}"
+			],
+			"meta" : {
+				"args": "If I had wings..."
+			}
+		},
 		"050_contaier_env": {
 			"short_desc": "Basic container support",
 			"commands": [
