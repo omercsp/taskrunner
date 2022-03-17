@@ -2,15 +2,6 @@ from common import *
 import jsonschema
 
 
-class _CommonKeys(object):
-    Shell = "shell"
-    ShellPath = "shell_path"
-    Env = "env"
-    Cwd = "cwd"
-    Include = "include"
-    Hidden = "hidden"
-
-
 class Schema(object):
     class Keys(object):
         class Ver(object):
@@ -18,38 +9,35 @@ class Schema(object):
             Minor = "minor"
 
         class Task(object):
-            Include = _CommonKeys.Include
-            Shell = _CommonKeys.Shell
-            ShellPath = _CommonKeys.ShellPath
-            Env = _CommonKeys.Env
-            Cwd = _CommonKeys.Cwd
-            Hidden = _CommonKeys.Hidden
+            Shell = "shell"
+            ShellPath = "shell_path"
+            Env = "env"
+            Cwd = "cwd"
+            Include = "include"
+            Hidden = "hidden"
             ShortDesc = "short_desc"
             LongDesc = "description"
             Commands = "commands"
             StopOnError = "stop_on_error"
-            Container = "container"
             Global = "global"
             Meta = "meta"
+            # Container settings
+            CImage = "c_image"
+            CTool = "c_container_tool"
+            CVolumes = "c_volumes"
+            CInteractive = "c_interactive"
+            CTty = "c_tty"
+            CFlags = "c_flags"
+            CExec = "c_exec"
+            CRemove = "c_remove"
+            CSudo = "c_sudo"
+            CShell = "c_shell"
+            CShellPath = "c_shell_path"
+            CEnv = "c_env"
+            CCwd = "c_cwd"
 
-        class Container(object):
-            Image = "image"
-            Tool = "container_tool"
-            Volumes = "volumes"
-            Interactive = "interactive"
-            Tty = "tty"
-            Flags = "flags"
-            Exec = "exec"
-            Remove = "remove"
-            Sudo = "sudo"
-            Shell = _CommonKeys.Shell
-            ShellPath = _CommonKeys.ShellPath
-            Env = _CommonKeys.Env
-            Cwd = _CommonKeys.Cwd
-            Include = _CommonKeys.Include
         Version = "version"
         Tasks = "tasks"
-        Containers = "containers"
         Definitions = "definitions"
         DfltTask = "default_task"
         DfltShellPath = "default_shell_path"
@@ -77,42 +65,34 @@ class Schema(object):
                 }
             },
             Keys.Task.StopOnError: {"type": "boolean"},
-            Keys.Task.Container: {"type": "string", "minLength": 1},
             Keys.Task.Hidden: {"type": "boolean"},
             Keys.Task.Global: {"type": "boolean"},
-            Keys.Task.Meta: {"type": "object"},
-        },
-        "additionalProperties": False
-    }
-
-    __container_schema = {
-        "type": "object",
-        "properties": {
-            Keys.Container.Include: {"type": "string", "minLength": 1},
-            Keys.Container.Image: {"type": "string", "minLength": 1},
-            Keys.Container.Tool: {"type": "string"},
-            Keys.Container.Volumes: {
+            Keys.Task.CImage: {"type": "string"},
+            Keys.Task.CTool: {"type": "string"},
+            Keys.Task.CVolumes: {
                 "type": "array",
                 "items": {"type": "string"}
             },
-            Keys.Container.Interactive: {"type": "boolean"},
-            Keys.Container.Tty: {"type": "boolean"},
-            Keys.Container.Remove: {"type": "boolean"},
-            Keys.Container.Flags: {"type": "string"},
-            Keys.Container.Exec: {"type": "boolean"},
-            Keys.Container.Cwd: {"type": "string", "minLength": 1},
-            Keys.Container.Shell: {"type": "boolean"},
-            Keys.Container.ShellPath: {"type": "string", "minLength": 1},
-            Keys.Container.Sudo: {"type": "boolean"},
-            Keys.Container.Env: {
+            Keys.Task.CInteractive: {"type": "boolean"},
+            Keys.Task.CTty: {"type": "boolean"},
+            Keys.Task.CRemove: {"type": "boolean"},
+            Keys.Task.CFlags: {"type": "string"},
+            Keys.Task.CExec: {"type": "boolean"},
+            Keys.Task.CCwd: {"type": "string", "minLength": 1},
+            Keys.Task.CShell: {"type": "boolean"},
+            Keys.Task.CShellPath: {"type": "string", "minLength": 1},
+            Keys.Task.CSudo: {"type": "boolean"},
+            Keys.Task.CEnv: {
                 "type": "object",
                 "additionalProperties": {
                     "type": "string"
                 }
             },
+            Keys.Task.Meta: {"type": "object"},
         },
         "additionalProperties": False
     }
+
     __schema = {
         "type": "object",
         "properties": {
@@ -127,10 +107,6 @@ class Schema(object):
                 "type": "object",
                 "additionalProperties": __task_schema
              },
-            Keys.Containers:  {
-                "type": "object",
-                "additionalProperties": __container_schema
-            },
             Keys.Definitions: {"type": "object"},
             Keys.DfltTask: {"type": "string"},
             Keys.DfltShellPath: {

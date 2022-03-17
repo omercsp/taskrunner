@@ -31,30 +31,21 @@ class Task(object):
             Schema.Keys.Task.ShellPath, config.default_shell_path())
         self.env = task_descriptor.get(Schema.Keys.Task.Env, None)
 
-        self.c_name = task_descriptor.get(Schema.Keys.Task.Container, None)
-        if self.c_name:
-            info("Task is set to use container '{}'", self.c_name)
-            self.expected_container = True
-            c_settings = config.get_cont_desc(self.c_name)
-        else:
-            self.expected_container = False
-            c_settings = {}
-
-        self.c_image = c_settings.get(Schema.Keys.Container.Image, None)
-        self.c_volumes = c_settings.get(Schema.Keys.Container.Volumes, [])
-        self.c_interactive = c_settings.get(Schema.Keys.Container.Interactive, False)
-        self.c_tty = c_settings.get(Schema.Keys.Container.Tty, False)
-        self.c_flags = c_settings.get(Schema.Keys.Container.Flags, "")
-        self.c_exec = c_settings.get(Schema.Keys.Container.Exec, False)
-        self.c_rm = c_settings.get(Schema.Keys.Container.Remove, True)
-        self.c_tool = c_settings.get(Schema.Keys.Container.Tool,
-                                     self.config.default_container_tool())
-        self.c_shell = c_settings.get(Schema.Keys.Container.Shell, False)
-        self.c_shell_path = c_settings.get(Schema.Keys.Container.ShellPath,
-                                           self.config.default_container_shell_path())
-        self.c_cwd = c_settings.get(Schema.Keys.Container.Cwd, None)
-        self.c_env = c_settings.get(Schema.Keys.Container.Env, {})
-        self.c_sudo = c_settings.get(Schema.Keys.Container.Sudo, False)
+        self.c_image = task_descriptor.get(Schema.Keys.Task.CImage, None)
+        self.c_volumes = task_descriptor.get(Schema.Keys.Task.CVolumes, [])
+        self.c_interactive = task_descriptor.get(Schema.Keys.Task.CInteractive, False)
+        self.c_tty = task_descriptor.get(Schema.Keys.Task.CTty, False)
+        self.c_flags = task_descriptor.get(Schema.Keys.Task.CFlags, "")
+        self.c_exec = task_descriptor.get(Schema.Keys.Task.CExec, False)
+        self.c_rm = task_descriptor.get(Schema.Keys.Task.CRemove, True)
+        self.c_tool = task_descriptor.get(Schema.Keys.Task.CTool,
+                                          self.config.default_container_tool())
+        self.c_shell = task_descriptor.get(Schema.Keys.Task.CShell, False)
+        self.c_shell_path = task_descriptor.get(Schema.Keys.Task.CShellPath,
+                                                self.config.default_container_shell_path())
+        self.c_cwd = task_descriptor.get(Schema.Keys.Task.CCwd, None)
+        self.c_env = task_descriptor.get(Schema.Keys.Task.CEnv, {})
+        self.c_sudo = task_descriptor.get(Schema.Keys.Task.CSudo, False)
         self.cli_args = None
 
     def args_update(self, args: Args) -> None:
@@ -165,9 +156,6 @@ class Task(object):
     def run(self, expander: StringVarExpander) -> int:
         if self.global_task and not self.config.setting(Schema.Keys.AllowGlobal, True):
             raise TaskException("Global tasks aren't allowed from this location")
-
-        if self.expected_container and self.c_image is None:
-            raise TaskException("Task included a container reference, but now image was defined")
 
         if self.env is None:
             info("no special environment variables were set for task")

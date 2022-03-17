@@ -19,8 +19,8 @@ class Config(object):
 
     __G_PREFIX = "g/"
     _CONF_FILE_NAME = "tasks.json"
-    _MAJOR_VER: int = 0
-    _MINOR_VER: int = 1
+    _MAJOR_VER: int = 1
+    _MINOR_VER: int = 0
 
     @staticmethod
     def _read_tasks_file(file_path: str) -> dict:
@@ -99,9 +99,6 @@ class Config(object):
                 verbose("{}='{}'", k, v)
             stop_raw_logging()
 
-        self.local_containers = self.local_conf.get(Schema.Keys.Containers, {})
-        self.global_containers = self.global_conf.get(Schema.Keys.Containers, {})
-
     def allow_global(self):
         return self.local_conf.get(Schema.Keys.AllowGlobal, True) and \
                self.global_conf.get(Schema.Keys.AllowGlobal, True)
@@ -160,12 +157,6 @@ class Config(object):
         except KeyError:
             raise TaskException("No such task '{}'".format(name))
 
-    def _raw_container(self, name: str) -> dict:
-        try:
-            return Config._raw_object(name, self.local_containers, self.global_containers)
-        except KeyError:
-            raise TaskException("No such container '{}'".format(name))
-
     @staticmethod
     def _include_obj(name, search_func, included_list: set):
         if name in included_list:
@@ -185,10 +176,6 @@ class Config(object):
         included_obj_name.update(base_obj)
         included_obj_name[Schema.Keys.Task.Hidden] = hidden
         return included_obj_name
-
-    def get_cont_desc(self, name: str) -> dict:
-        verbose("Container '{}' requested", name)
-        return self._include_obj(name, self._raw_container, set())
 
     def get_task_desc(self, name: str, force_global: bool = False) -> dict:
         verbose("Task '{}' requested. force_global={}", name, force_global)

@@ -1,7 +1,7 @@
 {
 	"version": {
-		"major": 0,
-		"minor": 1
+		"major": 1,
+		"minor": 0
 	},
 	"definitions": {
 		"aux_dir": "{{TASK_ROOT}}/aux",
@@ -9,17 +9,6 @@
 		"define1": "define1",
 		"define2": "define2",
 		"define0_1_2": "{{define0}} {{define1}} {{define2}}"
-	},
-	"containers": {
-		"ubuntu": {
-			"image": "docker.io/library/ubuntu:latest",
-			"interactive": true,
-			"tty": true,
-			"shell": true,
-			"env": {
-				"CENV0": "value0"
-			}
-		}
 	},
 	"tasks": {
 		"001_simple": {
@@ -138,10 +127,16 @@
 		},
 		"050_contaier_env": {
 			"short_desc": "Basic container support",
-			"container": "ubuntu",
 			"commands": [
 				"echo $CENV0"
-			]
+			],
+			"c_image": "docker.io/library/ubuntu:latest",
+			"c_interactive": true,
+			"c_tty": true,
+			"c_shell": true,
+			"c_env": {
+				"CENV0": "value0"
+			}
 		}
 	},
 	"default_container_tool": "/usr/bin/podman"
