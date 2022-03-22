@@ -79,8 +79,10 @@ class Config(object):
         self.defs[Schema.Keys.AutoDefs.CWD] = os.getcwd()
         if self.local_conf:
             self.defs[Schema.Keys.AutoDefs.TASK_ROOT] = os.path.dirname(self.local_conf_path)
-            self.defs[Schema.Keys.AutoDefs.CWD_REL_TASK_ROOT] = os.path.relpath(
-                    self.defs[Schema.Keys.AutoDefs.CWD], self.defs[Schema.Keys.AutoDefs.TASK_ROOT])
+        else:
+            self.defs[Schema.Keys.AutoDefs.TASK_ROOT] = self.defs[Schema.Keys.AutoDefs.CWD]
+        self.defs[Schema.Keys.AutoDefs.CWD_REL_TASK_ROOT] = os.path.relpath(
+                self.defs[Schema.Keys.AutoDefs.CWD], self.defs[Schema.Keys.AutoDefs.TASK_ROOT])
         self.defs[Schema.Keys.AutoDefs.CLI_ARGS] = " ".join(cli_args)
         if defs:
             for define in defs:
