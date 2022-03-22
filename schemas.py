@@ -3,10 +3,20 @@ import jsonschema
 
 
 class Schema(object):
+    class Version(object):
+        MAJOR: int = 1
+        MINOR: int = 0
+
     class Keys(object):
         class Ver(object):
             Major = "major"
             Minor = "minor"
+
+        class AutoDefs(object):
+            TASK_ROOT = "TASK_ROOT"
+            CWD = "CWD"
+            CWD_REL_TASK_ROOT = "CWD_REL_TASK_ROOT"
+            CLI_ARGS = "ARGS"
 
         class Task(object):
             Shell = "shell"
