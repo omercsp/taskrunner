@@ -11,17 +11,9 @@ class ExtKeys(object):
 
 
 class Config(object):
-    class _AutoDefsKeys(object):
-        # Auto definitions keys
-        TASK_ROOT = "TASK_ROOT"
-        CWD = "CWD"
-        CWD_REL_TASK_ROOT = "CWD_REL_TASK_ROOT"
-        ARGS = "ARGS"
 
     __G_PREFIX = "g/"
     _CONF_FILE_NAME = "tasks.json"
-    _MAJOR_VER: int = 1
-    _MINOR_VER: int = 0
 
     @staticmethod
     def _read_tasks_file(file_path: str) -> dict:
@@ -37,11 +29,11 @@ class Config(object):
         conf_file_type = "local" if local else "global"
         major = data[Schema.Keys.Version][Schema.Keys.Ver.Major]
         minor = data[Schema.Keys.Version][Schema.Keys.Ver.Minor]
-        if major != Config._MAJOR_VER or minor > Config._MINOR_VER:
+        if major != Schema.Version.MAJOR or minor > Schema.Version.MINOR:
             raise TaskException(("Incompatible {} configuration file version: " +
                                  "Found:{}.{}, expected <= {}.{}").format(
-                conf_file_type, major, minor, Config._MAJOR_VER, Config._MINOR_VER))
-        if minor != Config._MINOR_VER:
+                conf_file_type, major, minor, Schema.Version.MAJOR, Schema.Version.MINOR))
+        if minor != Schema.Version.MINOR:
             print("Incompatible {} configuration file minor version".format(conf_file_type))
 
     def _read_local_conf_file(self) -> None:
@@ -84,12 +76,12 @@ class Config(object):
         self.defs = self.global_conf.get(Schema.Keys.Definitions, {})
         self.defs.update(self.local_conf.get(Schema.Keys.Definitions, {}))
 
-        self.defs[Config._AutoDefsKeys.CWD] = os.getcwd()
+        self.defs[Schema.Keys.AutoDefs.CWD] = os.getcwd()
         if self.local_conf:
-            self.defs[Config._AutoDefsKeys.TASK_ROOT] = os.path.dirname(self.local_conf_path)
-            self.defs[Config._AutoDefsKeys.CWD_REL_TASK_ROOT] = os.path.relpath(
-                    self.defs[Config._AutoDefsKeys.CWD], self.defs[Config._AutoDefsKeys.TASK_ROOT])
-        self.defs[Config._AutoDefsKeys.ARGS] = " ".join(cli_args)
+            self.defs[Schema.Keys.AutoDefs.TASK_ROOT] = os.path.dirname(self.local_conf_path)
+            self.defs[Schema.Keys.AutoDefs.CWD_REL_TASK_ROOT] = os.path.relpath(
+                    self.defs[Schema.Keys.AutoDefs.CWD], self.defs[Schema.Keys.AutoDefs.TASK_ROOT])
+        self.defs[Schema.Keys.AutoDefs.CLI_ARGS] = " ".join(cli_args)
         if defs:
             for define in defs:
                 key, val = parse_assignment_str(define)
