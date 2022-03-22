@@ -4,7 +4,7 @@ import jsonschema
 
 class Schema(object):
     class Version(object):
-        MAJOR: int = 1
+        MAJOR: int = 2
         MINOR: int = 0
 
     class Keys(object):
@@ -13,10 +13,10 @@ class Schema(object):
             Minor = "minor"
 
         class AutoDefs(object):
-            TASK_ROOT = "TASK_ROOT"
-            CWD = "CWD"
-            CWD_REL_TASK_ROOT = "CWD_REL_TASK_ROOT"
-            CLI_ARGS = "ARGS"
+            TASK_ROOT = "taskRoot"
+            CWD = "cwd"
+            CWD_REL_TASK_ROOT = "cwdRelTaskRoot"
+            CLI_ARGS = "cliArgs"
 
         class Task(object):
             Shell = "shell"

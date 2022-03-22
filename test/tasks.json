@@ -1,10 +1,10 @@
 {
 	"version": {
-		"major": 1,
+		"major": 2,
 		"minor": 0
 	},
 	"definitions": {
-		"aux_dir": "{{TASK_ROOT}}/aux",
+		"aux_dir": "{{taskRoot}}/aux",
 		"define0": "define0",
 		"define1": "define1",
 		"define2": "define2",
@@ -78,9 +78,9 @@
 		},
 		"022_workdir_taskroot": {
 			"short_desc": "Validate working directory as task root (autodef)",
-			"cwd": "{{TASK_ROOT}}",
+			"cwd": "{{taskRoot}}",
 			"env": {
-				"EXPECTED_PWD": "{{TASK_ROOT}}"
+				"EXPECTED_PWD": "{{taskRoot}}"
 			},
 			"commands": ["{{aux_dir}}/check_cwd.sh"]
 		},
@@ -128,9 +128,9 @@
 		"030_args_handling": {
 			"short_desc": "Check arguments handling",
 			"commands": [
-				"echo {{ARGS}}",
+				"echo {{cliArgs}}",
 				"echo \"no args\"",
-				"echo {{ARGS}}"
+				"echo {{cliArgs}}"
 			],
 			"meta" : {
 				"args": "If I had wings..."
