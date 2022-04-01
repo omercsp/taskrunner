@@ -5,16 +5,12 @@ import pathlib
 import json
 
 
-# None schema keys
-class ExtKeys(object):
-    Global = "global"
+_Global = "global"
+_G_PREFIX = "g/"
+_CONF_FILE_NAME = "tasks.json"
 
 
 class Config(object):
-
-    __G_PREFIX = "g/"
-    _CONF_FILE_NAME = "tasks.json"
-
     @staticmethod
     def _read_tasks_file(file_path: str) -> dict:
         try:
@@ -38,7 +34,7 @@ class Config(object):
 
     def _read_local_conf_file(self) -> None:
         directory = os.getcwd()
-        f = directory + "/." + Config._CONF_FILE_NAME
+        f = directory + "/." + _CONF_FILE_NAME
         info("Reading '{}'".format(f))
         while not os.path.exists(f):
             if directory == "/":
@@ -46,13 +42,13 @@ class Config(object):
                 self.local_conf_path = ""
                 return
             directory = os.path.dirname(directory)
-            f = directory + "/." + Config._CONF_FILE_NAME
+            f = directory + "/." + _CONF_FILE_NAME
         self.local_conf_path = f
         self.local_conf = Config._read_tasks_file(f)
         Config._check_config_file_version(self.local_conf, local=True)
 
     def _read_global_conf_file(self) -> None:
-        f = str(pathlib.Path.home()) + "/.config/" + Config._CONF_FILE_NAME
+        f = str(pathlib.Path.home()) + "/.config/" + _CONF_FILE_NAME
         info("Reading '{}'".format(f))
         if not os.path.isfile(f):
             self.global_conf = {}
@@ -136,15 +132,15 @@ class Config(object):
 
     @staticmethod
     def _raw_object(name, local_objects: dict, global_objects: dict):
-        global_prefix = name.startswith(Config.__G_PREFIX)
+        global_prefix = name.startswith(_G_PREFIX)
         if global_prefix or name not in local_objects:
             if global_prefix:
-                name = name[len(Config.__G_PREFIX):]
+                name = name[len(_G_PREFIX):]
             obj = global_objects[name]
-            obj[ExtKeys.Global] = True
+            obj[_Global] = True
         else:
             obj = local_objects[name]
-            obj[ExtKeys.Global] = False
+            obj[_Global] = False
         return obj
 
     def raw_task(self, name: str) -> dict:
@@ -160,7 +156,7 @@ class Config(object):
 
         base_obj = search_func(name)
         hidden = base_obj.get(Schema.Keys.Task.Hidden, False)
-        included_list.add(Config.__G_PREFIX + name if name.startswith(Config.__G_PREFIX) else name)
+        included_list.add(_G_PREFIX + name if name.startswith(_G_PREFIX) else name)
 
         included_obj_name = base_obj.get(Schema.Keys.Task.Include, None)
         if included_obj_name is None:
@@ -175,6 +171,6 @@ class Config(object):
 
     def get_task_desc(self, name: str, force_global: bool = False) -> dict:
         verbose("Task '{}' requested. force_global={}", name, force_global)
-        if force_global and not name.startswith(Config.__G_PREFIX):
-            name = Config.__G_PREFIX + name
+        if force_global and not name.startswith(_G_PREFIX):
+            name = _G_PREFIX + name
         return self._include_obj(name, self.raw_task, set())
