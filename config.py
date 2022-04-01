@@ -59,6 +59,7 @@ class Config(object):
         Config._check_config_file_version(self.global_conf, local=False)
 
     def __init__(self, defs: list, cli_args: list[str]):
+        self.expander = StringVarExpander()
         self._read_global_conf_file()
         self._read_local_conf_file()
 
@@ -84,6 +85,7 @@ class Config(object):
             for define in defs:
                 key, val = parse_assignment_str(define)
                 self.defs[key] = val
+        self.expander.defs = self.defs
         if logging_enabled_for(logging.DEBUG):
             verbose("Definitions settings are (unexpanded):")
             start_raw_logging()

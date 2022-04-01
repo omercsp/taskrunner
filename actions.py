@@ -107,7 +107,7 @@ def _show_task(task: Task, expander: StringVarExpander, full_details: bool) -> N
 def show_task_info(args: Args, config: Config) -> None:
     task_name = _active_task_name(config, args)
     task = Task(task_name, args.global_task, config)
-    _show_task(task, StringVarExpander(config.defs), True)
+    _show_task(task, config.expander, True)
 
 
 def list_tasks(config: Config, show_all: bool, names_only: bool):
@@ -162,12 +162,11 @@ def run_task(config: Config, args: Args) -> int:
     info("Running task '{}'", task_name)
     task = Task(task_name, False, config)
     task.args_update(args)
-    expander = StringVarExpander(config.defs)
     if args.summary:
-        _show_task(task, expander, False)
+        _show_task(task, config.expander, False)
         print("-" * 70)
         sys.stdout.flush()
-    return task.run(expander)
+    return task.run(config.expander)
 
 
 def dump_task(config: Config, args: Args):

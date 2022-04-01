@@ -48,9 +48,9 @@ def dict_value(d: dict, path: str, require=False, default=None) -> typing.Any:
 class StringVarExpander(object):
     var_re = re.compile(r'{{\S*?}}')
 
-    def __init__(self, defs: dict):
+    def __init__(self):
         self.curr_expansion_stack = []
-        self.defs = defs
+        self.defs = {}
 
     def __call__(self, s: str) -> str:
         self.curr_expansion_stack = []
