@@ -1,0 +1,20 @@
+{
+	"include": [
+		"{{taskRoot}}/base_tasks_a.json"
+	],
+	"definitions": {
+		"base_def1": "from-base b 1",
+		"base_def2": "from-base b 2"
+	},
+	"tasks": {
+		"041_included": {
+			"commands": [
+				"echo base b"
+			],
+			"meta": {
+				"comment": "should be overridden by a task in the maing tasks file"
+			}
+		}
+	},
+	"use_default_include": false
+}

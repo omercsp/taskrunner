@@ -1,0 +1,18 @@
+{
+	"definitions": {
+		"base_def1": "from-base a 1",
+		"base_def0": "from_base a 0",
+		"base_def2": "from-base a 2"
+	},
+	"tasks": {
+		"042_included": {
+			"commands": [
+				"echo base a"
+			],
+			"meta": {
+				"comment": "should be overridden by a task in the base_tasks_b.json, and then again by main tasks file"
+			}
+		}
+	},
+	"use_default_include": false
+}

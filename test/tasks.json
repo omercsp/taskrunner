@@ -3,12 +3,14 @@
 		"major": 3,
 		"minor": 0
 	},
+	"include": ["{{taskRoot}}/base_tasks_b.json"],
 	"definitions": {
 		"aux_dir": "{{taskRoot}}/aux",
 		"define0": "define0",
 		"define1": "define1",
 		"define2": "define2",
-		"define0_1_2": "{{define0}} {{define1}} {{define2}}"
+		"define0_1_2": "{{define0}} {{define1}} {{define2}}",
+		"base_def2": "from main tasks file"
 	},
 	"tasks": {
 		"001_simple": {
@@ -135,6 +137,20 @@
 			"meta" : {
 				"args": "If I had wings..."
 			}
+		},
+		"040_config_file_include_defs": {
+			"short_desc": "Check definitions from included files",
+			"shell": true,
+			"commands": [
+				"echo {{base_def0}}; echo {{base_def1}}; echo {{base_def2}}"]
+		},
+		"041_included": {
+			"short_desc": "Check overridden task, 1 deep",
+			"commands": [ "echo main config file" ]
+		},
+		"042_included": {
+			"short_desc": "Check overridden task, 2 deep",
+			"commands": [ "echo main config file" ]
 		},
 		"050_contaier_env": {
 			"short_desc": "Basic container support",
