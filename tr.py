@@ -13,7 +13,7 @@ def _tasks_complete(**kwargs):
         return []
     if (parser_name == "run" or parser_name == "info" or parser_name == "dump") \
        and parsed_args.task is None:
-        return Config([], []).visible_tasks()
+        return Config(None, [], []).visible_tasks()
     return []
 
 
@@ -28,6 +28,8 @@ def _parse_arguments():
     yes_no: typing.List[str] = [TASK_YES_TOKEN, TASK_NO_TOKEN]
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--verbose', action='count', help='log file verbosity', default=0)
+    parser.add_argument('-C', '--conf', metavar='CONF', help='configuration file to use',
+                        default=None)
     parser.add_argument('--log_file', metavar='FILE', help='set log file', default='')
     parser.add_argument('-d', '--define', metavar='DEFINE', default=None, action='append',
                         help='set a definition')
@@ -79,13 +81,8 @@ def _parse_arguments():
     run_parser.add_argument('--c-cwd', metavar='DIR', default=None,
                             help='set container working directory')
 
-    global_opt_parser = argparse.ArgumentParser(add_help=False)
-    global_opt_parser.add_argument('-g', '--global_task', action='store_true', default=False,
-                                   help='Global task only')
-    subparsers.add_parser('info', help='show task info',
-                          parents=[task_target_parser, global_opt_parser])
-    dump_parser = subparsers.add_parser('dump', help='dump a task',
-                                        parents=[task_target_parser, global_opt_parser])
+    subparsers.add_parser('info', help='show task info', parents=[task_target_parser])
+    dump_parser = subparsers.add_parser('dump', help='dump a task', parents=[task_target_parser])
     dump_parser.add_argument('--raw', help='show raw task', action='store_true', default=False)
     list_parser = subparsers.add_parser('list', help='list tasks')
     list_parser.add_argument('-a', '--all', action='store_true', default=False,
@@ -93,7 +90,8 @@ def _parse_arguments():
     list_parser.add_argument('--names-only', action='store_true', default=False,
                              help=argparse.SUPPRESS)
 
-    subparsers.add_parser('schema', help='dump configuration schema')
+    subparsers.add_parser('schema_dump', help='dump configuration schema')
+    subparsers.add_parser('config_dump', help='dump configuration')
 
     # TODO: Not sure what pyright wants with this type ignore
     argcomplete.autocomplete(parser, always_complete_options=False,
@@ -113,13 +111,15 @@ if __name__ == "__main__":
             Schema.dump()
             exit(0)
 
-        config = Config(args.define, cmds_args)
+        config = Config(args.conf, args.define, cmds_args)
         if args.subparsers_name == "list":
             actions.list_tasks(config, args.all, args.names_only)
         elif args.subparsers_name == "info":
             actions.show_task_info(args=args, config=config)
-        elif args.subparsers_name == "dump":
+        elif args.subparsers_name == "schema_dump":
             actions.dump_task(config, args)
+        elif args.subparsers_name == "config_dump":
+            actions.dump_config(config)
         else:
             exit(actions.run_task(config, args))
 

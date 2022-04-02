@@ -5,9 +5,8 @@ import pathlib
 import json
 
 
-_Global = "global"
-_G_PREFIX = "g/"
 _CONF_FILE_NAME = "tasks.json"
+_DFLT_CONF_FILE_NAME = str(pathlib.Path.home()) + "/.config/" + _CONF_FILE_NAME
 
 
 class Config(object):
@@ -15,93 +14,113 @@ class Config(object):
     def _read_tasks_file(file_path: str) -> dict:
         try:
             data: dict = json.load(open(file_path, 'r'))
-            Schema.validate(data)
         except (IOError, TypeError, ValueError, TaskException) as e:
             raise TaskException("Error parsing {} - {}".format(file_path, e))
         return data
 
-    @staticmethod
-    def _check_config_file_version(data: dict, local: bool) -> None:
-        conf_file_type = "local" if local else "global"
-        major = data[Schema.Keys.Version][Schema.Keys.Ver.Major]
-        minor = data[Schema.Keys.Version][Schema.Keys.Ver.Minor]
+    def _check_config_file_version(self, path: str) -> None:
+        major = self.conf[Schema.Keys.Version][Schema.Keys.Ver.Major]
+        minor = self.conf[Schema.Keys.Version][Schema.Keys.Ver.Minor]
         if major != Schema.Version.MAJOR or minor > Schema.Version.MINOR:
-            raise TaskException(("Incompatible {} configuration file version: " +
+            raise TaskException(("Incompatible major configuration version for '{}': " +
                                  "Found:{}.{}, expected <= {}.{}").format(
-                conf_file_type, major, minor, Schema.Version.MAJOR, Schema.Version.MINOR))
+                path, major, minor, Schema.Version.MAJOR, Schema.Version.MINOR))
         if minor != Schema.Version.MINOR:
-            print("Incompatible {} configuration file minor version".format(conf_file_type))
+            print("Incompatible minor configuration version for '{}'".format(str))
 
-    def _read_local_conf_file(self) -> None:
+    def _read_configuration(self, file_path: str, read_files: set = set()):
+        conf = {}
+        tasks = {}
+        defs = {}
+        info("Reading configuration file {}", file_path)
+        orig_conf = Config._read_tasks_file(file_path)
+        includes = orig_conf.get(Schema.Keys.Include, [])
+        if file_path != _DFLT_CONF_FILE_NAME and \
+                os.path.isfile(_DFLT_CONF_FILE_NAME) and \
+                orig_conf.get(Schema.Keys.UseDfltInclude, True):
+            includes.insert(0, _DFLT_CONF_FILE_NAME)
+
+        info("Configuration file includes: {}", includes)
+        read_files.add(file_path)
+        for f in includes:
+            f = self.expander(f)
+            if f in read_files:
+                raise TaskException("Inlcude loop detected - '{}'".format(f))
+            included_conf = self._read_configuration(f, read_files)
+            tasks.update(included_conf.get(Schema.Keys.Tasks))
+            defs.update(included_conf.get(Schema.Keys.Definitions))
+            conf.update(included_conf)
+        read_files.remove(file_path)
+        if Schema.Keys.Include in conf:
+            conf.pop(Schema.Keys.Include)
+
+        conf.update(orig_conf)
+        tasks.update(orig_conf.get(Schema.Keys.Tasks, {}))
+        for supressed_task in conf.get(Schema.Keys.Suppress, []):
+            if supressed_task in tasks:
+                info("Removing supressed task {}", supressed_task)
+                tasks.pop(supressed_task)
+        conf[Schema.Keys.Tasks] = tasks
+        defs.update(orig_conf.get(Schema.Keys.Definitions, {}))
+        conf[Schema.Keys.Definitions] = defs
+        return conf
+
+    @staticmethod
+    def _get_conf_file_path(cli_conf: typing.Union[str, None]) -> typing.Union[str, None]:
+        if cli_conf:
+            return cli_conf
+
         directory = os.getcwd()
-        f = directory + "/." + _CONF_FILE_NAME
-        info("Reading '{}'".format(f))
-        while not os.path.exists(f):
+        while True:
+            conf_path = directory + "/." + _CONF_FILE_NAME
+            if os.path.isfile(conf_path):
+                return conf_path
             if directory == "/":
-                self.local_conf = {}
-                self.local_conf_path = ""
-                return
+                break
             directory = os.path.dirname(directory)
-            f = directory + "/." + _CONF_FILE_NAME
-        self.local_conf_path = f
-        self.local_conf = Config._read_tasks_file(f)
-        Config._check_config_file_version(self.local_conf, local=True)
 
-    def _read_global_conf_file(self) -> None:
-        f = str(pathlib.Path.home()) + "/.config/" + _CONF_FILE_NAME
-        info("Reading '{}'".format(f))
-        if not os.path.isfile(f):
-            self.global_conf = {}
-            self.global_conf_path = ""
-            return
-        self.global_conf_path = f
-        self.global_conf = Config._read_tasks_file(f)
-        Config._check_config_file_version(self.global_conf, local=False)
+        if os.path.isfile(_DFLT_CONF_FILE_NAME):
+            return _DFLT_CONF_FILE_NAME
+        return None
 
-    def __init__(self, defs: list, cli_args: list[str]):
+    def __init__(self, cli_conf: typing.Union[str, None], cli_defs: list, cli_args: list[str]):
         self.expander = StringVarExpander()
-        self._read_global_conf_file()
-        self._read_local_conf_file()
+        conf_path = Config._get_conf_file_path(cli_conf)
 
-        self.global_tasks = self.global_conf.get(Schema.Keys.Tasks, {})
-        for task in self.global_tasks.values():
-            task[Schema.Keys.Task.Global] = True
-        self.local_tasks = self.local_conf.get(Schema.Keys.Tasks, {})
-        for task in self.local_tasks.values():
-            task[Schema.Keys.Task.Global] = False
-
-        self.defs = self.global_conf.get(Schema.Keys.Definitions, {})
-        self.defs.update(self.local_conf.get(Schema.Keys.Definitions, {}))
-
-        self.defs[Schema.Keys.AutoDefs.CWD] = os.getcwd()
-        if self.local_conf:
-            self.defs[Schema.Keys.AutoDefs.TASK_ROOT] = os.path.dirname(self.local_conf_path)
+        #  Poplulate some deiniftions early so they are available in
+        early_defs = {}
+        cwd = os.getcwd()
+        early_defs[Schema.Keys.AutoDefs.CWD] = cwd
+        if conf_path:
+            early_defs[Schema.Keys.AutoDefs.TASK_ROOT] = os.path.dirname(conf_path)
         else:
-            self.defs[Schema.Keys.AutoDefs.TASK_ROOT] = self.defs[Schema.Keys.AutoDefs.CWD]
-        self.defs[Schema.Keys.AutoDefs.CWD_REL_TASK_ROOT] = os.path.relpath(
-                self.defs[Schema.Keys.AutoDefs.CWD], self.defs[Schema.Keys.AutoDefs.TASK_ROOT])
+            early_defs[Schema.Keys.AutoDefs.TASK_ROOT] = cwd
+        early_defs[Schema.Keys.AutoDefs.CWD_REL_TASK_ROOT] = os.path.relpath(
+            cwd, early_defs[Schema.Keys.AutoDefs.TASK_ROOT])
+
+        self.conf = {}
+        if conf_path:
+            self.expander.defs = early_defs
+            self.conf = self._read_configuration(conf_path)
+            Schema.validate(self.conf)
+            self._check_config_file_version(conf_path)
+
+        #  Always override configuration definitions with hardcoded ones
+        self.defs = self.conf.get(Schema.Keys.Definitions, {})
+        self.defs.update(early_defs)
+        self.tasks = self.conf.get(Schema.Keys.Tasks, {})
         self.defs[Schema.Keys.AutoDefs.CLI_ARGS] = " ".join(cli_args)
-        if defs:
-            for define in defs:
-                key, val = parse_assignment_str(define)
+        if cli_defs:
+            for d in cli_defs:
+                key, val = parse_assignment_str(d)
                 self.defs[key] = val
         self.expander.defs = self.defs
         if logging_enabled_for(logging.DEBUG):
             verbose("Definitions settings are (unexpanded):")
             start_raw_logging()
-            for k,v in self.defs.items():
+            for k, v in self.defs.items():
                 verbose("{}='{}'", k, v)
             stop_raw_logging()
-
-    def allow_global(self):
-        return self.local_conf.get(Schema.Keys.AllowGlobal, True) and \
-               self.global_conf.get(Schema.Keys.AllowGlobal, True)
-
-    def local_setting(self, path: str):
-        return dict_value(self.local_conf, path)
-
-    def global_setting(self, path: str):
-        return dict_value(self.global_conf, path)
 
     def default_task_name(self) -> typing.Union[str, None]:
         return self.setting(Schema.Keys.DfltTask)
@@ -117,37 +136,18 @@ class Config(object):
 
     def visible_tasks(self) -> typing.List[str]:
         tasks = set()
-        for name, task in self.global_tasks.items():
-            if not task.get(Schema.Keys.Task.Hidden, False):
-                tasks.add(name)
-        for name, task in self.local_tasks.items():
+        for name, task in self.tasks.items():
             if not task.get(Schema.Keys.Task.Hidden, False):
                 tasks.add(name)
         return list(tasks)
 
     #  Return anything. Types is forced by schema validations.
     def setting(self, path: str, default=None) -> typing.Any:
-        setting = self.local_setting(path)
-        if setting is None:
-            setting = self.global_setting(path)
-        return default if setting is None else setting
-
-    @staticmethod
-    def _raw_object(name, local_objects: dict, global_objects: dict):
-        global_prefix = name.startswith(_G_PREFIX)
-        if global_prefix or name not in local_objects:
-            if global_prefix:
-                name = name[len(_G_PREFIX):]
-            obj = global_objects[name]
-            obj[_Global] = True
-        else:
-            obj = local_objects[name]
-            obj[_Global] = False
-        return obj
+        return dict_value(self.conf, path, default=default)
 
     def raw_task(self, name: str) -> dict:
         try:
-            return Config._raw_object(name, self.local_tasks, self.global_tasks)
+            return self.tasks[name]
         except KeyError:
             raise TaskException("No such task '{}'".format(name))
 
@@ -158,9 +158,8 @@ class Config(object):
 
         base_obj = search_func(name)
         hidden = base_obj.get(Schema.Keys.Task.Hidden, False)
-        included_list.add(_G_PREFIX + name if name.startswith(_G_PREFIX) else name)
 
-        included_obj_name = base_obj.get(Schema.Keys.Task.Include, None)
+        included_obj_name = base_obj.get(Schema.Keys.Task.Base, None)
         if included_obj_name is None:
             return base_obj
 
@@ -171,8 +170,6 @@ class Config(object):
         included_obj_name[Schema.Keys.Task.Hidden] = hidden
         return included_obj_name
 
-    def get_task_desc(self, name: str, force_global: bool = False) -> dict:
-        verbose("Task '{}' requested. force_global={}", name, force_global)
-        if force_global and not name.startswith(_G_PREFIX):
-            name = _G_PREFIX + name
+    def get_task_desc(self, name: str) -> dict:
+        verbose("Task '{}' requested", name)
         return self._include_obj(name, self.raw_task, set())

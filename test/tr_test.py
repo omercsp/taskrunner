@@ -1,17 +1,12 @@
 import argparse
 import argcomplete
 import os
-import pathlib
-import shutil
 import json
 import subprocess
 
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 TASKS_JSON_FILE = "tasks.json"
-GLOBAL_TASKS_FILE = "{}/.config/{}".format(pathlib.Path.home(), TASKS_JSON_FILE)
-GLOBAL_TASKS_FILE_BACK = "{}.back".format(GLOBAL_TASKS_FILE)
-TEST_GLOBAL_TASKS_FILE = "{}/global_{}".format(SCRIPT_DIR, TASKS_JSON_FILE)
 LOG_FILE = "/tmp/task_runner.log"
 OUTPUT_DIR = "{}/output".format(SCRIPT_DIR)
 INTERMEIDATE_EXPECTED = "{}/intermediate.expected".format(SCRIPT_DIR)
@@ -64,7 +59,7 @@ def run_test_tasks(tasks: dict, diff_output: bool, stop_on_failure: bool,
         FAILED_STR = "Failed"
 
     if not tasks_list:
-        tasks_list = list(tasks.keys())
+        tasks_list = sorted([*tasks])
     base_cmd = "{}/../task --log_file={} run".format(SCRIPT_DIR, LOG_FILE)
     rc = 0
     for t_name in tasks_list:
@@ -146,44 +141,21 @@ def run_test_tasks(tasks: dict, diff_output: bool, stop_on_failure: bool,
     return rc
 
 
-def init():
-    try:
-        with open(LOG_FILE, "a") as f:
-            f.truncate()
-        os.chdir(SCRIPT_DIR)
-
-        if os.path.exists(GLOBAL_TASKS_FILE):
-            shutil.copy(GLOBAL_TASKS_FILE, GLOBAL_TASKS_FILE_BACK)
-        shutil.copy(TEST_GLOBAL_TASKS_FILE, GLOBAL_TASKS_FILE)
-        if not os.path.isdir(OUTPUT_DIR):
-            os.mkdir(OUTPUT_DIR)
-    except (OSError, ValueError) as e:
-        raise TaskTestException(str(e))
-
-
-def fini():
-    try:
-        if os.path.exists(GLOBAL_TASKS_FILE):
-            os.unlink(GLOBAL_TASKS_FILE)
-        if os.path.exists(GLOBAL_TASKS_FILE_BACK):
-            shutil.move(GLOBAL_TASKS_FILE_BACK, GLOBAL_TASKS_FILE)
-    except Exception as e:
-        print(e)
-        print("Error occured during finalization of the script. Global tasks file might be wrong")
-
-
 if __name__ == "__main__":
     rc = 0
     args = parse_arguments()
 
     try:
-        init()
+        with open(LOG_FILE, "a") as f:
+            f.truncate()
+        os.chdir(SCRIPT_DIR)
+
+        if not os.path.isdir(OUTPUT_DIR):
+            os.mkdir(OUTPUT_DIR)
         tasks = read_tasks()
         rc = run_test_tasks(tasks, not args.no_diff, args.stop_on_failure,
                             args.task, not args.no_colors, args.no_containers)
-    except TaskTestException as e:
+    except (OSError, ValueError, TaskTestException) as e:
         print(e)
         rc = 1
-    finally:
-        fini()
     exit(rc)

@@ -4,7 +4,7 @@ import jsonschema
 
 class Schema(object):
     class Version(object):
-        MAJOR: int = 2
+        MAJOR: int = 3
         MINOR: int = 0
 
     class Keys(object):
@@ -23,13 +23,12 @@ class Schema(object):
             ShellPath = "shell_path"
             Env = "env"
             Cwd = "cwd"
-            Include = "include"
+            Base = "base"
             Hidden = "hidden"
             ShortDesc = "short_desc"
             LongDesc = "description"
             Commands = "commands"
             StopOnError = "stop_on_error"
-            Global = "global"
             Meta = "meta"
             # Container settings
             CImage = "c_image"
@@ -46,19 +45,21 @@ class Schema(object):
             CEnv = "c_env"
             CCwd = "c_cwd"
 
+        Include = "include"
+        UseDfltInclude = "use_default_include"
         Version = "version"
         Tasks = "tasks"
+        Suppress = "suppress"
         Definitions = "definitions"
         DfltTask = "default_task"
         DfltShellPath = "default_shell_path"
         DfltContainerShellPath = "default_container_shell_path"
         DfltContainerTool = "default_container_tool"
-        AllowGlobal = "allow_global"
 
     __task_schema = {
         "type": "object",
         "properties": {
-            Keys.Task.Include: {"type": "string", "minLength": 1},
+            Keys.Task.Base: {"type": "string", "minLength": 1},
             Keys.Task.ShortDesc: {"type": "string", "maxLength": 75},
             Keys.Task.LongDesc: {"type": "string"},
             Keys.Task.Commands: {
@@ -76,7 +77,6 @@ class Schema(object):
             },
             Keys.Task.StopOnError: {"type": "boolean"},
             Keys.Task.Hidden: {"type": "boolean"},
-            Keys.Task.Global: {"type": "boolean"},
             Keys.Task.CImage: {"type": "string"},
             Keys.Task.CTool: {"type": "string"},
             Keys.Task.CVolumes: {
@@ -113,10 +113,20 @@ class Schema(object):
                     Keys.Ver.Minor: {"type": "number", "minValue": 1}
                 }
             },
+            Keys.Include: {
+                "type": "array",
+                "items": {"type": "string", "minLength": 1}
+            },
+            Keys.UseDfltInclude: {"type": "boolean"},
+
             Keys.Tasks: {
                 "type": "object",
                 "additionalProperties": __task_schema
              },
+            Keys.Suppress: {
+                "type": "array",
+                "items": {"type": "string", "minLength": 1}
+            },
             Keys.Definitions: {"type": "object"},
             Keys.DfltTask: {"type": "string"},
             Keys.DfltShellPath: {
@@ -124,7 +134,6 @@ class Schema(object):
                 "minLength": 1
             },
             Keys.DfltContainerTool: {"type": "string", "minLength": 1},
-            Keys.AllowGlobal: {"type": "boolean"}
         },
         "required": [Keys.Version],
         "additionalProperties": False

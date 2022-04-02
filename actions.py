@@ -44,7 +44,6 @@ def _show_task(task: Task, expander: StringVarExpander, full_details: bool) -> N
         if task.long_desc:
             print_blob("Description:", task.long_desc)
         print_bool("Hidden", task.hidden)
-        print_bool("Global:", task.global_task)
     print_bool("Use shell: ", task.shell)
     if task.shell:
         shell_title = "Shell path:"
@@ -106,7 +105,7 @@ def _show_task(task: Task, expander: StringVarExpander, full_details: bool) -> N
 
 def show_task_info(args: Args, config: Config) -> None:
     task_name = _active_task_name(config, args)
-    task = Task(task_name, args.global_task, config)
+    task = Task(task_name, config)
     _show_task(task, config.expander, True)
 
 
@@ -115,52 +114,40 @@ def list_tasks(config: Config, show_all: bool, names_only: bool):
     print_fmt = "{:<24}{:<6}{:<55}"
     err_print_fmt = "{:<24}{:<59}"
     default_task_name = config.default_task_name()
-    local_tasks = config.local_tasks.keys()
 
-    def print_task(task_name: str, glbl: bool) -> None:
+    if not names_only:
+        print(print_fmt.format("Name", "Flags", "Description"))
+        print(print_fmt.format("----", "-----", "-----------"))
+    for task_name in sorted([*config.tasks]):
         try:
-            t = Task(task_name, glbl, config=config)
+            t = Task(task_name, config=config)
         except TaskException as e:
             print(err_print_fmt.format(task_name, "<error: {}>".format(str(e))))
-            return
+            continue
         if not show_all and t.hidden:
-            return
+            continue
         if names_only:
             print(task_name, end=' ')
-            return
+            continue
 
         if t.short_desc:
             desc = t.short_desc if len(t.short_desc) <= 55 else t.short_desc[:52] + "..."
         else:
             desc = ""
 
-        flags = "G" if t.global_task else "L"
+        flags = ""
         if t.hidden:
             flags += "H"
-        if t.global_task and task_name in local_tasks:
-            flags += "S"
         elif task_name == default_task_name:
             flags += "*"
 
         print(print_fmt.format(task_name, flags, desc[-55:]))
 
-    if not names_only:
-        print(print_fmt.format("Name", "Flags", "Description"))
-        print(print_fmt.format("----", "-----", "-----------"))
-    for task_name in local_tasks:
-        print_task(task_name, False)
-    if not config.setting(Schema.Keys.AllowGlobal, True):
-        return
-    for task_name in config.global_tasks.keys():
-        if not show_all and task_name in local_tasks:
-            continue
-        print_task(task_name, True)
-
 
 def run_task(config: Config, args: Args) -> int:
     task_name = _active_task_name(config, args)
     info("Running task '{}'", task_name)
-    task = Task(task_name, False, config)
+    task = Task(task_name, config)
     task.args_update(args)
     if args.summary:
         _show_task(task, config.expander, False)
@@ -175,3 +162,7 @@ def dump_task(config: Config, args: Args):
         print(json.dumps(config.raw_task(task_name), indent=4))
     else:
         print(json.dumps(config.get_task_desc(task_name), indent=4))
+
+
+def dump_config(config: Config):
+    print(json.dumps(config.conf, indent=4))

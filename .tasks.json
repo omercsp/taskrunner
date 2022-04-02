@@ -1,6 +1,6 @@
 {
 	"version": {
-		"major": 2,
+		"major": 3,
 		"minor": 0
 	},
 	"tasks": {
@@ -11,5 +11,5 @@
 		}
 	},
 	"default_task": "test",
-	"allow_global": false
+	"use_default_include": false
 }

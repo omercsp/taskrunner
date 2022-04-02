@@ -1,6 +1,6 @@
 {
 	"version": {
-		"major": 2,
+		"major": 3,
 		"minor": 0
 	},
 	"definitions": {
@@ -15,9 +15,9 @@
 			"short_desc": "Simple echo",
 			"commands": [ "echo \"XXX\"" ]
 		},
-		"001i_simple": {
-			"include": "001_simple",
-			"short_desc": "Simple echo, included"
+		"001b_simple": {
+			"base": "001_simple",
+			"short_desc": "Simple echo (based on 001_simple)"
 		},
 		"002_simple_env": {
 			"short_desc": "Simple echo with environment variable",
@@ -25,9 +25,9 @@
 			"shell": true,
 			"commands": ["echo $V0"]
 		},
-		"002i_simple_env": {
-			"include": "002_simple_env",
-			"short_desc": "Simple echo with environment variable; included, variable changed",
+		"002b_simple_env": {
+			"base": "002_simple_env",
+			"short_desc": "Simple echo with environment variable (based on 002_simple_env)",
 			"env": {"V0": "43"}
 		},
 		"003_stop_on_error": {
@@ -43,7 +43,7 @@
 			}
 		},
 		"004_continue_on_error": {
-			"include": "003_stop_on_error",
+			"base": "003_stop_on_error",
 			"short_desc": "Validate continue on error behavior",
 			"stop_on_error": false,
 			"meta": {
@@ -150,5 +150,6 @@
 			}
 		}
 	},
+	"use_default_include": false,
 	"default_container_tool": "/usr/bin/podman"
 }

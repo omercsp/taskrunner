@@ -12,16 +12,15 @@ class Task(object):
             return
         raise TaskException("Expanded {} for task '{}' is empty".format(title, self.name))
 
-    def __init__(self, name: str, glbl: bool, config: Config) -> None:
+    def __init__(self, name: str, config: Config) -> None:
         super().__init__()
         info("Initializing task '{}'", name)
-        task_descriptor = config.get_task_desc(name, force_global=glbl)
+        task_descriptor = config.get_task_desc(name)
         self.name = name
         self.config = config
         self.short_desc = task_descriptor.get(Schema.Keys.Task.ShortDesc, None)
         self.long_desc = task_descriptor.get(Schema.Keys.Task.LongDesc, None)
         self.hidden = task_descriptor.get(Schema.Keys.Task.Hidden, False)
-        self.global_task = task_descriptor[Schema.Keys.Task.Global]
 
         self.stop_on_error = task_descriptor.get(Schema.Keys.Task.StopOnError, True)
         self.commands = task_descriptor.get(Schema.Keys.Task.Commands, [])
@@ -151,9 +150,6 @@ class Task(object):
             raise TaskException("User interrupt")
 
     def run(self, expander: StringVarExpander) -> int:
-        if self.global_task and not self.config.setting(Schema.Keys.AllowGlobal, True):
-            raise TaskException("Global tasks aren't allowed from this location")
-
         if self.env is None:
             info("no special environment variables were set for task")
             penv = None
