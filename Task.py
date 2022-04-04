@@ -110,11 +110,11 @@ class Task(object):
             cmd_array.append("-i")
         if self.c_tty:
             cmd_array.append("-t")
-        if self.c_rm:
-            cmd_array.append("--rm")
-
-        for v in self.c_volumes:
-            cmd_array += ["-v", expander(v)]
+        if not self.c_exec:
+            if self.c_rm:
+                cmd_array.append("--rm")
+            for v in self.c_volumes:
+                cmd_array += ["-v", expander(v)]
 
         for k, v in self.c_env.items():
             expanded_k = expander(k)
