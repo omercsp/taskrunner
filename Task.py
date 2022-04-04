@@ -101,7 +101,7 @@ class Task(object):
             raise TaskException("Illegal command '{}' for task '{}' - {}".format(cmd, self.name, e))
 
     def _container_cmd_arr(self, cmd, expander: StringVarExpander) -> list:
-        info("Preparing conatiner command")
+        info("Preparing container command")
         cmd_array = ["sudo", self.c_tool] if self.c_sudo else [self.c_tool]
         cmd_array.append("exec" if self.c_exec else "run")
         if self.c_cwd:

@@ -45,7 +45,7 @@ class Config(object):
         for f in includes:
             f = self.expander(f)
             if f in read_files:
-                raise TaskException("Inlcude loop detected - '{}'".format(f))
+                raise TaskException("Include loop detected - '{}'".format(f))
             included_conf = self._read_configuration(f, read_files)
             tasks.update(included_conf.get(Schema.Keys.Tasks))
             defs.update(included_conf.get(Schema.Keys.Definitions))
@@ -58,7 +58,7 @@ class Config(object):
         tasks.update(orig_conf.get(Schema.Keys.Tasks, {}))
         for supressed_task in conf.get(Schema.Keys.Suppress, []):
             if supressed_task in tasks:
-                info("Removing supressed task {}", supressed_task)
+                info("Removing suppressed task {}", supressed_task)
                 tasks.pop(supressed_task)
         conf[Schema.Keys.Tasks] = tasks
         defs.update(orig_conf.get(Schema.Keys.Definitions, {}))
@@ -87,7 +87,7 @@ class Config(object):
         self.expander = StringVarExpander()
         conf_path = Config._get_conf_file_path(cli_conf)
 
-        #  Poplulate some deiniftions early so they are available in
+        #  Populate some definitions early so they are available in
         early_defs = {}
         cwd = os.getcwd()
         early_defs[Schema.Keys.AutoDefs.CWD] = cwd
@@ -105,7 +105,7 @@ class Config(object):
             Schema.validate(self.conf)
             self._check_config_file_version(conf_path)
 
-        #  Always override configuration definitions with hardcoded ones
+        #  Always override configuration definitions with hard coded ones
         self.defs = self.conf.get(Schema.Keys.Definitions, {})
         self.defs.update(early_defs)
         self.tasks = self.conf.get(Schema.Keys.Tasks, {})
@@ -116,7 +116,7 @@ class Config(object):
                 self.defs[key] = val
         self.expander.defs = self.defs
         if logging_enabled_for(logging.DEBUG):
-            verbose("Definitions settings are (unexpanded):")
+            verbose("Definitions settings are (not expanded):")
             start_raw_logging()
             for k, v in self.defs.items():
                 verbose("{}='{}'", k, v)
