@@ -155,12 +155,12 @@ class Task(object):
             penv = None
         else:
 
-            for k, v in self.env.items():
-                expanded_v = expander(v)
-                self.env[k] = expanded_v
-                info("Environment variable will be set '{}={}'", k, expanded_v)
             penv = os.environ.copy()
-            penv.update(self.env)
+            for k, v in self.env.items():
+                expanded_k = expander(k)
+                expanded_v = expander(v)
+                penv[expanded_k] = expanded_v
+                info("Environment variable will be set '{}={}'", expanded_k, expanded_v)
         cwd = expander(self.cwd) if self.cwd else None
         if cwd:
             info("Working directory will be set to '{}'", cwd)
