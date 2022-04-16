@@ -1,8 +1,8 @@
 {
-	"definitions": {
-		"base_def1": "from-base a 1",
-		"base_def0": "from_base a 0",
-		"base_def2": "from-base a 2"
+	"variables": {
+		"base_var1": "from-base a 1",
+		"base_var0": "from_base a 0",
+		"base_var2": "from-base a 2"
 	},
 	"tasks": {
 		"042_included": {

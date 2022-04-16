@@ -48,7 +48,7 @@ class Config(object):
                 raise TaskException("Include loop detected - '{}'".format(f))
             included_conf = self._read_configuration(f, read_files)
             tasks.update(included_conf.get(Schema.Keys.Tasks))
-            defs.update(included_conf.get(Schema.Keys.Definitions))
+            defs.update(included_conf.get(Schema.Keys.Variables))
             conf.update(included_conf)
         read_files.remove(file_path)
         if Schema.Keys.Include in conf:
@@ -61,8 +61,8 @@ class Config(object):
                 info("Removing suppressed task {}", supressed_task)
                 tasks.pop(supressed_task)
         conf[Schema.Keys.Tasks] = tasks
-        defs.update(orig_conf.get(Schema.Keys.Definitions, {}))
-        conf[Schema.Keys.Definitions] = defs
+        defs.update(orig_conf.get(Schema.Keys.Variables, {}))
+        conf[Schema.Keys.Variables] = defs
         return conf
 
     @staticmethod
@@ -87,38 +87,38 @@ class Config(object):
         self.expander = StringVarExpander()
         conf_path = Config._get_conf_file_path(cli_conf)
 
-        #  Populate some definitions early so they are available in
-        early_defs = {}
+        #  Populate some variables early so they are available in
+        early_vars = {}
         cwd = os.getcwd()
-        early_defs[Schema.Keys.AutoDefs.CWD] = cwd
+        early_vars[Schema.Keys.AutoVars.CWD] = cwd
         if conf_path:
-            early_defs[Schema.Keys.AutoDefs.TASK_ROOT] = os.path.dirname(conf_path)
+            early_vars[Schema.Keys.AutoVars.TASK_ROOT] = os.path.dirname(conf_path)
         else:
-            early_defs[Schema.Keys.AutoDefs.TASK_ROOT] = cwd
-        early_defs[Schema.Keys.AutoDefs.CWD_REL_TASK_ROOT] = os.path.relpath(
-            cwd, early_defs[Schema.Keys.AutoDefs.TASK_ROOT])
+            early_vars[Schema.Keys.AutoVars.TASK_ROOT] = cwd
+        early_defs[Schema.Keys.AutoVars.CWD_REL_TASK_ROOT] = os.path.relpath(
+            cwd, early_defs[Schema.Keys.AutoVars.TASK_ROOT])
 
         self.conf = {}
         if conf_path:
-            self.expander.defs = early_defs
+            self.expander.map = early_vars
             self.conf = self._read_configuration(conf_path)
             Schema.validate(self.conf)
             self._check_config_file_version(conf_path)
 
-        #  Always override configuration definitions with hard coded ones
-        self.defs = self.conf.get(Schema.Keys.Definitions, {})
-        self.defs.update(early_defs)
+        #  Always override configuration variables with hard coded ones
+        self.vars = self.conf.get(Schema.Keys.Variables, {})
+        self.vars.update(early_vars)
         self.tasks = self.conf.get(Schema.Keys.Tasks, {})
-        self.defs[Schema.Keys.AutoDefs.CLI_ARGS] = " ".join(cli_args)
+        self.vars[Schema.Keys.AutoVars.CLI_ARGS] = " ".join(cli_args)
         if cli_defs:
             for d in cli_defs:
                 key, val = parse_assignment_str(d)
-                self.defs[key] = val
-        self.expander.defs = self.defs
+                self.vars[key] = val
+        self.expander.map = self.vars
         if logging_enabled_for(logging.DEBUG):
-            verbose("Definitions settings are (not expanded):")
+            verbose("Unexapnded variables:")
             start_raw_logging()
-            for k, v in self.defs.items():
+            for k, v in self.vars.items():
                 verbose("{}='{}'", k, v)
             stop_raw_logging()
 

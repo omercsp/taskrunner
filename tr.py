@@ -31,8 +31,8 @@ def _parse_arguments():
     parser.add_argument('-C', '--conf', metavar='CONF', help='configuration file to use',
                         default=None)
     parser.add_argument('--log_file', metavar='FILE', help='set log file', default='')
-    parser.add_argument('-d', '--define', metavar='DEFINE', default=None, action='append',
-                        help='set a definition')
+    parser.add_argument('-V', '--variable', metavar='VAR', default=None, action='append',
+                        help='set a variable')
     subparsers = parser.add_subparsers(help='commands', dest='subparsers_name')
     subparsers.required = True
 
@@ -111,7 +111,7 @@ if __name__ == "__main__":
             Schema.dump()
             exit(0)
 
-        config = Config(args.conf, args.define, cmds_args)
+        config = Config(args.conf, args.variable, cmds_args)
         if args.subparsers_name == "list":
             actions.list_tasks(config, args.all, args.names_only)
         elif args.subparsers_name == "info":

@@ -2,9 +2,9 @@
 	"include": [
 		"{{taskRoot}}/base_tasks_a.json"
 	],
-	"definitions": {
-		"base_def1": "from-base b 1",
-		"base_def2": "from-base b 2"
+	"variables": {
+		"base_var1": "from-base b 1",
+		"base_var2": "from-base b 2"
 	},
 	"tasks": {
 		"041_included": {

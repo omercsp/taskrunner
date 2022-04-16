@@ -1,16 +1,16 @@
 {
 	"version": {
-		"major": 3,
+		"major": 4,
 		"minor": 0
 	},
 	"include": ["{{taskRoot}}/base_tasks_b.json"],
-	"definitions": {
+	"variables": {
 		"aux_dir": "{{taskRoot}}/aux",
-		"define0": "define0",
-		"define1": "define1",
-		"define2": "define2",
-		"define0_1_2": "{{define0}} {{define1}} {{define2}}",
-		"base_def2": "from main tasks file"
+		"var0": "var0",
+		"var1": "var1",
+		"var2": "var2",
+		"var0_1_2": "{{var0}} {{var1}} {{var2}}",
+		"base_var2": "from main tasks file"
 	},
 	"tasks": {
 		"001_simple": {
@@ -87,22 +87,22 @@
 			"commands": ["{{aux_dir}}/check_cwd.sh"]
 		},
 		"023_def_expansion": {
-			"short_desc": "Validate definitions expansion",
+			"short_desc": "Validate variables expansion",
 			"env": {
-				"MY_ENV": "{{define2}}"
+				"MY_ENV": "{{var2}}"
 			},
 			"commands": [
-				"echo {{define0}} {{define0}}",
-				"echo __{{define1}}__",
-				"echo __{{define0_1_2}}__"
+				"echo {{var0}} {{var0}}",
+				"echo __{{var1}}__",
+				"echo __{{var0_1_2}}__"
 			]
 		},
 		"024_def_expansion_env": {
-			"short_desc": "Validate environment variables definitions expansion",
+			"short_desc": "Validate variables expansion for environment variables",
 			"env": {
-				"MY_ENV0": "{{define0}}",
-				"MY_ENV1": "{{define1}}",
-				"MY_ENV2": "{{define2}}"
+				"MY_ENV0": "{{var0}}",
+				"MY_ENV1": "{{var1}}",
+				"MY_ENV2": "{{var2}}"
 			},
 			"shell": true,
 			"commands": [
@@ -139,10 +139,10 @@
 			}
 		},
 		"040_config_file_include_defs": {
-			"short_desc": "Check definitions from included files",
+			"short_desc": "Check variables from included files",
 			"shell": true,
 			"commands": [
-				"echo {{base_def0}}; echo {{base_def1}}; echo {{base_def2}}"]
+				"echo {{base_var0}}; echo {{base_var1}}; echo {{base_var2}}"]
 		},
 		"041_included": {
 			"short_desc": "Check overridden task, 1 deep",

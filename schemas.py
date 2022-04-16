@@ -4,7 +4,7 @@ import jsonschema
 
 class Schema(object):
     class Version(object):
-        MAJOR: int = 3
+        MAJOR: int = 4
         MINOR: int = 0
 
     class Keys(object):
@@ -12,7 +12,7 @@ class Schema(object):
             Major = "major"
             Minor = "minor"
 
-        class AutoDefs(object):
+        class AutoVars(object):
             TASK_ROOT = "taskRoot"
             CWD = "cwd"
             CWD_REL_TASK_ROOT = "cwdRelTaskRoot"
@@ -50,7 +50,7 @@ class Schema(object):
         Version = "version"
         Tasks = "tasks"
         Suppress = "suppress"
-        Definitions = "definitions"
+        Variables = "variables"
         DfltTask = "default_task"
         DfltShellPath = "default_shell_path"
         DfltContainerShellPath = "default_container_shell_path"
@@ -127,7 +127,7 @@ class Schema(object):
                 "type": "array",
                 "items": {"type": "string", "minLength": 1}
             },
-            Keys.Definitions: {"type": "object"},
+            Keys.Variables: {"type": "object"},
             Keys.DfltTask: {"type": "string"},
             Keys.DfltShellPath: {
                 "type": "string",

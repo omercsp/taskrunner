@@ -50,7 +50,7 @@ class StringVarExpander(object):
 
     def __init__(self):
         self.curr_expansion_stack = []
-        self.defs = {}
+        self.map = {}
 
     def __call__(self, s: str) -> str:
         self.curr_expansion_stack = []
@@ -62,7 +62,7 @@ class StringVarExpander(object):
             raise TaskException("Recursive expanded var '{}'".format(var))
         if var.startswith("$"):
             return os.getenv(var[1:], "")
-        value = self.defs.get(var, "")
+        value = self.map.get(var, "")
         if type(value) is list or type(value) is dict:
             raise TaskException("Var expanded path '{}' doesn't refer to valid type".format(var))
         self.curr_expansion_stack.append(var)
