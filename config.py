@@ -83,7 +83,7 @@ class Config(object):
             return _DFLT_CONF_FILE_NAME
         return None
 
-    def __init__(self, cli_conf: typing.Union[str, None], cli_defs: list, cli_args: list[str]):
+    def __init__(self, cli_conf: typing.Union[str, None], cli_defs: list, cli_args: typing.List[str]):
         self.expander = StringVarExpander()
         conf_path = Config._get_conf_file_path(cli_conf)
 

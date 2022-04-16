@@ -3,6 +3,7 @@ import argcomplete
 import os
 import json
 import subprocess
+import typing
 
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -45,7 +46,7 @@ def read_tasks() -> dict:
 
 
 def run_test_tasks(tasks: dict, diff_output: bool, stop_on_failure: bool,
-                   tasks_list: list[str], show_colors: bool, skip_container_tasks: bool) -> int:
+                   tasks_list: typing.List[str], show_colors: bool, skip_container_tasks: bool) -> int:
     class Colors(object):
         BOLD = '\033[1m'
         GREEN = '\033[32m'
@@ -118,7 +119,7 @@ def run_test_tasks(tasks: dict, diff_output: bool, stop_on_failure: bool,
                 expected_file = "{}/{}.expected".format(SCRIPT_DIR, t_name)
             diff_cmd = "diff -u {} {}".format(expected_file, out_file)
             pr = subprocess.run(diff_cmd.split(), stdout=subprocess.PIPE,
-                                stderr=subprocess.STDOUT, text=True)
+                                stderr=subprocess.STDOUT, encoding='utf-8')
             if not pr.returncode and not pr.stdout:
                 print(OK_STR)
                 continue
