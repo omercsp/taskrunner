@@ -123,7 +123,7 @@
 			},
 			"shell": true,
 			"commands": [
-				"echo $ENV0; echo $ENV1; echo $ENV2; echo $ENV3; echo $ENV4; echo -e $ENV5"
+				"echo $ENV0; echo $ENV1; echo $ENV2; echo $ENV3; echo $ENV4; printf \"$ENV5\n\""
 			]
 		},
 		"030_args_handling": {
