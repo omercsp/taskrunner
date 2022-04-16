@@ -62,10 +62,11 @@ def _show_task(task: Task, expander: StringVarExpander, full_details: bool) -> N
 
     if task.c_image:
         print_val("Container details:", "")
+        image = info_expanded_str(task.c_image)
         if task.c_exec:
-            print_val("  Execute in:", task.c_image)
+            print_val("  Execute in:", image)
         else:
-            print_val("  Run image:", task.c_image)
+            print_val("  Run image:", image)
             print_bool("  Remove:", task.c_rm)
         print_bool("  Interactive:", task.c_interactive)
         print_bool("  Allocate tty:", task.c_tty)

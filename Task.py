@@ -124,7 +124,7 @@ class Task(object):
 
         cmd_array += self.c_flags.split()
 
-        cmd_array.append(self.c_image)
+        cmd_array.append(expander(self.c_image))
         if self.c_shell and cmd is not None:
             cmd_array += [self.c_shell_path, "-c"]
         if cmd:
