@@ -95,13 +95,15 @@ def run_test_tasks(tasks: dict, diff_output: bool, stop_on_failure: bool,
                 if output_gen_cmd_rc:
                     raise TaskTestException(
                         "Error running expected outout generation command for task '{}'".format(t_name))
-        run_task_cmd = "{} {} -- {}".format(base_cmd, t_name, t_meta.get("args", ""))
-        if diff_output:
-            run_task_cmd += " &> {}/{}.out".format(OUTPUT_DIR, t_name)
-        else:
-            run_task_cmd = "{} {}".format(base_cmd, t_name)
+        run_task_cmd = "{} {} -- {}".format(base_cmd, t_name, t_meta.get("args", "")).split()
         try:
-            cmd_rc = subprocess.Popen(run_task_cmd, shell=True).wait()
+            if diff_output:
+                with open("{}/{}.out".format(OUTPUT_DIR, t_name), "w") as f:
+                    p = subprocess.Popen(run_task_cmd, stderr=f, stdout=f)
+            else:
+                p = subprocess.Popen(run_task_cmd)
+            cmd_rc = p.wait()
+
             allowed_rc = t_meta.get("allowed_rc", [0])
             if cmd_rc not in allowed_rc:
                 rc = 1
