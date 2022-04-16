@@ -101,14 +101,10 @@ def run_test_tasks(tasks: dict, diff_output: bool, stop_on_failure: bool,
             run_task_cmd = "{} {}".format(base_cmd, t_name)
         try:
             cmd_rc = subprocess.Popen(run_task_cmd, shell=True).wait()
-            should_fail = t_meta.get("should_fail", False)
-            if (cmd_rc != 0 and not should_fail) or (cmd_rc == 0 and should_fail):
+            allowed_rc = t_meta.get("allowed_rc", [0])
+            if cmd_rc not in allowed_rc:
                 rc = 1
-                print("{}, unallowed exit (expected t)".format(FAILED_STR, rc), end=' ')
-                if cmd_rc == 0:
-                    print("task expected to succeed, but failed")
-                if cmd_rc == 1:
-                    print("task expected to fail, but succeded")
+                print("{}, unallowed return code '{}' (allowed={})".format(FAILED_STR, rc, allowed_rc))
                 if stop_on_failure:
                     return 1
                 continue

@@ -41,7 +41,7 @@
 				"echo message2"
 			],
 			"meta": {
-				"should_fail": true
+				"allowed_rc": [1]
 			}
 		},
 		"004_continue_on_error": {
@@ -49,16 +49,15 @@
 			"short_desc": "Validate continue on error behavior",
 			"stop_on_error": false,
 			"meta": {
-				"should_fail": true
+				"allowed_rc": [1]
 			}
-
 		},
 		"005_bash_multi_cmds_no_fail": {
 			"short_desc": "Validate mulit bash commands not allowed to fail",
 			"shell": true,
 			"commands":  ["true && echo message1 && false && echo message2"],
 			"meta": {
-				"should_fail": true
+				"allowed_rc": [1]
 			}
 		},
 		"006_bash_multi_cmds_allow_fail": {
