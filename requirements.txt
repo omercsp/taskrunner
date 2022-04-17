@@ -1,4 +1,2 @@
-argcomplete==2.0.0
-attrs==21.4.0
-jsonschema==4.4.0
-pyrsistent==0.18.1
+argcomplete>=2.0.0
+jsonschema>=3.2.0

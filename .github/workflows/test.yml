@@ -1,0 +1,30 @@
+name: Taskrunner test suite
+on:
+  push:
+    branches:
+      - master
+      - devel
+defaults:
+  run:
+    shell: bash
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10"]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          podman pull docker.io/rockylinux/rockylinux:8.5
+          podman pull docker.io/library/ubuntu:20.04
+      - name: Run test
+        run: |
+          test/tr_test
