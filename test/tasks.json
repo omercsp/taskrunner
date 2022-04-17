@@ -151,18 +151,30 @@
 			"short_desc": "Check overridden task, 2 deep",
 			"commands": [ "echo main config file" ]
 		},
-		"050_contaier_env": {
+		"base_container_test": {
 			"short_desc": "Basic container support",
 			"commands": [
-				"echo $CENV0"
+				"echo $CENV0",
+				"cat /etc/os-release | grep PRETTY_NAME"
 			],
-			"c_image": "docker.io/library/ubuntu:latest",
-			"c_interactive": true,
 			"c_tty": true,
 			"c_shell": true,
 			"c_env": {
 				"CENV0": "value0"
+			},
+			"meta": {
+				"abstract": true
 			}
+		},
+		"050_container_ubuntu": {
+			"base": "base_container_test",
+			"short_desc": "Basic container support o/Ubuntu 20.04",
+			"c_image": "docker.io/library/ubuntu:20.04"
+		},
+		"051_container_rocky": {
+			"base": "base_container_test",
+			"short_desc": "Basic container support o/Ubuntu 20.04",
+			"c_image": "docker.io/rockylinux/rockylinux:8.5"
 		}
 	},
 	"use_default_include": false,
