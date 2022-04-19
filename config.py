@@ -144,31 +144,33 @@ class Config(object):
     def setting(self, path: str, default=None) -> typing.Any:
         return dict_value(self.conf, path, default=default)
 
-    def raw_task(self, name: str) -> dict:
+    def _raw_task_obj(self, name: str) -> dict:
         try:
             return self.tasks[name]
         except KeyError:
             raise TaskException("No such task '{}'".format(name))
 
-    @staticmethod
-    def _include_obj(name, search_func, included_list: set):
+    def _task_desc(self, name, included_list: set):
         if name in included_list:
             raise TaskException("Include loop detected for '{}'".format(name))
 
-        base_obj = search_func(name)
-        hidden = base_obj.get(Schema.Keys.Task.Hidden, False)
+        base_task = self._raw_task_obj(name)
+        hidden = base_task.get(Schema.Keys.Task.Hidden, False)
 
-        included_obj_name = base_obj.get(Schema.Keys.Task.Base, None)
-        if included_obj_name is None:
-            return base_obj
+        included_task = base_task.get(Schema.Keys.Task.Base, None)
+        if included_task is None:
+            return base_task
 
         # We about to modify the included object, so deep copy it
-        included_obj_name = Config._include_obj(included_obj_name, search_func,
-                                                included_list=included_list).copy()
-        included_obj_name.update(base_obj)
-        included_obj_name[Schema.Keys.Task.Hidden] = hidden
-        return included_obj_name
+        included_task = self._task_desc(
+            included_task, included_list=included_list).copy()
+        included_task.update(base_task)
+        included_task[Schema.Keys.Task.Hidden] = hidden
+        return included_task
 
-    def get_task_desc(self, name: str) -> dict:
-        verbose("Task '{}' requested", name)
-        return self._include_obj(name, self.raw_task, set())
+    def get_task_desc(self, name: str, includes: bool):
+        verbose("Task '{}' requested, with_inclusions={}", name, includes)
+        if includes:
+            return self._task_desc(name, set())
+        else:
+            return self._raw_task_obj(name)

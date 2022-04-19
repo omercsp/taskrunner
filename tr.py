@@ -83,7 +83,8 @@ def _parse_arguments():
 
     subparsers.add_parser('info', help='show task info', parents=[task_target_parser])
     dump_parser = subparsers.add_parser('dump', help='dump a task', parents=[task_target_parser])
-    dump_parser.add_argument('--raw', help='show raw task', action='store_true', default=False)
+    dump_parser.add_argument('-i', '--includes', help='with inclusions',
+                             action='store_true', default=False)
     list_parser = subparsers.add_parser('list', help='list tasks')
     list_parser.add_argument('-a', '--all', action='store_true', default=False,
                              help='show hidden and shadowed tasks')

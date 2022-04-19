@@ -15,7 +15,7 @@ class Task(object):
     def __init__(self, name: str, config: Config) -> None:
         super().__init__()
         info("Initializing task '{}'", name)
-        task_descriptor = config.get_task_desc(name)
+        task_descriptor = config.get_task_desc(name, True)
         self.name = name
         self.config = config
         self.short_desc = task_descriptor.get(Schema.Keys.Task.ShortDesc, None)
