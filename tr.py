@@ -120,6 +120,8 @@ if __name__ == "__main__":
             actions.dump_task(config, args)
         elif args.subparsers_name == "config_dump":
             actions.dump_config(config)
+        elif args.subparsers_name == "dump":
+            actions.dump_task(config, args)
         else:
             exit(actions.run_task(config, args))
 
