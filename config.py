@@ -95,8 +95,6 @@ class Config(object):
             early_vars[Schema.Keys.AutoVars.TASK_ROOT] = os.path.dirname(conf_path)
         else:
             early_vars[Schema.Keys.AutoVars.TASK_ROOT] = cwd
-        early_defs[Schema.Keys.AutoVars.CWD_REL_TASK_ROOT] = os.path.relpath(
-            cwd, early_defs[Schema.Keys.AutoVars.TASK_ROOT])
 
         self.conf = {}
         if conf_path:
