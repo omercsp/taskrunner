@@ -15,7 +15,6 @@ class Schema(object):
         class AutoVars(object):
             TASK_ROOT = "taskRoot"
             CWD = "cwd"
-            CWD_REL_TASK_ROOT = "cwdRelTaskRoot"
             CLI_ARGS = "cliArgs"
 
         class Task(object):
