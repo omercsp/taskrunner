@@ -159,10 +159,7 @@ def run_task(config: Config, args: Args) -> int:
 
 def dump_task(config: Config, args: Args):
     task_name = _active_task_name(config, args)
-    if args.raw:
-        print(json.dumps(config.raw_task(task_name), indent=4))
-    else:
-        print(json.dumps(config.get_task_desc(task_name), indent=4))
+    print(json.dumps(config.get_task_desc(task_name, args.includes), indent=4))
 
 
 def dump_config(config: Config):
