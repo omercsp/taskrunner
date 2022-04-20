@@ -12,7 +12,7 @@ def _active_task_name(config: Config, args) -> str:
 __PRINT_FMT = "{:<24}{:<80}"
 
 
-def _show_task(task: Task, expander: StringVarExpander, full_details: bool) -> None:
+def _show_task(task: Task, full_details: bool) -> None:
     def print_val(title: str, value: typing.Any):
         print(__PRINT_FMT.format("{}".format(title), value))
 
@@ -32,11 +32,10 @@ def _show_task(task: Task, expander: StringVarExpander, full_details: bool) -> N
                     continue
                 print(__PRINT_FMT.format("", in_line))
 
-    def info_expanded_str(cmd_str: str) -> str:
-        ret = expander(cmd_str).strip()
-        if len(ret) == 0:
+    def _task_str(cmd_str: str) -> str:
+        if len(cmd_str.strip()) == 0:
             return "[n/a - empty string)]"
-        return ret
+        return cmd_str
 
     print_val("Task name:", task.name)
     if full_details:
@@ -58,11 +57,11 @@ def _show_task(task: Task, expander: StringVarExpander, full_details: bool) -> N
             print_blob("     [{}]".format(count), "{}={}".format(k, v))
             count += 1
     if task.cwd:
-        print_blob("Working directory:", info_expanded_str(task.cwd))
+        print_blob("Working directory:", _task_str(task.cwd))
 
     if task.c_image:
         print_val("Container details:", "")
-        image = info_expanded_str(task.c_image)
+        image = _task_str(task.c_image)
         if task.c_exec:
             print_val("  Execute in:", image)
         else:
@@ -76,14 +75,14 @@ def _show_task(task: Task, expander: StringVarExpander, full_details: bool) -> N
         if task.c_flags:
             print_blob("  Run/Exec flags:", task.c_flags)
         if task.c_cwd:
-            print_blob("  Working directory:", info_expanded_str(task.c_cwd))
+            print_blob("  Working directory:", _task_str(task.c_cwd))
         if len(task.c_volumes) == 1:
-            print_blob("  Volume:", info_expanded_str(task.c_volumes[0]))
+            print_blob("  Volume:", _task_str(task.c_volumes[0]))
         elif len(task.c_volumes) > 1:
             count = 0
             print(__PRINT_FMT.format("  Volumes:", ""))
             for vol in task.c_volumes:
-                print_blob("     [{}]".format(count), info_expanded_str(vol))
+                print_blob("     [{}]".format(count), _task_str(vol))
                 count += 1
 
     if len(task.commands) == 0:
@@ -93,21 +92,23 @@ def _show_task(task: Task, expander: StringVarExpander, full_details: bool) -> N
             print("NOTICE: Will run the image/container default command")
         return
     if len(task.commands) == 1:
-        print_blob("Command:", info_expanded_str(task.commands[0]))
+        print_blob("Command:", _task_str(task.commands[0]))
         return
 
     print_bool("Stop on error:", task.stop_on_error)
     print_val("Commands:", "")
     count = 0
     for cmd in task.commands:
-        print_blob("     [{}]".format(count), info_expanded_str(cmd))
+        print_blob("     [{}]".format(count), _task_str(cmd))
         count += 1
 
 
 def show_task_info(args: Args, config: Config) -> None:
     task_name = _active_task_name(config, args)
     task = Task(task_name, config)
-    _show_task(task, config.expander, True)
+    if args.expand:
+        task.expand_args(config.expander)
+    _show_task(task, True)
 
 
 def list_tasks(config: Config, show_all: bool, names_only: bool):
@@ -150,11 +151,12 @@ def run_task(config: Config, args: Args) -> int:
     info("Running task '{}'", task_name)
     task = Task(task_name, config)
     task.args_update(args)
+    task.expand_args(config.expander)
     if args.summary:
-        _show_task(task, config.expander, False)
+        _show_task(task, False)
         print("-" * 70)
         sys.stdout.flush()
-    return task.run(config.expander)
+    return task.run()
 
 
 def dump_task(config: Config, args: Args):

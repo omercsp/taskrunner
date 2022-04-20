@@ -81,10 +81,13 @@ def _parse_arguments():
     run_parser.add_argument('--c-cwd', metavar='DIR', default=None,
                             help='set container working directory')
 
-    subparsers.add_parser('info', help='show task info', parents=[task_target_parser])
+    info_parser = subparsers.add_parser('info', help='show task info', parents=[task_target_parser])
+    info_parser.add_argument('-x', '--expand', help='expand values', action='store_true', default=False)
+
     dump_parser = subparsers.add_parser('dump', help='dump a task', parents=[task_target_parser])
     dump_parser.add_argument('-i', '--includes', help='with inclusions',
                              action='store_true', default=False)
+
     list_parser = subparsers.add_parser('list', help='list tasks')
     list_parser.add_argument('-a', '--all', action='store_true', default=False,
                              help='show hidden and shadowed tasks')
