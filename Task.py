@@ -192,7 +192,7 @@ class Task(object):
             cmd_rc = self._run_cmd(cmd_arr, cmd)
             if cmd_rc == 0:
                 continue
-            info("Command had failed")
+            info("Command had failed cmd_rc={}", cmd_rc)
             if self.stop_on_error:
                 info("Stopping of first error")
                 return cmd_rc
