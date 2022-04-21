@@ -24,8 +24,7 @@
 		"002_simple_env": {
 			"short_desc": "Simple echo with environment variable",
 			"env": {"V0": "42"},
-			"shell": true,
-			"commands": ["echo $V0"]
+			"commands": ["printenv V0"]
 		},
 		"002b_simple_env": {
 			"base": "002_simple_env",
@@ -67,13 +66,11 @@
 		},
 		"020_workdir_root": {
 			"short_desc": "Validate working directory as /",
-			"shell": true,
 			"cwd": "/",
 			"commands":  ["pwd"]
 		},
 		"021_workdir_opt": {
 			"short_desc": "Validate working directory as /opt",
-			"shell": true,
 			"cwd": "/opt",
 			"commands":  ["pwd"]
 		},
@@ -106,24 +103,25 @@
 			"shell": true,
 			"commands": [
 				"echo __$MY_ENV0 XX $MY_ENV1 __${MY_ENV2}"
-			],
-			"meta": {
-				"1": "echo __$MY_ENV0 XX $MY_ENV1 __${MY_ENV2}"
-			}
+			]
 		},
 		"025_env_whitespace": {
 			"short_desc": "Check weird environment configrations",
 			"env": {
 				"ENV0": "   value0",
 				"ENV1   ": "value1",
-				"ENV2": "\tvalue2",
+				"  ENV2": "\tvalue2",
 				"ENV3": "\"value3\"",
 				"ENV4": "'value4'",
-				"ENV5": "'\\tvalue5\\t x'"
+				"ENV5": "'\\\\value5\\t x'"
 			},
-			"shell": true,
 			"commands": [
-				"echo $ENV0; echo $ENV1; echo $ENV2; echo $ENV3; echo $ENV4; printf \"$ENV5\n\""
+				"printenv ENV0",
+				"printenv 'ENV1   '",
+				"printenv '  ENV2'",
+				"printenv ENV3",
+				"printenv ENV4",
+				"printenv ENV5"
 			]
 		},
 		"030_args_handling": {
@@ -139,9 +137,11 @@
 		},
 		"040_config_file_include_defs": {
 			"short_desc": "Check variables from included files",
-			"shell": true,
 			"commands": [
-				"echo {{base_var0}}; echo {{base_var1}}; echo {{base_var2}}"]
+				"echo {{base_var0}}",
+				"echo {{base_var1}}",
+				"echo {{base_var2}}"
+			]
 		},
 		"041_included": {
 			"short_desc": "Check overridden task, 1 deep",
@@ -157,7 +157,6 @@
 				"echo $CENV0",
 				"cat /etc/os-release | grep PRETTY_NAME"
 			],
-			"c_tty": true,
 			"c_shell": true,
 			"c_env": {
 				"CENV0": "value0"

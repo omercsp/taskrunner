@@ -46,7 +46,8 @@ def read_tasks() -> dict:
 
 
 def run_test_tasks(tasks: dict, diff_output: bool, stop_on_failure: bool,
-                   tasks_list: typing.List[str], show_colors: bool, skip_container_tasks: bool) -> int:
+                   tasks_list: typing.List[str], show_colors: bool,
+                   skip_container_tasks: bool) -> int:
     class Colors(object):
         BOLD = '\033[1m'
         GREEN = '\033[32m'
@@ -70,7 +71,8 @@ def run_test_tasks(tasks: dict, diff_output: bool, stop_on_failure: bool,
         #  for inheritance and so.
         if t_meta.get("abstract", False):
             continue
-        print_t_name = "{:<40}".format(Colors.BOLD + t_name + Colors.RESET if show_colors else t_name)
+        print_t_name = "{:<40}".format(
+            Colors.BOLD + t_name + Colors.RESET if show_colors else t_name)
         print(print_t_name, end='')
 
         if t_meta.get("disabled", False):
@@ -94,7 +96,8 @@ def run_test_tasks(tasks: dict, diff_output: bool, stop_on_failure: bool,
             finally:
                 if output_gen_cmd_rc:
                     raise TaskTestException(
-                        "Error running expected outout generation command for task '{}'".format(t_name))
+                        "Error running expected outout generation command for task '{}'".format(
+                            t_name))
         run_task_cmd = "{} {} -- {}".format(base_cmd, t_name, t_meta.get("args", "")).split()
         try:
             if diff_output:
@@ -107,7 +110,8 @@ def run_test_tasks(tasks: dict, diff_output: bool, stop_on_failure: bool,
             allowed_rc = t_meta.get("allowed_rc", [0])
             if cmd_rc not in allowed_rc:
                 rc = 1
-                print("{}, unallowed return code '{}' (allowed={})".format(FAILED_STR, rc, allowed_rc))
+                print("{}, unallowed return code '{}' (allowed={})".format(
+                    FAILED_STR, rc, allowed_rc))
                 if stop_on_failure:
                     return 1
                 continue
@@ -125,7 +129,7 @@ def run_test_tasks(tasks: dict, diff_output: bool, stop_on_failure: bool,
             if not pr.returncode and not pr.stdout:
                 print(OK_STR)
                 continue
-            print("{}, output missmatch".format(FAILED_STR, rc))
+            print("{}, output mismatch".format(FAILED_STR, rc))
             if not pr.stdout:
                 print("No diff output to show")  # Should not happen
             else:
