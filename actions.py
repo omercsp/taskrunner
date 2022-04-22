@@ -9,19 +9,16 @@ def _active_task_name(config: Config, args) -> str:
     return task_name
 
 
-__PRINT_FMT = "{:<24}{:<80}"
-
-
 def _show_task(task: Task, full_details: bool) -> None:
     def print_val(title: str, value: typing.Any):
-        print(__PRINT_FMT.format("{}".format(title), value))
+        print("{:<24}{:<}".format("{}".format(title), value))
 
     def print_bool(title, value: bool):
         print_val(title, "Yes" if value else "No")
 
     def print_blob(title: str, text: str):
         if text is None or len(text) == 0:
-            print(__PRINT_FMT.format(title, ""))
+            print(title)
             return
         first = True
         for line in text.split('\n'):
@@ -30,7 +27,7 @@ def _show_task(task: Task, full_details: bool) -> None:
                     print_val(title, in_line)
                     first = False
                     continue
-                print(__PRINT_FMT.format("", in_line))
+                print_val("", in_line)
 
     def _task_str(cmd_str: str) -> str:
         if len(cmd_str.strip()) == 0:
@@ -39,7 +36,8 @@ def _show_task(task: Task, full_details: bool) -> None:
 
     print_val("Task name:", task.name)
     if full_details:
-        print_val("Short description:", task.short_desc if task.short_desc else "")
+        if task.short_desc:
+            print_val("Short description:", task.short_desc)
         if task.long_desc:
             print_blob("Description:", task.long_desc)
         print_bool("Hidden", task.hidden)
@@ -52,7 +50,7 @@ def _show_task(task: Task, full_details: bool) -> None:
             print_val(shell_title, task.shell_path)
     count = 0
     if task.env:
-        print(__PRINT_FMT.format("Environment:", ""))
+        print("Environment:")
         for k, v in task.env.items():
             print_blob("     [{}]".format(count), "{}={}".format(k, v))
             count += 1
@@ -60,7 +58,7 @@ def _show_task(task: Task, full_details: bool) -> None:
         print_blob("Working directory:", _task_str(task.cwd))
 
     if task.c_image:
-        print_val("Container details:", "")
+        print("Container details:")
         image = _task_str(task.c_image)
         if task.c_exec:
             print_val("  Execute in:", image)
@@ -80,7 +78,7 @@ def _show_task(task: Task, full_details: bool) -> None:
             print_blob("  Volume:", _task_str(task.c_volumes[0]))
         elif len(task.c_volumes) > 1:
             count = 0
-            print(__PRINT_FMT.format("  Volumes:", ""))
+            print("  Volumes:")
             for vol in task.c_volumes:
                 print_blob("     [{}]".format(count), _task_str(vol))
                 count += 1
@@ -96,7 +94,7 @@ def _show_task(task: Task, full_details: bool) -> None:
         return
 
     print_bool("Stop on error:", task.stop_on_error)
-    print_val("Commands:", "")
+    print("Commands:")
     count = 0
     for cmd in task.commands:
         print_blob("     [{}]".format(count), _task_str(cmd))
