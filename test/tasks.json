@@ -157,13 +157,15 @@
 		"base_container_test": {
 			"short_desc": "Basic container support",
 			"commands": [
-				"echo $CENV0",
-				"cat /etc/os-release | grep PRETTY_NAME"
-			],
+				"pwd; echo $CENV0; cat /etc/os-release | grep PRETTY_NAME; cat /aux/volume_file.txt" ],
+			"c_cwd": "/opt",
 			"c_shell": true,
 			"c_env": {
 				"CENV0": "value0"
 			},
+			"c_volumes": [
+				"{{cwd}}/aux:/aux"
+			],
 			"meta": {
 				"abstract": true
 			}
