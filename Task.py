@@ -1,6 +1,6 @@
 from config import *
 from argparse import Namespace as Args
-from schemas import Schema
+from schemas import TaskKeys
 import shlex
 import subprocess
 import signal
@@ -15,36 +15,36 @@ class Task(object):
     def __init__(self, name: str, config: Config) -> None:
         super().__init__()
         info("Initializing task '{}'", name)
-        task_descriptor = config.get_task_desc(name, True)
         self.name = name
         self.config = config
-        self.short_desc = task_descriptor.get(Schema.Keys.Task.ShortDesc, None)
-        self.long_desc = task_descriptor.get(Schema.Keys.Task.LongDesc, None)
-        self.hidden = task_descriptor.get(Schema.Keys.Task.Hidden, False)
+        task_descriptor = config.get_task_desc(name, True)
+        self.short_desc = task_descriptor.get(TaskKeys.ShortDesc, None)
+        self.long_desc = task_descriptor.get(TaskKeys.LongDesc, None)
+        self.hidden = task_descriptor.get(TaskKeys.Hidden, False)
 
-        self.stop_on_error = task_descriptor.get(Schema.Keys.Task.StopOnError, True)
-        self.commands = task_descriptor.get(Schema.Keys.Task.Commands, [])
-        self.cwd = task_descriptor.get(Schema.Keys.Task.Cwd, None)
-        self.shell = task_descriptor.get(Schema.Keys.Task.Shell, False)
+        self.stop_on_error = task_descriptor.get(TaskKeys.StopOnError, True)
+        self.commands = task_descriptor.get(TaskKeys.Commands, [])
+        self.cwd = task_descriptor.get(TaskKeys.Cwd, None)
+        self.shell = task_descriptor.get(TaskKeys.Shell, False)
         self.shell_path = task_descriptor.get(
-            Schema.Keys.Task.ShellPath, config.default_shell_path())
-        self.env = task_descriptor.get(Schema.Keys.Task.Env, None)
+            TaskKeys.ShellPath, config.default_shell_path())
+        self.env = task_descriptor.get(TaskKeys.Env, None)
 
-        self.c_image = task_descriptor.get(Schema.Keys.Task.CImage, None)
-        self.c_volumes = task_descriptor.get(Schema.Keys.Task.CVolumes, [])
-        self.c_interactive = task_descriptor.get(Schema.Keys.Task.CInteractive, False)
-        self.c_tty = task_descriptor.get(Schema.Keys.Task.CTty, False)
-        self.c_flags = task_descriptor.get(Schema.Keys.Task.CFlags, "")
-        self.c_exec = task_descriptor.get(Schema.Keys.Task.CExec, False)
-        self.c_rm = task_descriptor.get(Schema.Keys.Task.CRemove, True)
-        self.c_tool = task_descriptor.get(Schema.Keys.Task.CTool,
+        self.c_image = task_descriptor.get(TaskKeys.CImage, None)
+        self.c_volumes = task_descriptor.get(TaskKeys.CVolumes, [])
+        self.c_interactive = task_descriptor.get(TaskKeys.CInteractive, False)
+        self.c_tty = task_descriptor.get(TaskKeys.CTty, False)
+        self.c_flags = task_descriptor.get(TaskKeys.CFlags, "")
+        self.c_exec = task_descriptor.get(TaskKeys.CExec, False)
+        self.c_rm = task_descriptor.get(TaskKeys.CRemove, True)
+        self.c_tool = task_descriptor.get(TaskKeys.CTool,
                                           self.config.default_container_tool())
-        self.c_shell = task_descriptor.get(Schema.Keys.Task.CShell, False)
-        self.c_shell_path = task_descriptor.get(Schema.Keys.Task.CShellPath,
+        self.c_shell = task_descriptor.get(TaskKeys.CShell, False)
+        self.c_shell_path = task_descriptor.get(TaskKeys.CShellPath,
                                                 self.config.default_container_shell_path())
-        self.c_cwd = task_descriptor.get(Schema.Keys.Task.CCwd, None)
-        self.c_env = task_descriptor.get(Schema.Keys.Task.CEnv, {})
-        self.c_sudo = task_descriptor.get(Schema.Keys.Task.CSudo, False)
+        self.c_cwd = task_descriptor.get(TaskKeys.CCwd, None)
+        self.c_env = task_descriptor.get(TaskKeys.CEnv, {})
+        self.c_sudo = task_descriptor.get(TaskKeys.CSudo, False)
 
         self.expanded = False
 

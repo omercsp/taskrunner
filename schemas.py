@@ -2,102 +2,108 @@ from common import *
 import jsonschema
 
 
+class VerValues(object):
+    MAJOR: int = 4
+    MINOR: int = 0
+
+
+class VerKeys(object):
+    Major = "major"
+    Minor = "minor"
+
+
+class AutoVarsKeys(object):
+    TASK_ROOT = "taskRoot"
+    CWD = "cwd"
+    CLI_ARGS = "cliArgs"
+
+
+class TaskKeys(object):
+    Shell = "shell"
+    ShellPath = "shell_path"
+    Env = "env"
+    Cwd = "cwd"
+    Base = "base"
+    Hidden = "hidden"
+    ShortDesc = "short_desc"
+    LongDesc = "description"
+    Commands = "commands"
+    StopOnError = "stop_on_error"
+    Meta = "meta"
+    # Container settings
+    CImage = "c_image"
+    CTool = "c_container_tool"
+    CVolumes = "c_volumes"
+    CInteractive = "c_interactive"
+    CTty = "c_tty"
+    CFlags = "c_flags"
+    CExec = "c_exec"
+    CRemove = "c_remove"
+    CSudo = "c_sudo"
+    CShell = "c_shell"
+    CShellPath = "c_shell_path"
+    CEnv = "c_env"
+    CCwd = "c_cwd"
+
+
+class GlobalKeys(object):
+    Include = "include"
+    UseDfltInclude = "use_default_include"
+    Version = "version"
+    Tasks = "tasks"
+    Suppress = "suppress"
+    Variables = "variables"
+    DfltTask = "default_task"
+    DfltShellPath = "default_shell_path"
+    DfltContainerShellPath = "default_container_shell_path"
+    DfltContainerTool = "default_container_tool"
+
+
 class Schema(object):
-    class Version(object):
-        MAJOR: int = 4
-        MINOR: int = 0
-
-    class Keys(object):
-        class Ver(object):
-            Major = "major"
-            Minor = "minor"
-
-        class AutoVars(object):
-            TASK_ROOT = "taskRoot"
-            CWD = "cwd"
-            CLI_ARGS = "cliArgs"
-
-        class Task(object):
-            Shell = "shell"
-            ShellPath = "shell_path"
-            Env = "env"
-            Cwd = "cwd"
-            Base = "base"
-            Hidden = "hidden"
-            ShortDesc = "short_desc"
-            LongDesc = "description"
-            Commands = "commands"
-            StopOnError = "stop_on_error"
-            Meta = "meta"
-            # Container settings
-            CImage = "c_image"
-            CTool = "c_container_tool"
-            CVolumes = "c_volumes"
-            CInteractive = "c_interactive"
-            CTty = "c_tty"
-            CFlags = "c_flags"
-            CExec = "c_exec"
-            CRemove = "c_remove"
-            CSudo = "c_sudo"
-            CShell = "c_shell"
-            CShellPath = "c_shell_path"
-            CEnv = "c_env"
-            CCwd = "c_cwd"
-
-        Include = "include"
-        UseDfltInclude = "use_default_include"
-        Version = "version"
-        Tasks = "tasks"
-        Suppress = "suppress"
-        Variables = "variables"
-        DfltTask = "default_task"
-        DfltShellPath = "default_shell_path"
-        DfltContainerShellPath = "default_container_shell_path"
-        DfltContainerTool = "default_container_tool"
 
     __task_schema = {
         "type": "object",
         "properties": {
-            Keys.Task.Base: {"type": "string", "minLength": 1},
-            Keys.Task.ShortDesc: {"type": "string", "maxLength": 75},
-            Keys.Task.LongDesc: {"type": "string"},
-            Keys.Task.Commands: {
+            TaskKeys.Base: {"type": "string", "minLength": 1},
+            TaskKeys.ShortDesc: {"type": "string", "maxLength": 75},
+            TaskKeys.LongDesc: {"type": "string"},
+            TaskKeys.Commands: {
                 "type": "array",
                 "items": {"type": "string", "minLength": 1}
             },
-            Keys.Task.Cwd: {"type": "string", "minLength": 1},
-            Keys.Task.Shell: {"type": "boolean"},
-            Keys.Task.ShellPath: {"type": "string", "minLength": 1},
-            Keys.Task.Env: {
+            TaskKeys.Cwd: {"type": "string", "minLength": 1},
+            TaskKeys.Shell: {"type": "boolean"},
+            TaskKeys.ShellPath: {"type": "string", "minLength": 1},
+            TaskKeys.Env: {
                 "type": "object",
                 "additionalProperties": {
                     "type": "string"
                 }
             },
-            Keys.Task.StopOnError: {"type": "boolean"},
-            Keys.Task.Hidden: {"type": "boolean"},
-            Keys.Task.CImage: {"type": "string"},
-            Keys.Task.CTool: {"type": "string"},
-            Keys.Task.CVolumes: {
+            TaskKeys.StopOnError: {"type": "boolean"},
+            TaskKeys.Hidden: {"type": "boolean"},
+            TaskKeys.CImage: {"type": "string"},
+            TaskKeys.CTool: {"type": "string"},
+            TaskKeys.CVolumes: {
                 "type": "array",
                 "items": {"type": "string"}
             },
-            Keys.Task.CInteractive: {"type": "boolean"},
-            Keys.Task.CTty: {"type": "boolean"},
-            Keys.Task.CRemove: {"type": "boolean"},
-            Keys.Task.CFlags: {"type": "string"},
-            Keys.Task.CExec: {"type": "boolean"},
-            Keys.Task.CCwd: {"type": "string", "minLength": 1},
-            Keys.Task.CShell: {"type": "boolean"},
-            Keys.Task.CShellPath: {"type": "string", "minLength": 1},
-            Keys.Task.CSudo: {"type": "boolean"},
-            Keys.Task.CEnv: {
+            TaskKeys.CInteractive: {"type": "boolean"},
+            TaskKeys.CTty: {"type": "boolean"},
+            TaskKeys.CRemove: {"type": "boolean"},
+            TaskKeys.CFlags: {"type": "string"},
+            TaskKeys.CExec: {"type": "boolean"},
+            TaskKeys.CCwd: {"type": "string", "minLength": 1},
+            TaskKeys.CShell: {"type": "boolean"},
+            TaskKeys.CShellPath: {"type": "string", "minLength": 1},
+            TaskKeys.CSudo: {"type": "boolean"},
+            TaskKeys.CEnv: {
                 "type": "object",
                 "additionalProperties": {
                     "type": "string"
                 }
             },
-            Keys.Task.Meta: {"type": "object"},
+            TaskKeys.Meta: {"type": "object"},
         },
         "additionalProperties": False
     }
@@ -105,36 +111,36 @@ class Schema(object):
     __schema = {
         "type": "object",
         "properties": {
-            Keys.Version: {
+            GlobalKeys.Version: {
                 "type": "object",
                 "properties": {
-                    Keys.Ver.Major: {"type": "number", "minValue": 0},
-                    Keys.Ver.Minor: {"type": "number", "minValue": 1}
+                    VerKeys.Major: {"type": "number", "minValue": 0},
+                    VerKeys.Minor: {"type": "number", "minValue": 1}
                 }
             },
-            Keys.Include: {
+            GlobalKeys.Include: {
                 "type": "array",
                 "items": {"type": "string", "minLength": 1}
             },
-            Keys.UseDfltInclude: {"type": "boolean"},
+            GlobalKeys.UseDfltInclude: {"type": "boolean"},
 
-            Keys.Tasks: {
+            GlobalKeys.Tasks: {
                 "type": "object",
                 "additionalProperties": __task_schema
              },
-            Keys.Suppress: {
+            GlobalKeys.Suppress: {
                 "type": "array",
                 "items": {"type": "string", "minLength": 1}
             },
-            Keys.Variables: {"type": "object"},
-            Keys.DfltTask: {"type": "string"},
-            Keys.DfltShellPath: {
+            GlobalKeys.Variables: {"type": "object"},
+            GlobalKeys.DfltTask: {"type": "string"},
+            GlobalKeys.DfltShellPath: {
                 "type": "string",
                 "minLength": 1
             },
-            Keys.DfltContainerTool: {"type": "string", "minLength": 1},
+            GlobalKeys.DfltContainerTool: {"type": "string", "minLength": 1},
         },
-        "required": [Keys.Version],
+        "required": [GlobalKeys.Version],
         "additionalProperties": False
     }
 

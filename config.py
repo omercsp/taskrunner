@@ -1,4 +1,4 @@
-from schemas import Schema
+from schemas import *
 from common import *
 import os
 import pathlib
@@ -19,13 +19,13 @@ class Config(object):
         return data
 
     def _check_config_file_version(self, path: str) -> None:
-        major = self.conf[Schema.Keys.Version][Schema.Keys.Ver.Major]
-        minor = self.conf[Schema.Keys.Version][Schema.Keys.Ver.Minor]
-        if major != Schema.Version.MAJOR or minor > Schema.Version.MINOR:
+        major = self.conf[GlobalKeys.Version][VerKeys.Major]
+        minor = self.conf[GlobalKeys.Version][VerKeys.Minor]
+        if major != VerValues.MAJOR or minor > VerValues.MINOR:
             raise TaskException(("Incompatible major configuration version for '{}': " +
                                  "Found:{}.{}, expected <= {}.{}").format(
-                path, major, minor, Schema.Version.MAJOR, Schema.Version.MINOR))
-        if minor != Schema.Version.MINOR:
+                path, major, minor, VerValues.MAJOR, VerValues.MINOR))
+        if minor != VerValues.MINOR:
             print("Incompatible minor configuration version for '{}'".format(str))
 
     def _read_configuration(self, file_path: str, read_files: set = set()):
@@ -34,10 +34,10 @@ class Config(object):
         defs = {}
         info("Reading configuration file {}", file_path)
         orig_conf = Config._read_tasks_file(file_path)
-        includes = orig_conf.get(Schema.Keys.Include, [])
+        includes = orig_conf.get(GlobalKeys.Include, [])
         if file_path != _DFLT_CONF_FILE_NAME and \
                 os.path.isfile(_DFLT_CONF_FILE_NAME) and \
-                orig_conf.get(Schema.Keys.UseDfltInclude, True):
+                orig_conf.get(GlobalKeys.UseDfltInclude, True):
             includes.insert(0, _DFLT_CONF_FILE_NAME)
 
         info("Configuration file includes: {}", includes)
@@ -47,22 +47,22 @@ class Config(object):
             if f in read_files:
                 raise TaskException("Include loop detected - '{}'".format(f))
             included_conf = self._read_configuration(f, read_files)
-            tasks.update(included_conf.get(Schema.Keys.Tasks))
-            defs.update(included_conf.get(Schema.Keys.Variables))
+            tasks.update(included_conf.get(GlobalKeys.Tasks))
+            defs.update(included_conf.get(GlobalKeys.Variables))
             conf.update(included_conf)
         read_files.remove(file_path)
-        if Schema.Keys.Include in conf:
-            conf.pop(Schema.Keys.Include)
+        if GlobalKeys.Include in conf:
+            conf.pop(GlobalKeys.Include)
 
         conf.update(orig_conf)
-        tasks.update(orig_conf.get(Schema.Keys.Tasks, {}))
-        for supressed_task in conf.get(Schema.Keys.Suppress, []):
+        tasks.update(orig_conf.get(GlobalKeys.Tasks, {}))
+        for supressed_task in conf.get(GlobalKeys.Suppress, []):
             if supressed_task in tasks:
                 info("Removing suppressed task {}", supressed_task)
                 tasks.pop(supressed_task)
-        conf[Schema.Keys.Tasks] = tasks
-        defs.update(orig_conf.get(Schema.Keys.Variables, {}))
-        conf[Schema.Keys.Variables] = defs
+        conf[GlobalKeys.Tasks] = tasks
+        defs.update(orig_conf.get(GlobalKeys.Variables, {}))
+        conf[GlobalKeys.Variables] = defs
         return conf
 
     @staticmethod
@@ -91,11 +91,11 @@ class Config(object):
         #  Populate some variables early so they are available in
         early_vars = {}
         cwd = os.getcwd()
-        early_vars[Schema.Keys.AutoVars.CWD] = cwd
+        early_vars[AutoVarsKeys.CWD] = cwd
         if conf_path:
-            early_vars[Schema.Keys.AutoVars.TASK_ROOT] = os.path.dirname(conf_path)
+            early_vars[AutoVarsKeys.TASK_ROOT] = os.path.dirname(conf_path)
         else:
-            early_vars[Schema.Keys.AutoVars.TASK_ROOT] = cwd
+            early_vars[AutoVarsKeys.TASK_ROOT] = cwd
 
         self.conf = {}
         if conf_path:
@@ -105,10 +105,10 @@ class Config(object):
             self._check_config_file_version(conf_path)
 
         #  Always override configuration variables with hard coded ones
-        self.vars = self.conf.get(Schema.Keys.Variables, {})
+        self.vars = self.conf.get(GlobalKeys.Variables, {})
         self.vars.update(early_vars)
-        self.tasks = self.conf.get(Schema.Keys.Tasks, {})
-        self.vars[Schema.Keys.AutoVars.CLI_ARGS] = " ".join(cli_args)
+        self.tasks = self.conf.get(GlobalKeys.Tasks, {})
+        self.vars[AutoVarsKeys.CLI_ARGS] = " ".join(cli_args)
         if cli_defs:
             for d in cli_defs:
                 key, val = parse_assignment_str(d)
@@ -122,21 +122,21 @@ class Config(object):
             stop_raw_logging()
 
     def default_task_name(self) -> typing.Union[str, None]:
-        return self.setting(Schema.Keys.DfltTask)
+        return self.setting(GlobalKeys.DfltTask)
 
     def default_container_tool(self) -> str:
-        return self.setting(Schema.Keys.DfltContainerTool, default="/usr/bin/docker")
+        return self.setting(GlobalKeys.DfltContainerTool, default="/usr/bin/docker")
 
     def default_container_shell_path(self) -> str:
-        return self.setting(Schema.Keys.DfltContainerShellPath, default="/usr/bin/sh")
+        return self.setting(GlobalKeys.DfltContainerShellPath, default="/usr/bin/sh")
 
     def default_shell_path(self) -> typing.Union[str, None]:
-        return self.setting(Schema.Keys.DfltShellPath, None)
+        return self.setting(GlobalKeys.DfltShellPath, None)
 
     def visible_tasks(self) -> typing.List[str]:
         tasks = set()
         for name, task in self.tasks.items():
-            if not task.get(Schema.Keys.Task.Hidden, False):
+            if not task.get(TaskKeys.Hidden, False):
                 tasks.add(name)
         return list(tasks)
 
@@ -155,9 +155,9 @@ class Config(object):
             raise TaskException("Include loop detected for '{}'".format(name))
 
         base_task = self._raw_task_obj(name)
-        hidden = base_task.get(Schema.Keys.Task.Hidden, False)
+        hidden = base_task.get(TaskKeys.Hidden, False)
 
-        included_task = base_task.get(Schema.Keys.Task.Base, None)
+        included_task = base_task.get(TaskKeys.Base, None)
         if included_task is None:
             return base_task
 
@@ -165,7 +165,7 @@ class Config(object):
         included_task = self._task_desc(
             included_task, included_list=included_list).copy()
         included_task.update(base_task)
-        included_task[Schema.Keys.Task.Hidden] = hidden
+        included_task[TaskKeys.Hidden] = hidden
         return included_task
 
     def get_task_desc(self, name: str, includes: bool):
