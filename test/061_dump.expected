@@ -1,0 +1,47 @@
+{
+    "short_desc": "Dummy task for info/dump validations",
+    "description": "'task' running 'task'? blesphamy!",
+    "base": "info_task_base",
+    "env": {
+        "{{var0}}": "{{var1}}",
+        "{{var1}}": "{{var0}}"
+    },
+    "hidden": true,
+    "cwd": "{{optDir}}",
+    "commands": [
+        "a command",
+        "another command",
+        "yet another command"
+    ],
+    "meta": {
+        "abstract": true
+    }
+}
+{
+    "c_image": "a-wonderfull-image",
+    "c_remove": false,
+    "c_exec": true,
+    "c_interactive": true,
+    "c_volumes": [
+        "/to-be-mapped-to-opt:{{optDir}}"
+    ],
+    "c_shell": true,
+    "c_shell_path": "/usr/bin/acme-shell",
+    "hidden": true,
+    "meta": {
+        "abstract": true
+    },
+    "short_desc": "Dummy task for info/dump validations",
+    "description": "'task' running 'task'? blesphamy!",
+    "base": "info_task_base",
+    "env": {
+        "{{var0}}": "{{var1}}",
+        "{{var1}}": "{{var0}}"
+    },
+    "cwd": "{{optDir}}",
+    "commands": [
+        "a command",
+        "another command",
+        "yet another command"
+    ]
+}
