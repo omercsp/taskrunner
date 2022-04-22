@@ -16,7 +16,6 @@ class Task(object):
         super().__init__()
         info("Initializing task '{}'", name)
         self.name = name
-        self.config = config
         task_descriptor = config.get_task_desc(name, True)
         self.short_desc = task_descriptor.get(TaskKeys.ShortDesc, None)
         self.long_desc = task_descriptor.get(TaskKeys.LongDesc, None)
@@ -37,11 +36,10 @@ class Task(object):
         self.c_flags = task_descriptor.get(TaskKeys.CFlags, "")
         self.c_exec = task_descriptor.get(TaskKeys.CExec, False)
         self.c_rm = task_descriptor.get(TaskKeys.CRemove, True)
-        self.c_tool = task_descriptor.get(TaskKeys.CTool,
-                                          self.config.default_container_tool())
+        self.c_tool = task_descriptor.get(TaskKeys.CTool, config.default_container_tool())
         self.c_shell = task_descriptor.get(TaskKeys.CShell, False)
         self.c_shell_path = task_descriptor.get(TaskKeys.CShellPath,
-                                                self.config.default_container_shell_path())
+                                                config.default_container_shell_path())
         self.c_cwd = task_descriptor.get(TaskKeys.CCwd, None)
         self.c_env = task_descriptor.get(TaskKeys.CEnv, {})
         self.c_sudo = task_descriptor.get(TaskKeys.CSudo, False)
