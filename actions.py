@@ -112,8 +112,8 @@ def show_task_info(args: Args, config: Config) -> None:
 
 def list_tasks(config: Config, show_all: bool, names_only: bool):
     info("Listing tasks show_all={} names_only={}".format(show_all, names_only))
-    print_fmt = "{:<24}{:<6}{:<55}"
-    err_print_fmt = "{:<24}{:<59}"
+    print_fmt = "{:<24}{:<6}{}"
+    err_print_fmt = "{:<30}{}"
     default_task_name = config.default_task_name()
 
     if not names_only:
