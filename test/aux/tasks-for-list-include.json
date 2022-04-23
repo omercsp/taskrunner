@@ -1,0 +1,10 @@
+{
+	"tasks": {
+		"abstract_task":{
+			"short_desc": "Inherits abstract class from included file",
+			"commands": ["do_something_abstract"],
+			"abstract": true
+		}
+	},
+	"use_default_include": false
+}
