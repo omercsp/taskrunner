@@ -4,7 +4,7 @@ import jsonschema
 
 class VerValues(object):
     MAJOR: int = 4
-    MINOR: int = 0
+    MINOR: int = 1
 
 
 class VerKeys(object):
@@ -25,6 +25,7 @@ class TaskKeys(object):
     Cwd = "cwd"
     Base = "base"
     Hidden = "hidden"
+    Abstract = "abstract"
     ShortDesc = "short_desc"
     LongDesc = "description"
     Commands = "commands"
@@ -82,6 +83,7 @@ class Schema(object):
             },
             TaskKeys.StopOnError: {"type": "boolean"},
             TaskKeys.Hidden: {"type": "boolean"},
+            TaskKeys.Abstract: {"type": "boolean"},
             TaskKeys.CImage: {"type": "string"},
             TaskKeys.CTool: {"type": "string"},
             TaskKeys.CVolumes: {

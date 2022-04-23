@@ -28,6 +28,7 @@ class Task(object):
         self.shell_path = task_descriptor.get(
             TaskKeys.ShellPath, config.default_shell_path())
         self.env = task_descriptor.get(TaskKeys.Env, None)
+        self.abstract = task_descriptor.get(TaskKeys.Abstract, False)
 
         self.c_image = task_descriptor.get(TaskKeys.CImage, None)
         self.c_volumes = task_descriptor.get(TaskKeys.CVolumes, [])
@@ -171,6 +172,8 @@ class Task(object):
     def run(self) -> int:
         if not self.expanded:
             raise TaskException("Task must be expanded before run")  # Should never happen
+        if self.abstract:
+            raise TaskException("Can't run abstract tasks")
         if self.cwd:
             info("Working directory will be set to '{}'", self.cwd)
         else:
