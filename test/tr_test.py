@@ -110,6 +110,7 @@ def run_test_tasks(tasks: dict, diff_output: bool, stop_on_failure: bool,
                 rc = 1
                 print("{}, unallowed return code '{}' (allowed={})".format(
                     FAILED_STR, rc, allowed_rc))
+                subprocess.Popen(["tail", "/tmp/task_runner.log"]).wait()
                 if stop_on_failure:
                     return 1
                 continue
