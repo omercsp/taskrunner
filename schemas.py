@@ -60,100 +60,106 @@ class GlobalKeys(object):
     DfltContainerTool = "default_container_tool"
 
 
-class Schema(object):
-
-    __task_schema = {
-        "type": "object",
-        "properties": {
-            TaskKeys.Base: {"type": "string", "minLength": 1},
-            TaskKeys.ShortDesc: {"type": "string", "maxLength": 75},
-            TaskKeys.LongDesc: {"type": "string"},
-            TaskKeys.Commands: {
-                "type": "array",
-                "items": {"type": "string", "minLength": 1}
-            },
-            TaskKeys.Cwd: {"type": "string", "minLength": 1},
-            TaskKeys.Shell: {"type": "boolean"},
-            TaskKeys.ShellPath: {"type": "string", "minLength": 1},
-            TaskKeys.Env: {
-                "type": "object",
-                "additionalProperties": {
-                    "type": "string"
-                }
-            },
-            TaskKeys.StopOnError: {"type": "boolean"},
-            TaskKeys.Hidden: {"type": "boolean"},
-            TaskKeys.Abstract: {"type": "boolean"},
-            TaskKeys.CImage: {"type": "string"},
-            TaskKeys.CTool: {"type": "string"},
-            TaskKeys.CVolumes: {
-                "type": "array",
-                "items": {"type": "string"}
-            },
-            TaskKeys.CInteractive: {"type": "boolean"},
-            TaskKeys.CTty: {"type": "boolean"},
-            TaskKeys.CRemove: {"type": "boolean"},
-            TaskKeys.CFlags: {"type": "string"},
-            TaskKeys.CExec: {"type": "boolean"},
-            TaskKeys.CCwd: {"type": "string", "minLength": 1},
-            TaskKeys.CShell: {"type": "boolean"},
-            TaskKeys.CShellPath: {"type": "string", "minLength": 1},
-            TaskKeys.CSudo: {"type": "boolean"},
-            TaskKeys.CEnv: {
-                "type": "object",
-                "additionalProperties": {
-                    "type": "string"
-                }
-            },
-            TaskKeys.Meta: {"type": "object"},
+_task_schema = {
+    "type": "object",
+    "properties": {
+        TaskKeys.Base: {"type": "string", "minLength": 1},
+        TaskKeys.ShortDesc: {"type": "string", "maxLength": 75},
+        TaskKeys.LongDesc: {"type": "string"},
+        TaskKeys.Commands: {
+            "type": "array",
+            "items": {"type": "string", "minLength": 1}
         },
-        "additionalProperties": False
-    }
-
-    __schema = {
-        "type": "object",
-        "properties": {
-            GlobalKeys.Version: {
-                "type": "object",
-                "properties": {
-                    VerKeys.Major: {"type": "number", "minValue": 0},
-                    VerKeys.Minor: {"type": "number", "minValue": 1}
-                }
-            },
-            GlobalKeys.Include: {
-                "type": "array",
-                "items": {"type": "string", "minLength": 1}
-            },
-            GlobalKeys.UseDfltInclude: {"type": "boolean"},
-
-            GlobalKeys.Tasks: {
-                "type": "object",
-                "additionalProperties": __task_schema
-             },
-            GlobalKeys.Suppress: {
-                "type": "array",
-                "items": {"type": "string", "minLength": 1}
-            },
-            GlobalKeys.Variables: {"type": "object"},
-            GlobalKeys.DfltTask: {"type": "string"},
-            GlobalKeys.DfltShellPath: {
-                "type": "string",
-                "minLength": 1
-            },
-            GlobalKeys.DfltContainerTool: {"type": "string", "minLength": 1},
+        TaskKeys.Cwd: {"type": "string", "minLength": 1},
+        TaskKeys.Shell: {"type": "boolean"},
+        TaskKeys.ShellPath: {"type": "string", "minLength": 1},
+        TaskKeys.Env: {
+            "type": "object",
+            "additionalProperties": {
+                "type": "string"
+            }
         },
-        "required": [GlobalKeys.Version],
-        "additionalProperties": False
-    }
+        TaskKeys.StopOnError: {"type": "boolean"},
+        TaskKeys.Hidden: {"type": "boolean"},
+        TaskKeys.Abstract: {"type": "boolean"},
+        TaskKeys.CImage: {"type": "string"},
+        TaskKeys.CTool: {"type": "string"},
+        TaskKeys.CVolumes: {
+            "type": "array",
+            "items": {"type": "string"}
+        },
+        TaskKeys.CInteractive: {"type": "boolean"},
+        TaskKeys.CTty: {"type": "boolean"},
+        TaskKeys.CRemove: {"type": "boolean"},
+        TaskKeys.CFlags: {"type": "string"},
+        TaskKeys.CExec: {"type": "boolean"},
+        TaskKeys.CCwd: {"type": "string", "minLength": 1},
+        TaskKeys.CShell: {"type": "boolean"},
+        TaskKeys.CShellPath: {"type": "string", "minLength": 1},
+        TaskKeys.CSudo: {"type": "boolean"},
+        TaskKeys.CEnv: {
+            "type": "object",
+            "additionalProperties": {
+                "type": "string"
+            }
+        },
+        TaskKeys.Meta: {"type": "object"},
+    },
+    "additionalProperties": False
+}
 
-    @staticmethod
-    def validate(data: dict) -> None:
-        try:
-            jsonschema.validate(data, Schema.__schema)
-        except jsonschema.ValidationError as e:
-            raise TaskException("Schema validation error at '{}': {}".format(
-                "/".join(str(v) for v in list(e.absolute_path)), e.message))
+_config_file_schema = {
+    "type": "object",
+    "properties": {
+        GlobalKeys.Version: {
+            "type": "object",
+            "properties": {
+                VerKeys.Major: {"type": "number", "minValue": 0},
+                VerKeys.Minor: {"type": "number", "minValue": 1}
+            }
+        },
+        GlobalKeys.Include: {
+            "type": "array",
+            "items": {"type": "string", "minLength": 1}
+        },
+        GlobalKeys.UseDfltInclude: {"type": "boolean"},
 
-    @staticmethod
-    def dump() -> None:
-        print_dict(Schema.__schema)
+        GlobalKeys.Tasks: {"type": "object"},
+        GlobalKeys.Suppress: {
+            "type": "array",
+            "items": {"type": "string", "minLength": 1}
+        },
+        GlobalKeys.Variables: {"type": "object"},
+        GlobalKeys.DfltTask: {"type": "string"},
+        GlobalKeys.DfltShellPath: {
+            "type": "string",
+            "minLength": 1
+        },
+        GlobalKeys.DfltContainerTool: {"type": "string", "minLength": 1},
+    },
+    "required": [GlobalKeys.Version],
+    "additionalProperties": False
+}
+
+
+def validate_config_file_schema(data: dict) -> None:
+    try:
+        jsonschema.validate(data, _config_file_schema)
+    except jsonschema.ValidationError as e:
+        raise TaskException("Schema validation error at '{}': {}".format(
+            "/".join(str(v) for v in list(e.absolute_path)), e.message))
+
+
+def validate_task_schema(name: str, data: dict) -> None:
+    try:
+        jsonschema.validate(data, _task_schema)
+    except jsonschema.ValidationError as e:
+        raise TaskException("Task schema validation error for '{}': {}".format(name, e.message))
+
+
+def dump_config_file_schema() -> None:
+    print_dict(_config_file_schema)
+
+
+def dump_task_schema() -> None:
+    print_dict(_task_schema)

@@ -101,7 +101,7 @@ class Config(object):
         if conf_path:
             self.expander.map = early_vars
             self.conf = self._read_configuration(conf_path)
-            Schema.validate(self.conf)
+            validate_config_file_schema(self.conf)
             self._check_config_file_version(conf_path)
 
         #  Always override configuration variables with hard coded ones

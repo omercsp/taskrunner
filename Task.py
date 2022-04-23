@@ -1,6 +1,6 @@
 from config import *
 from argparse import Namespace as Args
-from schemas import TaskKeys
+from schemas import TaskKeys, validate_task_schema
 import shlex
 import subprocess
 import signal
@@ -17,6 +17,8 @@ class Task(object):
         info("Initializing task '{}'", name)
         self.name = name
         task_descriptor = config.get_task_desc(name, True)
+        validate_task_schema(name, task_descriptor)
+
         self.short_desc = task_descriptor.get(TaskKeys.ShortDesc, None)
         self.long_desc = task_descriptor.get(TaskKeys.LongDesc, None)
         self.hidden = task_descriptor.get(TaskKeys.Hidden, False)
