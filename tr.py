@@ -4,6 +4,13 @@ import actions
 import argcomplete
 import sys
 
+__RUN_CMD = "run"
+__LIST_CMD = "list"
+__INFO_CMD = "info"
+__DUMP_TASK_CMD = "dump"
+__DUMP_CONFIG_CMD = "dump_config"
+__DUMP_SCHEMA_CMD = "dump_schema"
+
 
 def _tasks_complete(**kwargs):
     try:
@@ -11,7 +18,7 @@ def _tasks_complete(**kwargs):
         parser_name = parsed_args.subparsers_name
     except (KeyError, AttributeError):
         return []
-    if (parser_name == "run" or parser_name == "info" or parser_name == "dump") \
+    if (parser_name == __RUN_CMD or parser_name == __INFO_CMD or parser_name == __DUMP_TASK_CMD) \
        and parsed_args.task is None:
         return Config(None, [], []).visible_tasks()
     return []
@@ -39,7 +46,8 @@ def _parse_arguments():
     task_target_parser = argparse.ArgumentParser(add_help=False)
     task_target_parser.add_argument('task', nargs='?', metavar='TASK', default=None,
                                     help='set task')
-    run_parser = subparsers.add_parser('run', help='execute a task', parents=[task_target_parser])
+    run_parser = subparsers.add_parser(__RUN_CMD, help='execute a task',
+                                       parents=[task_target_parser])
     run_parser.add_argument('-c', '--command', metavar='CMD', default=None, action='append',
                             help='set command to run')
     run_parser.add_argument('--cwd', metavar='DIR', default=None, help='set working directory')
@@ -81,22 +89,24 @@ def _parse_arguments():
     run_parser.add_argument('--c-cwd', metavar='DIR', default=None,
                             help='set container working directory')
 
-    info_parser = subparsers.add_parser('info', help='show task info', parents=[task_target_parser])
+    info_parser = subparsers.add_parser(__INFO_CMD, help='show task info',
+                                        parents=[task_target_parser])
     info_parser.add_argument('-x', '--expand', help='expand values', action='store_true',
                              default=False)
 
-    dump_parser = subparsers.add_parser('dump', help='dump a task', parents=[task_target_parser])
+    dump_parser = subparsers.add_parser(__DUMP_TASK_CMD, help='dump a task',
+                                        parents=[task_target_parser])
     dump_parser.add_argument('-i', '--includes', help='with inclusions',
                              action='store_true', default=False)
 
-    list_parser = subparsers.add_parser('list', help='list tasks')
+    list_parser = subparsers.add_parser(__LIST_CMD, help='list tasks')
     list_parser.add_argument('-a', '--all', action='store_true', default=False,
                              help='show hidden and shadowed tasks')
     list_parser.add_argument('--names-only', action='store_true', default=False,
                              help=argparse.SUPPRESS)
 
-    subparsers.add_parser('schema_dump', help='dump configuration schema')
-    subparsers.add_parser('config_dump', help='dump configuration')
+    subparsers.add_parser(__DUMP_SCHEMA_CMD, help='dump configuration schema')
+    subparsers.add_parser(__DUMP_CONFIG_CMD, help='dump configuration')
 
     # TODO: Not sure what pyright wants with this type ignore
     argcomplete.autocomplete(parser, always_complete_options=False,
@@ -112,23 +122,23 @@ if __name__ == "__main__":
     info("cmd_args={}", cmds_args)
     try:
 
-        if args.subparsers_name == "schema":
+        if args.subparsers_name == __DUMP_SCHEMA_CMD:
             Schema.dump()
             exit(0)
 
         config = Config(args.conf, args.variable, cmds_args)
-        if args.subparsers_name == "list":
+        if args.subparsers_name == __RUN_CMD:
+            exit(actions.run_task(config, args))
+        elif args.subparsers_name == __LIST_CMD:
             actions.list_tasks(config, args.all, args.names_only)
-        elif args.subparsers_name == "info":
+        elif args.subparsers_name == __INFO_CMD:
             actions.show_task_info(args=args, config=config)
-        elif args.subparsers_name == "schema_dump":
-            actions.dump_task(config, args)
-        elif args.subparsers_name == "config_dump":
+        elif args.subparsers_name == __DUMP_CONFIG_CMD:
             actions.dump_config(config)
-        elif args.subparsers_name == "dump":
+        elif args.subparsers_name == __DUMP_TASK_CMD:
             actions.dump_task(config, args)
         else:
-            exit(actions.run_task(config, args))
+            raise TaskException("Unknown command")  # Should never happen
 
     except TaskException as e:
         error_and_print(str(e))
