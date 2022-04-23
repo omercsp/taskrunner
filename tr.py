@@ -9,7 +9,8 @@ __LIST_CMD = "list"
 __INFO_CMD = "info"
 __DUMP_TASK_CMD = "dump"
 __DUMP_CONFIG_CMD = "dump_config"
-__DUMP_SCHEMA_CMD = "dump_schema"
+__DUMP_CONFIG_SCHEMA_CMD = "dump_config_schema"
+__DUMP_TASK_SCHEMA_CMD = "dump_task_schema"
 
 
 def _tasks_complete(**kwargs):
@@ -105,7 +106,8 @@ def _parse_arguments():
     list_parser.add_argument('--names-only', action='store_true', default=False,
                              help=argparse.SUPPRESS)
 
-    subparsers.add_parser(__DUMP_SCHEMA_CMD, help='dump configuration schema')
+    subparsers.add_parser(__DUMP_CONFIG_SCHEMA_CMD, help='dump configuration file schema')
+    subparsers.add_parser(__DUMP_TASK_SCHEMA_CMD, help='dump task schema')
     subparsers.add_parser(__DUMP_CONFIG_CMD, help='dump configuration')
 
     # TODO: Not sure what pyright wants with this type ignore
@@ -122,8 +124,11 @@ if __name__ == "__main__":
     info("cmd_args={}", cmds_args)
     try:
 
-        if args.subparsers_name == __DUMP_SCHEMA_CMD:
-            Schema.dump()
+        if args.subparsers_name == __DUMP_CONFIG_SCHEMA_CMD:
+            dump_config_file_schema()
+            exit(0)
+        if args.subparsers_name == __DUMP_TASK_SCHEMA_CMD:
+            dump_task_schema()
             exit(0)
 
         config = Config(args.conf, args.variable, cmds_args)
