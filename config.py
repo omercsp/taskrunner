@@ -156,6 +156,7 @@ class Config(object):
 
         base_task = self._raw_task_obj(name)
         hidden = base_task.get(TaskKeys.Hidden, False)
+        abstract = base_task.get(TaskKeys.Abstract, False)
 
         included_task = base_task.get(TaskKeys.Base, None)
         if included_task is None:
@@ -166,6 +167,7 @@ class Config(object):
             included_task, included_list=included_list).copy()
         included_task.update(base_task)
         included_task[TaskKeys.Hidden] = hidden
+        included_task[TaskKeys.Abstract] = abstract
         return included_task
 
     def get_task_desc(self, name: str, includes: bool):

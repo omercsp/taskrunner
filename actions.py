@@ -41,6 +41,7 @@ def _show_task(task: Task, full_details: bool) -> None:
         if task.long_desc:
             print_blob("Description:", task.long_desc)
         print_bool("Hidden", task.hidden)
+        print_bool("Abstract", task.abstract)
     print_bool("Use shell: ", task.shell)
     if task.shell:
         shell_title = "Shell path:"
@@ -124,7 +125,7 @@ def list_tasks(config: Config, show_all: bool, names_only: bool):
         except TaskException as e:
             print(err_print_fmt.format(task_name, "<error: {}>".format(str(e))))
             continue
-        if not show_all and t.hidden:
+        if not show_all and (t.hidden or t.abstract):
             continue
         if names_only:
             print(task_name, end=' ')
@@ -136,7 +137,9 @@ def list_tasks(config: Config, show_all: bool, names_only: bool):
             desc = ""
 
         flags = ""
-        if t.hidden:
+        if t.abstract:
+            flags += "A"
+        elif t.hidden:
             flags += "H"
         elif task_name == default_task_name:
             flags += "*"

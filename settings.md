@@ -19,7 +19,8 @@
 * `env` - Dictionary of `"key": "val"`. Each pair will define an environment variable to set when running the task's commands (type: object, empty default value).
 * `shell` - Sets if the commands in this tasks are ran with a wrapping shell. In general this should be not used unless the task's commands require shell semantics like redirection. (type: Boolean, default value: `false`)
 * `shell_path` - Path for shell to use if `shell` is set to true (type: string, default value: the global `default_shell_path` value, which is `/usr/bin/sh` if unmodified)
-* `hidden` - Sets a `hidden` property to the task. Hidden tasks are not listed by default (type: Boolean, default value: `false`).
+* `hidden` - Hides task from being listed by default. Hidden tasks can still be listed using `--all` flag. (type: Boolean, default value: `false`).
+* `abstract` - Abastrct tasks are not allowed to be run. This setting is useful when there's a need to mark task as a base task, while preventing it from being wrongfuly ran. Abstract tasks are implictly hidden. (type: Boolean, default value: `false`).
 * `base` - An optional task name to inherit from. Any current task settings override inherited settings (type: string, empty default value).
 * `meta` - A dictionary for the user own use. TR does not refer to values in this object (type: object, empty default value).
 
