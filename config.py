@@ -26,7 +26,7 @@ class Config(object):
                                  "Found:{}.{}, expected <= {}.{}").format(
                 path, major, minor, VerValues.MAJOR, VerValues.MINOR))
         if minor != VerValues.MINOR:
-            print("Incompatible minor configuration version for '{}'".format(str))
+            print("Incompatible minor configuration version for '{}'".format(VerValues.MINOR))
 
     def _read_configuration(self, file_path: str, read_files: set = set()):
         conf = {}
