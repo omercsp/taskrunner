@@ -1,7 +1,7 @@
 {
 	"version": {
 		"major": 4,
-		"minor": 0
+		"minor": 1
 	},
 	"include": ["{{taskRoot}}/base_tasks_b.json"],
 	"variables": {
@@ -166,9 +166,7 @@
 			"c_volumes": [
 				"{{cwd}}/aux:/aux"
 			],
-			"meta": {
-				"abstract": true
-			}
+			"abstract": true
 		},
 		"050_container_ubuntu": {
 			"base": "base_container_test",
@@ -181,17 +179,14 @@
 			"c_image": "docker.io/rockylinux/rockylinux:8.5"
 		},
 		"info_task_base": {
+			"abstract": true,
 			"c_image": "a-wonderfull-image",
 			"c_remove": false,
 			"c_exec": true,
 			"c_interactive": true,
 			"c_volumes": ["/to-be-mapped-to-opt:{{optDir}}"],
 			"c_shell": true,
-			"c_shell_path": "/usr/bin/acme-shell",
-			"hidden": true,
-			"meta": {
-				"abstract": true
-			}
+			"c_shell_path": "/usr/bin/acme-shell"
 		},
 		"info_task": {
 			"short_desc": "Dummy task for info/dump validations",
@@ -202,15 +197,13 @@
 				"{{var1}}": "{{var0}}"
 			},
 			"hidden": true,
+			"abstract": true,
 			"cwd": "{{optDir}}",
 			"commands": [
 				"a command",
 				"another command",
 				"yet another command"
-			],
-			"meta": {
-				"abstract": true
-			}
+			]
 		},
 		"060_info": {
 			"short_desc": "Validate task info",
