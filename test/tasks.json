@@ -14,7 +14,8 @@
 		"task_cmd": "../task",
 		"task_info_cmd": "{{task_cmd}} info",
 		"task_dump_cmd": "{{task_cmd}} dump",
-		"optDir": "/opt"
+		"optDir": "/opt",
+		"tmp_dir": "/tmp"
 	},
 	"tasks": {
 		"001_simple": {
@@ -144,6 +145,21 @@
 			],
 			"meta" : {
 				"args": "-- If I had wings..."
+			}
+		},
+		"031_args_override": {
+			"short_desc": "Check task setting override by CLI",
+			"description": "Check some task settings override by CLI args (env, shell usage, cwd and command)",
+			"commands": [
+				"false"
+			],
+			"cwd": "/nowhere",
+			"env": {
+				"MY_ENV0": "orig_value"
+			},
+			"shell": false,
+			"meta" : {
+				"args": "--env MY_ENV0=new_value --shell=yes --cwd {{tmp_dir}} -c \"pwd; echo $MY_ENV0\""
 			}
 		},
 		"040_config_file_include_defs": {
