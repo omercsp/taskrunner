@@ -143,7 +143,7 @@
 				"echo {{cliArgs}}"
 			],
 			"meta" : {
-				"args": "If I had wings..."
+				"args": "-- If I had wings..."
 			}
 		},
 		"040_config_file_include_defs": {
