@@ -4,6 +4,7 @@ import os
 import json
 import subprocess
 import typing
+import shlex
 
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -96,7 +97,8 @@ def run_test_tasks(tasks: dict, diff_output: bool, stop_on_failure: bool,
                     raise TaskTestException(
                         "Error running expected outout generation command for task '{}'".format(
                             t_name))
-        run_task_cmd = "{} {} -- {}".format(base_cmd, t_name, t_meta.get("args", "")).split()
+        run_task_cmd = "{} {} {}".format(base_cmd, t_name, t_meta.get("args", ""))
+        run_task_cmd = shlex.split(run_task_cmd)
         try:
             if diff_output:
                 with open("{}/{}.out".format(OUTPUT_DIR, t_name), "w") as f:
