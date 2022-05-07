@@ -15,18 +15,18 @@ class Config(object):
         try:
             data: dict = json.load(open(file_path, 'r'))
         except (IOError, TypeError, ValueError, TaskException) as e:
-            raise TaskException("Error parsing {} - {}".format(file_path, e))
+            raise TaskException(f"Error parsing {file_path} - {e}")
         return data
 
     def _check_config_file_version(self, path: str) -> None:
         major = self.conf[GlobalKeys.Version][VerKeys.Major]
         minor = self.conf[GlobalKeys.Version][VerKeys.Minor]
         if major != VerValues.MAJOR or minor > VerValues.MINOR:
-            raise TaskException(("Incompatible major configuration version for '{}': " +
-                                 "Found:{}.{}, expected <= {}.{}").format(
-                path, major, minor, VerValues.MAJOR, VerValues.MINOR))
+            raise TaskException(
+                f"Incompatible major configuration version for '{path}': " +
+                f"Found:{major}.{minor}, expected <= {VerValues.MAJOR,}.{VerValues.MINOR}")
         if minor != VerValues.MINOR:
-            print("Incompatible minor configuration version for '{}'".format(VerValues.MINOR))
+            print(f"Incompatible minor configuration version for '{VerValues.MINOR}'")
 
     def _read_configuration(self, file_path: str, read_files: set = set()):
         conf = {}
@@ -45,7 +45,7 @@ class Config(object):
         for f in includes:
             f = self.expander(f)
             if f in read_files:
-                raise TaskException("Include loop detected - '{}'".format(f))
+                raise TaskException(f"Include loop detected - '{f}'")
             included_conf = self._read_configuration(f, read_files)
             tasks.update(included_conf.get(GlobalKeys.Tasks))
             defs.update(included_conf.get(GlobalKeys.Variables))
@@ -148,11 +148,11 @@ class Config(object):
         try:
             return self.tasks[name]
         except KeyError:
-            raise TaskException("No such task '{}'".format(name))
+            raise TaskException(f"No such task '{name}'")
 
     def _task_desc(self, name, included_list: set):
         if name in included_list:
-            raise TaskException("Include loop detected for '{}'".format(name))
+            raise TaskException(f"Include loop detected for '{name}'")
 
         base_task = self._raw_task_obj(name)
         hidden = base_task.get(TaskKeys.Hidden, False)

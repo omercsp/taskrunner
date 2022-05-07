@@ -154,7 +154,7 @@ def validate_task_schema(name: str, data: dict) -> None:
     try:
         jsonschema.validate(data, _task_schema)
     except jsonschema.ValidationError as e:
-        raise TaskException("Task schema validation error for '{}': {}".format(name, e.message))
+        raise TaskException(f"Task schema validation error for '{name}': {e.message}")
 
 
 def dump_config_file_schema() -> None:

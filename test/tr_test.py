@@ -10,8 +10,8 @@ import shlex
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 TASKS_JSON_FILE = "tasks.json"
 LOG_FILE = "/tmp/task_runner.log"
-OUTPUT_DIR = "{}/output".format(SCRIPT_DIR)
-INTERMEIDATE_EXPECTED = "{}/intermediate.expected".format(SCRIPT_DIR)
+OUTPUT_DIR = f"{SCRIPT_DIR}/output"
+INTERMEIDATE_EXPECTED = f"{SCRIPT_DIR}/intermediate.expected"
 
 
 class TaskTestException(Exception):
@@ -38,12 +38,12 @@ def parse_arguments():
 
 
 def read_tasks() -> dict:
-    file_path = "{}/{}".format(SCRIPT_DIR, TASKS_JSON_FILE)
+    file_path = f"{SCRIPT_DIR}/{TASKS_JSON_FILE}"
     try:
         data: dict = json.load(open(file_path, 'r'))
         return data["tasks"]
     except (IOError, TypeError, ValueError, KeyError) as e:
-        raise TaskTestException("Error parsing {} - {}".format(file_path, e))
+        raise TaskTestException(f"Error parsing {file_path} - {e}")
 
 
 def run_test_tasks(tasks: dict, diff_output: bool, stop_on_failure: bool,
@@ -63,7 +63,7 @@ def run_test_tasks(tasks: dict, diff_output: bool, stop_on_failure: bool,
 
     if not tasks_list:
         tasks_list = sorted([*tasks])
-    base_cmd = "{}/../task --log_file={} run".format(SCRIPT_DIR, LOG_FILE)
+    base_cmd = f"{SCRIPT_DIR}/../task --log_file={LOG_FILE} run"
     rc = 0
     for t_name in tasks_list:
         try:
@@ -98,13 +98,12 @@ def run_test_tasks(tasks: dict, diff_output: bool, stop_on_failure: bool,
             finally:
                 if output_gen_cmd_rc:
                     raise TaskTestException(
-                        "Error running expected outout generation command for task '{}'".format(
-                            t_name))
+                        f"Error running expected output generation command for task '{t_name}'")
         run_task_cmd = "{} {} {}".format(base_cmd, t_name, t_meta.get("args", ""))
         run_task_cmd = shlex.split(run_task_cmd)
         try:
             if diff_output:
-                with open("{}/{}.out".format(OUTPUT_DIR, t_name), "w") as f:
+                with open(f"{OUTPUT_DIR}/{t_name}.out", "w") as f:
                     p = subprocess.Popen(run_task_cmd, stderr=f, stdout=f)
             else:
                 p = subprocess.Popen(run_task_cmd)
@@ -113,27 +112,26 @@ def run_test_tasks(tasks: dict, diff_output: bool, stop_on_failure: bool,
             allowed_rc = t_meta.get("allowed_rc", [0])
             if cmd_rc not in allowed_rc:
                 rc = 1
-                print("{}, unallowed return code '{}' (allowed={})".format(
-                    FAILED_STR, rc, allowed_rc))
+                print(f"{FAILED_STR}, unallowed return code '{rc}' (allowed={allowed_rc})")
                 subprocess.Popen(["tail", "/tmp/task_runner.log"]).wait()
                 if stop_on_failure:
                     return 1
                 continue
             if not diff_output:
-                print("{} (output not validated)".format(OK_STR))
+                print(f"{OK_STR} (output not validated)")
                 continue
-            out_file = "{}/{}.out".format(OUTPUT_DIR, t_name)
+            out_file = f"{OUTPUT_DIR}/{t_name}.out"
             if output_gen_cmd:
                 expected_file = INTERMEIDATE_EXPECTED
             else:
-                expected_file = "{}/{}.expected".format(SCRIPT_DIR, t_name)
-            diff_cmd = "diff -u {} {}".format(expected_file, out_file)
+                expected_file = f"{SCRIPT_DIR}/{t_name}.expected"
+            diff_cmd = f"diff -u {expected_file} {out_file}"
             pr = subprocess.run(diff_cmd.split(), stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT, encoding='utf-8')
             if not pr.returncode and not pr.stdout:
                 print(OK_STR)
                 continue
-            print("{}, output mismatch".format(FAILED_STR, rc))
+            print(f"{FAILED_STR}, output mismatch")
             if not pr.stdout:
                 print("No diff output to show")  # Should not happen
             else:
@@ -142,7 +140,7 @@ def run_test_tasks(tasks: dict, diff_output: bool, stop_on_failure: bool,
                 return 1
             rc = 1
         except OSError as e:
-            raise TaskTestException("Error occurred running task '{}' - {}".format(t_name, e))
+            raise TaskTestException(f"Error occurred running task '{t_name}' - {e}")
         except KeyboardInterrupt:
             raise TaskTestException("User interrupt")
     return rc

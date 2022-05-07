@@ -33,8 +33,7 @@ class TrLogging(object):
     @staticmethod
     def _frame_str() -> str:
         frame = inspect.stack()[4]
-        return "[{}:{}] {}".format(
-            basename(frame.filename), frame.lineno, frame.function).ljust(38, '.')
+        return f"[{basename(frame.filename)}:{frame.lineno}] {frame.function}".ljust(38, '.')
 
     def log(self, verbosity: int, msg_args):
         if not self._logger.isEnabledFor(verbosity):
@@ -45,7 +44,7 @@ class TrLogging(object):
             if self.raw_format:
                 self._logger.log(verbosity, msg_args)
             else:
-                self._logger.log(verbosity, ("{}: {}").format(self._frame_str(), msg_args))
+                self._logger.log(verbosity, f"{self._frame_str()}: {msg_args}")
             return
         assert(type(msg_args) is tuple)
         if self.raw_format:

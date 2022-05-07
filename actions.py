@@ -11,7 +11,7 @@ def _active_task_name(config: Config, args) -> str:
 
 def _show_task(task: Task, full_details: bool) -> None:
     def print_val(title: str, value: typing.Any):
-        print("{:<24}{:<}".format("{}".format(title), value))
+        print(f"{title:<24}{value:<}")
 
     def print_bool(title, value: bool):
         print_val(title, "Yes" if value else "No")
@@ -53,7 +53,7 @@ def _show_task(task: Task, full_details: bool) -> None:
     if task.env:
         print("Environment:")
         for k, v in task.env.items():
-            print_blob("     [{}]".format(count), "{}={}".format(k, v))
+            print_blob(f"     [{count}]", f"{k}={v}")
             count += 1
     if task.cwd:
         print_blob("Working directory:", _task_str(task.cwd))
@@ -81,7 +81,7 @@ def _show_task(task: Task, full_details: bool) -> None:
             count = 0
             print("  Volumes:")
             for vol in task.c_volumes:
-                print_blob("     [{}]".format(count), _task_str(vol))
+                print_blob(f"     [{count}]", _task_str(vol))
                 count += 1
 
     if len(task.commands) == 0:
@@ -98,7 +98,7 @@ def _show_task(task: Task, full_details: bool) -> None:
     print("Commands:")
     count = 0
     for cmd in task.commands:
-        print_blob("     [{}]".format(count), _task_str(cmd))
+        print_blob(f"     [{count}]", _task_str(cmd))
         count += 1
 
 
@@ -111,7 +111,7 @@ def show_task_info(args: Args, config: Config) -> None:
 
 
 def list_tasks(config: Config, show_all: bool, names_only: bool):
-    info("Listing tasks show_all={} names_only={}".format(show_all, names_only))
+    info("Listing tasks show_all={} names_only={}", show_all, names_only)
     print_fmt = "{:<24}{:<6}{}"
     err_print_fmt = "{:<30}{}"
     default_task_name = config.default_task_name()
@@ -123,7 +123,7 @@ def list_tasks(config: Config, show_all: bool, names_only: bool):
         try:
             t = Task(task_name, config=config)
         except TaskException as e:
-            print(err_print_fmt.format(task_name, "<error: {}>".format(str(e))))
+            print(err_print_fmt.format(task_name, f"<error: {e}>"))
             continue
         if not show_all and (t.hidden or t.abstract):
             continue
