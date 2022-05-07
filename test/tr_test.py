@@ -75,7 +75,7 @@ def run_test_tasks(tasks: dict, diff_output: bool, stop_on_failure: bool,
             continue
         print_t_name = "{:<40}".format(
             Colors.BOLD + t_name + Colors.RESET if show_colors else t_name)
-        print(print_t_name, end='')
+        print(print_t_name, end='', flush=True)
 
         if t_meta.get("disabled", False):
             print("Skipped [disabled]")
