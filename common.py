@@ -41,7 +41,7 @@ def dict_value(d: dict, path: str, require=False, default=None) -> typing.Any:
 
     except (KeyError, IndexError):
         if require:
-            raise TaskException("No '{}' setting was found".format(path))
+            raise TaskException(f"No '{path}' setting was found")
     return default
 
 
@@ -59,12 +59,12 @@ class StringVarExpander(object):
     def _expand_re(self, match) -> str:
         var = match.group()[2:-2]
         if var in self.curr_expansion_stack:
-            raise TaskException("Recursive expanded var '{}'".format(var))
+            raise TaskException(f"Recursive expanded var '{var}'")
         if var.startswith("$"):
             return os.getenv(var[1:], "")
         value = self.map.get(var, "")
         if type(value) is list or type(value) is dict:
-            raise TaskException("Var expanded path '{}' doesn't refer to valid type".format(var))
+            raise TaskException(f"Var expanded path '{var}' doesn't refer to valid type")
         self.curr_expansion_stack.append(var)
         s = re.sub(StringVarExpander.var_re, self._expand_re, str(value))
         self.curr_expansion_stack.pop()

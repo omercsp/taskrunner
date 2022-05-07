@@ -10,7 +10,7 @@ class Task(object):
     def _check_empty_setting(self, s, title):
         if len(s) > 0:
             return
-        raise TaskException("Expanded {} for task '{}' is empty".format(title, self.name))
+        raise TaskException(f"Expanded {title} for task '{self.name}' is empty")
 
     def __init__(self, name: str, config: Config) -> None:
         super().__init__()
@@ -98,7 +98,7 @@ class Task(object):
         if self.expanded:
             warn("Task '{}' is already expanded", self.name)
             return
-        info("Expanding task '{}'".format(self.name))
+        info(f"Expanding task '{self.name}'")
         self.expanded = True
         if self.env is not None:
             self.env = {expander(k): expander(v) for k, v in self.env.items()}
@@ -122,7 +122,7 @@ class Task(object):
         try:
             return shlex.split(cmd)
         except ValueError as e:
-            raise TaskException("Illegal command '{}' for task '{}' - {}".format(cmd, self.name, e))
+            raise TaskException(f"Illegal command '{cmd}' for task '{self.name}' - {e}")
 
     def _container_cmd_arr(self, cmd) -> list:
         info("Preparing container command")
@@ -141,7 +141,7 @@ class Task(object):
                 cmd_array += ["-v", v]
 
         for k, v in self.c_env.items():
-            cmd_array += ["-e", "{}={}".format(k, v)]
+            cmd_array += ["-e", f"{k}={v}"]
             info("Setting container environment variable will '{}={}'", k, v)
 
         cmd_array += self.c_flags.split()
@@ -164,7 +164,7 @@ class Task(object):
             return p.wait()
 
         except (OSError, FileNotFoundError) as e:
-            raise TaskException("Error occurred running command '{}' - {}".format(cmd_str, e))
+            raise TaskException(f"Error occurred running command '{cmd_str}' - {e}")
         except KeyboardInterrupt:
             if p:
                 p.send_signal(signal.SIGINT)
@@ -185,7 +185,7 @@ class Task(object):
             if self.c_image:
                 info("Running container's default command")
                 return self._run_cmd(self._container_cmd_arr(None), "<CONTAINER_DEFAULT>")
-            print("No commands defined for task '{}'. Nothing to do.".format(self.name))
+            print(f"No commands defined for task '{self.name}'. Nothing to do.")
             return 0
 
         rc = 0
