@@ -102,8 +102,6 @@ class Task(object):
         self.expanded = True
         if self.env is not None:
             self.env = {expander(k): expander(v) for k, v in self.env.items()}
-            for k, v in self.env.items():
-                info("Environment variable will be set as '{}={}'", k, v)
         if self.cwd:
             self.cwd = expander(self.cwd)
         self.commands = [expander(c) for c in self.commands]
@@ -176,10 +174,15 @@ class Task(object):
             raise TaskException("Task must be expanded before run")  # Should never happen
         if self.abstract:
             raise TaskException("Can't run abstract tasks")
-        if self.cwd:
-            info("Working directory will be set to '{}'", self.cwd)
-        else:
-            info("No working directory will be set")
+        if logging_enabled_for(logging.INFO):
+            if self.cwd:
+                info("Working directory will be set to '{}'", self.cwd)
+            else:
+                info("No working directory will be set")
+            if self.env:
+                info("Command Environment variables:")
+                for k, v in self.env.items():
+                    raw_msg(f"{k}={v}")
 
         if len(self.commands) == 0:
             if self.c_image:
