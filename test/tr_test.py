@@ -66,7 +66,10 @@ def run_test_tasks(tasks: dict, diff_output: bool, stop_on_failure: bool,
     base_cmd = "{}/../task --log_file={} run".format(SCRIPT_DIR, LOG_FILE)
     rc = 0
     for t_name in tasks_list:
-        task = tasks[t_name]
+        try:
+            task = tasks[t_name]
+        except KeyError:
+            raise TaskTestException(f"Unknown task '{t_name}'")
         t_meta = task.get("meta", {})
         if task.get("abstract", False):
             continue
