@@ -1,6 +1,7 @@
-from config import *
+#!/usr/bin/python3
+from tr.config import *
+import tr.actions as actions
 import argparse
-import actions
 import argcomplete
 import sys
 
@@ -116,7 +117,7 @@ def _parse_arguments():
     return parser.parse_args(tr_argv), cmds_argv
 
 
-if __name__ == "__main__":
+def task_runner_main():
     args, cmds_args = _parse_arguments()
     init_logging(args.log_file, args.verbose)
 

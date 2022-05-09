@@ -1,4 +1,4 @@
-from Task import *
+from tr.Task import *
 import textwrap
 
 

@@ -1,5 +1,5 @@
-from schemas import *
-from common import *
+from tr.schemas import *
+from tr.common import *
 import os
 import pathlib
 import json

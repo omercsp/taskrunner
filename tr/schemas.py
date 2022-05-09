@@ -1,4 +1,4 @@
-from common import *
+from tr.common import *
 import jsonschema
 
 
