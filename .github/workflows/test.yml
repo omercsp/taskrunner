@@ -27,4 +27,4 @@ jobs:
           podman pull docker.io/library/ubuntu:20.04
       - name: Run test
         run: |
-          test/tr_test
+          tests/tr_test

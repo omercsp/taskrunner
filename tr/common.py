@@ -1,4 +1,4 @@
-from logTools import *
+from tr.logTools import *
 import sys
 import re
 import typing

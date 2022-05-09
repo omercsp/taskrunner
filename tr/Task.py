@@ -1,6 +1,6 @@
-from config import *
+from tr.config import *
+from tr.schemas import TaskKeys, validate_task_schema
 from argparse import Namespace as Args
-from schemas import TaskKeys, validate_task_schema
 import shlex
 import subprocess
 import signal

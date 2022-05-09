@@ -1,6 +1,6 @@
-from config import *
+from tr.config import *
+import tr.actions as actions
 import argparse
-import actions
 import argcomplete
 import sys
 
@@ -116,7 +116,7 @@ def _parse_arguments():
     return parser.parse_args(tr_argv), cmds_argv
 
 
-if __name__ == "__main__":
+def task_runner_main() -> int:
     args, cmds_args = _parse_arguments()
     init_logging(args.log_file, args.verbose)
 
@@ -126,14 +126,14 @@ if __name__ == "__main__":
 
         if args.subparsers_name == __DUMP_CONFIG_SCHEMA_CMD:
             dump_config_file_schema()
-            exit(0)
+            return 0
         if args.subparsers_name == __DUMP_TASK_SCHEMA_CMD:
             dump_task_schema()
-            exit(0)
+            return 0
 
         config = Config(args.conf, args.variable, cmds_args)
         if args.subparsers_name == __RUN_CMD:
-            exit(actions.run_task(config, args))
+            return actions.run_task(config, args)
         elif args.subparsers_name == __LIST_CMD:
             actions.list_tasks(config, args.all, args.names_only)
         elif args.subparsers_name == __INFO_CMD:
@@ -147,4 +147,5 @@ if __name__ == "__main__":
 
     except TaskException as e:
         error_and_print(str(e))
-        exit(1)
+        return 1
+    return 0
