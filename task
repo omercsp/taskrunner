@@ -13,4 +13,4 @@ if [[ -z ${VENV_ACTIVATE} ]]; then
 	done
 fi
 export PYTHONPATH=${SCRIPT_DIR}
-${SCRIPT_DIR}/bin/taskrun "$@"
+python3 ${SCRIPT_DIR}/bin/taskrun "$@"

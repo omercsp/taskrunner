@@ -10,6 +10,7 @@ class Task(object):
     def _check_empty_setting(self, s, title):
         if len(s) > 0:
             return
+        print("koko")
         raise TaskException("Expanded {} for task '{}' is empty".format(title, self.name))
 
     def __init__(self, name: str, config: Config) -> None:
