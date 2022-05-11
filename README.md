@@ -24,7 +24,9 @@ With TR, all these problems are solved. All that is required is a project level 
 # Installation and requirements
 TR is python based tool, verified for python 3.6 and above. It should work for any environment with compatible python support, however it is developed on and mostly maintained for Linux machines.
 
-To install:
+To install run `pip3 install pytaskrunner`.
+
+For installation from source:
 1. Clone the repository
 2. Install the requirements using pip `pip3 install -r requirements.txt`
 3. Make sure the executable file `task` is accessible from to the execution search path (i.e. $PATH and so)

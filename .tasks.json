@@ -8,6 +8,21 @@
 			"short_desc": "Run test",
 			"commands": ["tests/tr_test"],
 			"cwd": "{{taskRoot}}"
+		},
+		"build": {
+			"short_desc": "Build package",
+			"commands": ["rm -rf dist", "python3 -m build"],
+			"cwd": "{{taskRoot}}"
+		},
+		"upload-testpypi": {
+			"short_desc": "Build package",
+			"commands": ["python3 -m twine upload --repository testpypi dist/*"],
+			"cwd": "{{taskRoot}}"
+		},
+		"upload-pypi": {
+			"short_desc": "Build package",
+			"commands": ["python3 -m twine upload dist/*"],
+			"cwd": "{{taskRoot}}"
 		}
 	},
 	"default_task": "test",
