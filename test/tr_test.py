@@ -112,7 +112,7 @@ def run_test_tasks(tasks: dict, diff_output: bool, stop_on_failure: bool,
             allowed_rc = t_meta.get("allowed_rc", [0])
             if cmd_rc not in allowed_rc:
                 rc = 1
-                print(f"{FAILED_STR}, unallowed return code '{rc}' (allowed={allowed_rc})")
+                print(f"{FAILED_STR}, unallowed return code '{cmd_rc}' (allowed={allowed_rc})")
                 subprocess.Popen(["tail", "/tmp/task_runner.log"]).wait()
                 if stop_on_failure:
                     return 1
