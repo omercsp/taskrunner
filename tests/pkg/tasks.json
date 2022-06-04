@@ -1,0 +1,51 @@
+{
+	"version": {
+		"major": 4,
+		"minor": 1
+	},
+	"variables": {
+		"tr_test_dir": "/tr_test"
+	},
+	"tasks": {
+		"base_pkg_container_test": {
+			"short_desc": "Basic package test",
+			"commands": [
+				"pkg/run_test.sh"
+			],
+			"c_cwd": "{{tr_test_dir}}",
+			"c_shell": false,
+			"c_volumes": [
+				"{{cwd}}/..:{{tr_test_dir}}"
+			],
+			"abstract": true
+		},
+		"base_pkg_container_test_testpypi": {
+			"base": "base_pkg_container_test",
+			"c_env": {
+				"TASK_RUNNER_PKG_TEST_ENV": "1",
+				"TEST_PYPI": "1"
+			},
+			"abstract": true
+		},
+		"base_pkg_container_test_pypi": {
+			"base": "base_pkg_container_test",
+			"c_env": {
+				"TASK_RUNNER_PKG_TEST_ENV": "1",
+				"TEST_PYPI": "0"
+			},
+			"abstract": true
+		},
+		"check_pkg_3.9_testpypi": {
+			"base": "base_pkg_container_test_testpypi",
+			"short_desc": "Test package o/python 3.9 container from testpypi",
+			"c_image": "docker.io/library/python:3.9"
+		},
+		"check_pkg_3.9_pypi": {
+			"base": "base_pkg_container_test_pypi",
+			"short_desc": "Test package o/python 3.9 container from pypi",
+			"c_image": "docker.io/library/python:3.9"
+		}
+	},
+	"use_default_include": false,
+	"default_container_tool": "/usr/bin/podman"
+}
