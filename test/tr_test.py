@@ -32,6 +32,8 @@ def parse_arguments():
                         help='stop on test failure')
     parser.add_argument('--no-containers', action='store_true', default=False,
                         help='don\'t container based tests')
+    parser.add_argument('--pkg', action='store_true', default=False,
+                        help='assume taskrunner was installed by a package (pip)')
     parser.add_argument('task', nargs='*', metavar='TASKS', help='set task')
     argcomplete.autocomplete(parser, always_complete_options=False)
     return parser.parse_args()
@@ -48,7 +50,7 @@ def read_tasks() -> dict:
 
 def run_test_tasks(tasks: dict, diff_output: bool, stop_on_failure: bool,
                    tasks_list: typing.List[str], show_colors: bool,
-                   skip_container_tasks: bool) -> int:
+                   skip_container_tasks: bool, pkg: bool) -> int:
     class Colors(object):
         BOLD = '\033[1m'
         GREEN = '\033[32m'
@@ -61,9 +63,14 @@ def run_test_tasks(tasks: dict, diff_output: bool, stop_on_failure: bool,
         OK_STR = "OK"
         FAILED_STR = "Failed"
 
+    if pkg:
+        task_bin = "task"
+    else:
+        task_bin = f"{SCRIPT_DIR}/../task"
+
     if not tasks_list:
         tasks_list = sorted([*tasks])
-    base_cmd = f"{SCRIPT_DIR}/../task --log_file={LOG_FILE} run"
+    base_cmd = f"{task_bin} -V task_cmd={task_bin} --log_file={LOG_FILE} run"
     rc = 0
     for t_name in tasks_list:
         try:
@@ -159,7 +166,7 @@ if __name__ == "__main__":
             os.mkdir(OUTPUT_DIR)
         tasks = read_tasks()
         rc = run_test_tasks(tasks, not args.no_diff, args.stop_on_failure,
-                            args.task, not args.no_colors, args.no_containers)
+                            args.task, not args.no_colors, args.no_containers, args.pkg)
     except (OSError, ValueError, TaskTestException) as e:
         print(e)
         rc = 1
