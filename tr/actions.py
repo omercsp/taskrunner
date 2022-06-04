@@ -81,7 +81,12 @@ def _show_task(task: Task, full_details: bool) -> None:
             count = 0
             print("  Volumes:")
             for vol in task.c_volumes:
-                print_blob(f"     [{count}]", _task_str(vol))
+                print_blob(f"       [{count}]", _task_str(vol))
+                count += 1
+        if task.c_env:
+            print("  Environment:")
+            for k, v in task.c_env.items():
+                print_blob(f"       [{count}]", f"{k}={v}")
                 count += 1
 
     if len(task.commands) == 0:
