@@ -3,6 +3,9 @@
 		"major": 4,
 		"minor": 1
 	},
+	"variables": {
+		"tr_test_dir": "/tr_test"
+	},
 	"tasks": {
 		"test": {
 			"short_desc": "Run test",
@@ -23,8 +26,36 @@
 			"short_desc": "Build package",
 			"commands": ["python3 -m twine upload dist/*"],
 			"cwd": "{{taskRoot}}"
+		},
+		"test_pkg_base": {
+			"short_desc": "Basic package test",
+			"commands": [
+				"./test_pkg.sh"
+			],
+			"c_cwd": "{{tr_test_dir}}",
+			"c_shell": false,
+			"c_volumes": [
+				"{{cwd}}/tests:{{tr_test_dir}}"
+			],
+			"c_image": "docker.io/library/python:3.9",
+			"abstract": true
+		},
+		"test_pkg_testpypi": {
+			"base": "test_pkg_base",
+			"c_env": {
+				"TASK_RUNNER_PKG_TEST_ENV": "1",
+				"TEST_PYPI": "1"
+			}
+		},
+		"test_pkg_pypi": {
+			"base": "test_pkg_base",
+			"c_env": {
+				"TASK_RUNNER_PKG_TEST_ENV": "1",
+				"TEST_PYPI": "0"
+			}
 		}
 	},
 	"default_task": "test",
+	"default_container_tool": "/usr/bin/podman",
 	"use_default_include": false
 }
