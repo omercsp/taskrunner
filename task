@@ -1,5 +1,12 @@
 #!/bin/bash
-SCRIPT_FILE="$(readlink -f ${BASH_SOURCE[0]})"
+# Stupid Apple
+if [[ ${OSTYPE} == 'darwin'* ]]; then
+	READLINK="greadlink"
+else
+	READLINK="readlink"
+fi
+
+SCRIPT_FILE="$(${READLINK} -f ${BASH_SOURCE[0]})"
 SCRIPT_DIR="$(dirname $SCRIPT_FILE)"
 
 # Source virtual environment file if such exist

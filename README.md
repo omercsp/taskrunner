@@ -21,7 +21,7 @@ The situation might get more complicated if other commands are needed as well - 
 With TR, all these problems are solved. All that is required is a project level configuration file defining a task named `my-task` to run the horrible `my-command...` and the command becomes available all over the project hierarchy, to all users with access to the project. `task list` can be used to see what tasks are available and `task info` to understand what they are doing. As long as TR is installed, moving the project to another machine will provide all the tasks with it.
 
 # Installation and requirements
-TR is python based tool, verified for python 3.6 and above. It should work for any environment with compatible python support, however it is developed on and mostly maintained for Linux machines.
+TR is python based tool, verified for python 3.6 and above.
 
 To install run `pip3 install pytaskrunner`.
 
@@ -29,6 +29,8 @@ For installation from source:
 1. Clone the repository
 2. Install the requirements using pip `pip3 install -r requirements.txt`
 3. Make sure the executable file `task` is accessible from to the execution search path (i.e. $PATH and so)
+
+TR should work for any environment with compatible python, however it is developed on and maintained for Linux machines. CI tests are ran for MacOS as well without container support. It is known to work on Cygwin systems (again, without containers support).
 
 # Basic configuration and usage
 TR uses json configuration files (By default, named `.tasks.json`) to describe tasks. These tasks are available when the current work directory is anywhere in the directory hierarchy under the directory the configuration file was placed in - TR recursively looks for `.tasks.json` from the current working directory up to root.
