@@ -14,8 +14,7 @@
 		"task_cmd": "../task",
 		"task_info_cmd": "{{task_cmd}} info",
 		"task_dump_cmd": "{{task_cmd}} dump",
-		"optDir": "/opt",
-		"tmp_dir": "/tmp"
+		"optDir": "/opt"
 	},
 	"tasks": {
 		"001_simple": {
@@ -159,7 +158,7 @@
 			},
 			"shell": false,
 			"meta" : {
-				"args": "--env MY_ENV0=new_value --shell=yes --cwd {{tmp_dir}} -c \"pwd; echo $MY_ENV0\""
+				"args": "--env MY_ENV0=new_value --shell=yes --cwd {{optDir}} -c \"pwd; echo $MY_ENV0\""
 			}
 		},
 		"040_config_file_include_defs": {
