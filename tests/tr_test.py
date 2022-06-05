@@ -39,55 +39,56 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def read_tasks() -> dict:
-    file_path = f"{SCRIPT_DIR}/{TASKS_JSON_FILE}"
-    try:
-        data: dict = json.load(open(file_path, 'r'))
-        return data["tasks"]
-    except (IOError, TypeError, ValueError, KeyError) as e:
-        raise TaskTestException(f"Error parsing {file_path} - {e}")
+class TestRunInfo(object):
+    def __init__(self,  args: argparse.Namespace) -> None:
+        file_path = f"{SCRIPT_DIR}/{TASKS_JSON_FILE}"
+        try:
+            self.tasks = json.load(open(file_path, 'r'))["tasks"]
+        except (IOError, TypeError, ValueError, KeyError) as e:
+            raise TaskTestException(f"Error parsing {file_path} - {e}")
+        if args.task:
+            self.task_list = args.task
+        else:
+            self.task_list = sorted(self.tasks.keys())
+        self.diff = not args.no_diff
+        self.stop_on_failure = args.stop_on_failure,
+        self.taskname = args.task
+        self.show_colors = not args.no_colors
+        self.skip_container_tests = args.no_containers
+        self.task_bin = "task" if args.pkg else f"{SCRIPT_DIR}/../task"
 
 
-def run_test_tasks(tasks: dict, diff_output: bool, stop_on_failure: bool,
-                   tasks_list: typing.List[str], show_colors: bool,
-                   skip_container_tasks: bool, pkg: bool) -> int:
+def run_test_tasks(info: TestRunInfo) -> int:
     class Colors(object):
         BOLD = '\033[1m'
         GREEN = '\033[32m'
         ERROR = '\033[31m'
         RESET = '\033[m'
-    if show_colors:
+    if info.show_colors:
         OK_STR = Colors.GREEN + "OK" + Colors.RESET
         FAILED_STR = Colors.ERROR + "Failed" + Colors.RESET
     else:
         OK_STR = "OK"
         FAILED_STR = "Failed"
 
-    if pkg:
-        task_bin = "task"
-    else:
-        task_bin = f"{SCRIPT_DIR}/../task"
-
-    if not tasks_list:
-        tasks_list = sorted([*tasks])
-    base_cmd = f"{task_bin} -V task_cmd={task_bin} --log_file={LOG_FILE} run"
+    base_cmd = f"{info.task_bin} -V task_cmd={info.task_bin} --log_file={LOG_FILE} run"
     rc = 0
-    for t_name in tasks_list:
+    for t_name in info.task_list:
         try:
-            task = tasks[t_name]
+            task = info.tasks[t_name]
         except KeyError:
             raise TaskTestException(f"Unknown task '{t_name}'")
         t_meta = task.get("meta", {})
         if task.get("abstract", False):
             continue
         print_t_name = "{:<40}".format(
-            Colors.BOLD + t_name + Colors.RESET if show_colors else t_name)
+            Colors.BOLD + t_name + Colors.RESET if info.show_colors else t_name)
         print(print_t_name, end='', flush=True)
 
         if t_meta.get("disabled", False):
             print("Skipped [disabled]")
             continue
-        if skip_container_tasks and "c_image" in task:
+        if info.skip_container_tests and "c_image" in task:
             print("Skipped [container]")
             continue
         output_gen_cmd = t_meta.get("output_gen_cmd", None)
@@ -109,7 +110,7 @@ def run_test_tasks(tasks: dict, diff_output: bool, stop_on_failure: bool,
         run_task_cmd = "{} {} {}".format(base_cmd, t_name, t_meta.get("args", ""))
         run_task_cmd = shlex.split(run_task_cmd)
         try:
-            if diff_output:
+            if info.diff:
                 with open(f"{OUTPUT_DIR}/{t_name}.out", "w") as f:
                     p = subprocess.Popen(run_task_cmd, stderr=f, stdout=f)
             else:
@@ -121,10 +122,10 @@ def run_test_tasks(tasks: dict, diff_output: bool, stop_on_failure: bool,
                 rc = 1
                 print(f"{FAILED_STR}, unallowed return code '{cmd_rc}' (allowed={allowed_rc})")
                 subprocess.Popen(["tail", "/tmp/task_runner.log"]).wait()
-                if stop_on_failure:
+                if info.stop_on_failure:
                     return 1
                 continue
-            if not diff_output:
+            if not info.diff:
                 print(f"{OK_STR} (output not validated)")
                 continue
             out_file = f"{OUTPUT_DIR}/{t_name}.out"
@@ -143,7 +144,7 @@ def run_test_tasks(tasks: dict, diff_output: bool, stop_on_failure: bool,
                 print("No diff output to show")  # Should not happen
             else:
                 print(pr.stdout)
-            if stop_on_failure:
+            if info.stop_on_failure:
                 return 1
             rc = 1
         except OSError as e:
@@ -164,9 +165,8 @@ if __name__ == "__main__":
 
         if not os.path.isdir(OUTPUT_DIR):
             os.mkdir(OUTPUT_DIR)
-        tasks = read_tasks()
-        rc = run_test_tasks(tasks, not args.no_diff, args.stop_on_failure,
-                            args.task, not args.no_colors, args.no_containers, args.pkg)
+        info = TestRunInfo(args)
+        rc = run_test_tasks(info)
     except (OSError, ValueError, TaskTestException) as e:
         print(e)
         rc = 1
