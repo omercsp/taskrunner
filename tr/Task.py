@@ -81,7 +81,7 @@ class Task(object):
         if args.c_rm:
             self.c_rm = (args.c_rm == TASK_YES_TOKEN)
         if args.c_tool:
-            self.c_tool = args.container_tool
+            self.c_tool = args.c_tool
         if args.c_shell:
             self.c_shell = (args.c_shell == TASK_YES_TOKEN)
         if args.c_shell_path:
