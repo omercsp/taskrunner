@@ -28,10 +28,10 @@ class Config(object):
         if minor != VerValues.MINOR:
             print(f"Incompatible minor configuration version for '{VerValues.MINOR}'")
 
-    def _read_configuration(self, file_path: str, read_files: set = set()):
+    def _read_configuration(self, file_path: str, read_files: set = set()) -> dict:
         conf = {}
         tasks = {}
-        defs = {}
+        variables = {}
         info("Reading configuration file {}", file_path)
         orig_conf = Config._read_tasks_file(file_path)
         includes = orig_conf.get(GlobalKeys.Include, [])
@@ -47,8 +47,8 @@ class Config(object):
             if f in read_files:
                 raise TaskException(f"Include loop detected - '{f}'")
             included_conf = self._read_configuration(f, read_files)
-            tasks.update(included_conf.get(GlobalKeys.Tasks))
-            defs.update(included_conf.get(GlobalKeys.Variables))
+            tasks.update(included_conf[GlobalKeys.Tasks])
+            variables.update(included_conf[GlobalKeys.Variables])
             conf.update(included_conf)
         read_files.remove(file_path)
         if GlobalKeys.Include in conf:
@@ -61,8 +61,8 @@ class Config(object):
                 info("Removing suppressed task {}", supressed_task)
                 tasks.pop(supressed_task)
         conf[GlobalKeys.Tasks] = tasks
-        defs.update(orig_conf.get(GlobalKeys.Variables, {}))
-        conf[GlobalKeys.Variables] = defs
+        variables.update(orig_conf.get(GlobalKeys.Variables, {}))
+        conf[GlobalKeys.Variables] = variables
         return conf
 
     @staticmethod
