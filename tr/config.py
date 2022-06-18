@@ -35,7 +35,12 @@ class Config(object):
         info("Reading configuration file {}", file_path)
         orig_conf = Config._read_tasks_file(file_path)
         includes = orig_conf.get(GlobalKeys.Include, [])
-        if file_path != _DFLT_CONF_FILE_NAME and \
+
+        # Add the default configuration file to includes list but only for the original
+        # configuration file, and the behavior isn't turned off (again, relevant ONLY to
+        # original file)
+        if len(read_files) == 0 and \
+                file_path != _DFLT_CONF_FILE_NAME and \
                 os.path.isfile(_DFLT_CONF_FILE_NAME) and \
                 orig_conf.get(GlobalKeys.UseDfltInclude, True):
             includes.insert(0, _DFLT_CONF_FILE_NAME)
