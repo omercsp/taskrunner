@@ -1,8 +1,8 @@
 Task name:              info_task
 Short description:      Dummy task for info/dump validations
 Description:            'task' running 'task'? blesphamy!
-Hidden                  Yes
-Abstract                Yes
+Hidden:                 Yes
+Abstract:               Yes
 Use shell:              No
 Environment:
      [0]                {{var0}}={{var1}}
@@ -23,8 +23,8 @@ Commands:
 Task name:              info_task
 Short description:      Dummy task for info/dump validations
 Description:            'task' running 'task'? blesphamy!
-Hidden                  Yes
-Abstract                Yes
+Hidden:                 Yes
+Abstract:               Yes
 Use shell:              No
 Environment:
      [0]                var0=var1

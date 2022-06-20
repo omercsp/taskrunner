@@ -159,7 +159,8 @@ user@host $ task info build
 Task name:              build
 Short description:      Build the project
 Description:            Build the project using cmake's build command
-Hidden                  No
+Hidden:                 No
+Abstract:               No
 Use shell:              No
 Working directory:      {{taskRoot}}/build
 Command:                cmake --build ..

@@ -23,6 +23,7 @@ def _show_task(task: Task, full_details: bool) -> None:
         first = True
         for line in text.split('\n'):
             for in_line in textwrap.wrap(line, width=80):
+
                 if first:
                     print_val(title, in_line)
                     first = False
@@ -40,8 +41,8 @@ def _show_task(task: Task, full_details: bool) -> None:
             print_val("Short description:", task.short_desc)
         if task.long_desc:
             print_blob("Description:", task.long_desc)
-        print_bool("Hidden", task.hidden)
-        print_bool("Abstract", task.abstract)
+        print_bool("Hidden:", task.hidden)
+        print_bool("Abstract:", task.abstract)
     print_bool("Use shell: ", task.shell)
     if task.shell:
         shell_title = "Shell path:"
