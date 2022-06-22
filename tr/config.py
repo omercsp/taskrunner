@@ -163,17 +163,16 @@ class Config(object):
         hidden = base_task.get(TaskKeys.Hidden, False)
         abstract = base_task.get(TaskKeys.Abstract, False)
 
-        included_task = base_task.get(TaskKeys.Base, None)
-        if included_task is None:
+        ret_task = base_task.get(TaskKeys.Base, None)
+        if ret_task is None:
             return base_task
 
         # We about to modify the included object, so deep copy it
-        included_task = self._task_desc(
-            included_task, included_list=included_list).copy()
-        included_task.update(base_task)
-        included_task[TaskKeys.Hidden] = hidden
-        included_task[TaskKeys.Abstract] = abstract
-        return included_task
+        ret_task = self._task_desc(ret_task, included_list=included_list).copy()
+        ret_task.update(base_task)
+        ret_task[TaskKeys.Hidden] = hidden
+        ret_task[TaskKeys.Abstract] = abstract
+        return ret_task
 
     def get_task_desc(self, name: str, includes: bool):
         verbose("Task '{}' requested, with_inclusions={}", name, includes)
