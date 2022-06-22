@@ -155,20 +155,21 @@ class Config(object):
         except KeyError:
             raise TaskException(f"No such task '{name}'")
 
-    def _task_desc(self, name, included_list: set):
+    def _task_desc(self, name: str, included_list: set) -> dict:
         if name in included_list:
             raise TaskException(f"Include loop detected for '{name}'")
 
         base_task = self._raw_task_obj(name)
+
+        ret_task_name = base_task.get(TaskKeys.Base, None)
+        if ret_task_name is None:
+            return base_task
+
         hidden = base_task.get(TaskKeys.Hidden, False)
         abstract = base_task.get(TaskKeys.Abstract, False)
 
-        ret_task = base_task.get(TaskKeys.Base, None)
-        if ret_task is None:
-            return base_task
-
         # We about to modify the included object, so deep copy it
-        ret_task = self._task_desc(ret_task, included_list=included_list).copy()
+        ret_task = self._task_desc(ret_task_name, included_list=included_list).copy()
         ret_task.update(base_task)
         ret_task[TaskKeys.Hidden] = hidden
         ret_task[TaskKeys.Abstract] = abstract
