@@ -3,7 +3,6 @@ import argcomplete
 import os
 import json
 import subprocess
-import typing
 import shlex
 
 
@@ -36,7 +35,7 @@ def parse_arguments():
                         help='assume taskrunner was installed by a package (pip)')
     ctool_grp = parser.add_mutually_exclusive_group()
     ctool_grp.add_argument('--ctool', choices=['docker', 'podman'], default='podman',
-                        help='choose container tool')
+                           help='choose container tool')
     ctool_grp.add_argument('--ctool-path', default=None, help='set container tool path')
     parser.add_argument('task', nargs='*', metavar='TASKS', help='set task')
     argcomplete.autocomplete(parser, always_complete_options=False)
