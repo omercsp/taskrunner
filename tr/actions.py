@@ -1,5 +1,6 @@
 from tr.Task import *
 import textwrap
+from argparse import Namespace as Args
 
 
 def _active_task_name(config: Config, args) -> str:
@@ -153,11 +154,57 @@ def list_tasks(config: Config, show_all: bool, names_only: bool):
         print(print_fmt.format(task_name, flags, desc[-55:]))
 
 
+def args_update(task, args: Args) -> None:
+    if args.stop_on_error:
+        task.stop_on_error = args.stop_on_error
+    if args.command:
+        task.commands = args.command
+    if args.cwd:
+        task.cwd = args.cwd
+    if args.shell:
+        task.shell = (args.shell == TASK_YES_TOKEN)
+    if args.shell_path:
+        task.shell_path = args.shell_path
+    if args.env:
+        task.env = {}
+        for e in args.env:
+            e_name, e_value = parse_assignment_str(e)
+            task.env[e_name] = e_value
+
+    if args.c_image:
+        task.c_image = args.c_image
+    if args.c_volume:
+        task.c_volumes = args.c_volume
+    if args.c_interactive:
+        task.c_interactive = (args.c_interactive == TASK_YES_TOKEN)
+    if args.c_tty:
+        task.c_tty = (args.c_tty == TASK_YES_TOKEN)
+    if args.c_flags:
+        task.c_flags = args.c_flags
+    if args.c_exec:
+        task.c_exec = args.c_exec
+    if args.c_rm:
+        task.c_rm = (args.c_rm == TASK_YES_TOKEN)
+    if args.c_tool:
+        task.c_tool = args.c_tool
+    if args.c_shell:
+        task.c_shell = (args.c_shell == TASK_YES_TOKEN)
+    if args.c_shell_path:
+        task.c_shell_path = args.c_shell_path
+    if args.c_cwd:
+        task.c_cwd = args.c_cwd
+    if args.c_env:
+        task.c_env = {}
+        for e in args.c_env:
+            e_name, e_value = parse_assignment_str(e)
+            task.c_env[e_name] = e_value
+
+
 def run_task(config: Config, args: Args) -> int:
     task_name = _active_task_name(config, args)
     info("Running task '{}'", task_name)
     task = Task(task_name, config)
-    task.args_update(args)
+    args_update(task, args)
     task.expand_args(config.expander)
     if args.summary:
         _show_task(task, False)

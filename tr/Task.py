@@ -1,6 +1,5 @@
 from tr.config import *
 from tr.schemas import TaskKeys, validate_task_schema
-from argparse import Namespace as Args
 import shlex
 import subprocess
 import signal
@@ -49,50 +48,6 @@ class Task(object):
 
         self.expanded = False
 
-    def args_update(self, args: Args) -> None:
-        if args.stop_on_error:
-            self.stop_on_error = args.stop_on_error
-        if args.command:
-            self.commands = args.command
-        if args.cwd:
-            self.cwd = args.cwd
-        if args.shell:
-            self.shell = (args.shell == TASK_YES_TOKEN)
-        if args.shell_path:
-            self.shell_path = args.shell_path
-        if args.env:
-            self.env = {}
-            for e in args.env:
-                e_name, e_value = parse_assignment_str(e)
-                self.env[e_name] = e_value
-
-        if args.c_image:
-            self.c_image = args.c_image
-        if args.c_volume:
-            self.c_volumes = args.c_volume
-        if args.c_interactive:
-            self.c_interactive = (args.c_interactive == TASK_YES_TOKEN)
-        if args.c_tty:
-            self.c_tty = (args.c_tty == TASK_YES_TOKEN)
-        if args.c_flags:
-            self.c_flags = args.c_flags
-        if args.c_exec:
-            self.c_exec = args.c_exec
-        if args.c_rm:
-            self.c_rm = (args.c_rm == TASK_YES_TOKEN)
-        if args.c_tool:
-            self.c_tool = args.c_tool
-        if args.c_shell:
-            self.c_shell = (args.c_shell == TASK_YES_TOKEN)
-        if args.c_shell_path:
-            self.c_shell_path = args.c_shell_path
-        if args.c_cwd:
-            self.c_cwd = args.c_cwd
-        if args.c_env:
-            self.c_env = {}
-            for e in args.c_env:
-                e_name, e_value = parse_assignment_str(e)
-                self.c_env[e_name] = e_value
 
     def expand_args(self, expander: StringVarExpander) -> None:
         if self.expanded:
