@@ -46,14 +46,23 @@ class Task(object):
         self.c_env = task_descriptor.get(TaskKeys.CEnv, {})
         self.c_sudo = task_descriptor.get(TaskKeys.CSudo, False)
 
+        self.vars_map = task_descriptor.get(TaskKeys.Variables, {})
+        self.const_vars_map = config.const_vars
+        self.global_vars_map = config.global_vars
         self.expanded = False
 
-    def expand_args(self, expander: StringVarExpander) -> None:
+    def expand(self) -> None:
         if self.expanded:
             warn("Task '{}' is already expanded", self.name)
             return
-        info(f"Expanding task '{self.name}'")
         self.expanded = True
+        vars_map = self.global_vars_map.copy()
+        if self.vars_map:  # Note the order of map updates!
+            vars_map.update(self.vars_map)
+        vars_map.update(self.const_vars_map)
+
+        expander = StringVarExpander(vars_map)
+        info(f"Expanding task '{self.name}'")
         if self.env is not None:
             self.env = {expander(k): expander(v) for k, v in self.env.items()}
         if self.cwd:
@@ -124,8 +133,7 @@ class Task(object):
             raise TaskException("User interrupt")
 
     def run(self) -> int:
-        if not self.expanded:
-            raise TaskException("Task must be expanded before run")  # Should never happen
+        self.expand()
         if self.abstract:
             raise TaskException("Can't run abstract tasks")
         if logging_enabled_for(logging.INFO):

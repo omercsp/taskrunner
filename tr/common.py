@@ -48,9 +48,9 @@ def dict_value(d: dict, path: str, require=False, default=None) -> typing.Any:
 class StringVarExpander(object):
     var_re = re.compile(r'{{\S*?}}')
 
-    def __init__(self):
+    def __init__(self, vars_map: dict):
         self.curr_expansion_stack = []
-        self.map = {}
+        self.vars_map = vars_map
 
     def __call__(self, s: str) -> str:
         self.curr_expansion_stack = []
@@ -62,7 +62,7 @@ class StringVarExpander(object):
             raise TaskException(f"Recursive expanded var '{var}'")
         if var.startswith("$"):
             return os.getenv(var[1:], "")
-        value = self.map.get(var, "")
+        value = self.vars_map.get(var, "")
         if type(value) is list or type(value) is dict:
             raise TaskException(f"Var expanded path '{var}' doesn't refer to valid type")
         self.curr_expansion_stack.append(var)

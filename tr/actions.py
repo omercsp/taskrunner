@@ -113,7 +113,7 @@ def show_task_info(args: Args, config: Config) -> None:
     task_name = _active_task_name(config, args)
     task = Task(task_name, config)
     if args.expand:
-        task.expand_args(config.expander)
+        task.expand()
     _show_task(task, True)
 
 
@@ -198,6 +198,10 @@ def args_update(task, args: Args) -> None:
         for e in args.c_env:
             e_name, e_value = parse_assignment_str(e)
             task.c_env[e_name] = e_value
+    task.vars_map[AutoVarsKeys.CLI_ARGS] = " ".join(getattr(args, AutoVarsKeys.CLI_ARGS))
+    for d in args.variable:
+        key, val = parse_assignment_str(d)
+        task.vars_map[key] = val
 
 
 def run_task(config: Config, args: Args) -> int:
@@ -205,7 +209,6 @@ def run_task(config: Config, args: Args) -> int:
     info("Running task '{}'", task_name)
     task = Task(task_name, config)
     args_update(task, args)
-    task.expand_args(config.expander)
     if args.summary:
         _show_task(task, False)
         print("-" * 70)

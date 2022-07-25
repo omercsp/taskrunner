@@ -1,3 +1,4 @@
+from typing import Optional
 from tr.schemas import *
 from tr.common import *
 import os
@@ -28,7 +29,8 @@ class Config(object):
         if minor != VerValues.MINOR:
             print(f"Incompatible minor configuration version for '{VerValues.MINOR}'")
 
-    def _read_configuration(self, file_path: str, read_files: set = set()) -> dict:
+    def _read_configuration(self, file_path: str, expander: StringVarExpander,
+                            read_files: set = set()) -> dict:
         conf = {}
         tasks = {}
         variables = {}
@@ -48,10 +50,10 @@ class Config(object):
         info("Configuration file includes: {}", includes)
         read_files.add(file_path)
         for f in includes:
-            f = self.expander(f)
+            f = expander(f)
             if f in read_files:
                 raise TaskException(f"Include loop detected - '{f}'")
-            included_conf = self._read_configuration(f, read_files)
+            included_conf = self._read_configuration(f, expander, read_files)
             tasks.update(included_conf[GlobalKeys.Tasks])
             variables.update(included_conf[GlobalKeys.Variables])
             conf.update(included_conf)
@@ -88,41 +90,31 @@ class Config(object):
             return _DFLT_CONF_FILE_NAME
         return None
 
-    def __init__(self, cli_conf: typing.Union[str, None], cli_defs: list,
-                 cli_args: typing.List[str]):
-        self.expander = StringVarExpander()
+    def __init__(self, cli_conf: Optional[str]):
         conf_path = Config._get_conf_file_path(cli_conf)
 
         #  Populate some variables early so they are available in
-        early_vars = {}
+        self.const_vars = {}
         cwd = os.getcwd()
-        early_vars[AutoVarsKeys.CWD] = cwd
+        self.const_vars[AutoVarsKeys.CWD] = cwd
         if conf_path:
-            early_vars[AutoVarsKeys.TASK_ROOT] = os.path.dirname(conf_path)
+            self.const_vars[AutoVarsKeys.TASK_ROOT] = os.path.dirname(conf_path)
         else:
-            early_vars[AutoVarsKeys.TASK_ROOT] = cwd
+            self.const_vars[AutoVarsKeys.TASK_ROOT] = cwd
 
         self.conf = {}
         if conf_path:
-            self.expander.map = early_vars
-            self.conf = self._read_configuration(conf_path)
+            self.conf = self._read_configuration(conf_path, StringVarExpander(self.const_vars))
             validate_config_file_schema(self.conf)
             self._check_config_file_version(conf_path)
 
         #  Always override configuration variables with hard coded ones
-        self.vars = self.conf.get(GlobalKeys.Variables, {})
-        self.vars.update(early_vars)
+        self.global_vars = self.conf.get(GlobalKeys.Variables, {})
         self.tasks = self.conf.get(GlobalKeys.Tasks, {})
-        self.vars[AutoVarsKeys.CLI_ARGS] = " ".join(cli_args)
-        if cli_defs:
-            for d in cli_defs:
-                key, val = parse_assignment_str(d)
-                self.vars[key] = val
-        self.expander.map = self.vars
         if logging_enabled_for(logging.DEBUG):
-            verbose("Unexapnded variables:")
+            verbose("Unexapnded global variables:")
             start_raw_logging()
-            for k, v in self.vars.items():
+            for k, v in self.global_vars.items():
                 verbose("{}='{}'", k, v)
             stop_raw_logging()
 
