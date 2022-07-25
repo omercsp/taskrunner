@@ -48,7 +48,6 @@ class Task(object):
 
         self.expanded = False
 
-
     def expand_args(self, expander: StringVarExpander) -> None:
         if self.expanded:
             warn("Task '{}' is already expanded", self.name)
