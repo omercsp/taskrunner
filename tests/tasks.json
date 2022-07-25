@@ -1,7 +1,7 @@
 {
 	"version": {
 		"major": 4,
-		"minor": 1
+		"minor": 2
 	},
 	"include": ["{{taskRoot}}/base_tasks_b.json"],
 	"variables": {
