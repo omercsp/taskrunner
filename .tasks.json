@@ -1,7 +1,7 @@
 {
 	"version": {
 		"major": 4,
-		"minor": 1
+		"minor": 2
 	},
 	"variables": {
 		"tr_test_dir": "/tr_test"

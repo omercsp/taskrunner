@@ -4,12 +4,16 @@ import jsonschema
 
 class VerValues(object):
     MAJOR: int = 4
-    MINOR: int = 1
+    MINOR: int = 2
 
 
 class VerKeys(object):
     Major = "major"
     Minor = "minor"
+
+
+class _CommonKeys(object):
+    Variables = "variables"
 
 
 class AutoVarsKeys(object):
@@ -31,6 +35,7 @@ class TaskKeys(object):
     Commands = "commands"
     StopOnError = "stop_on_error"
     Meta = "meta"
+    Variables = _CommonKeys.Variables
     # Container settings
     CImage = "c_image"
     CTool = "c_container_tool"
@@ -53,7 +58,7 @@ class GlobalKeys(object):
     Version = "version"
     Tasks = "tasks"
     Suppress = "suppress"
-    Variables = "variables"
+    Variables = _CommonKeys.Variables
     DfltTask = "default_task"
     DfltShellPath = "default_shell_path"
     DfltContainerShellPath = "default_container_shell_path"
@@ -82,6 +87,7 @@ _task_schema = {
         TaskKeys.StopOnError: {"type": "boolean"},
         TaskKeys.Hidden: {"type": "boolean"},
         TaskKeys.Abstract: {"type": "boolean"},
+        TaskKeys.Variables: {"type": "object"},
         TaskKeys.CImage: {"type": "string"},
         TaskKeys.CTool: {"type": "string"},
         TaskKeys.CVolumes: {
