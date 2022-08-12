@@ -3,6 +3,7 @@ from tr.common import *
 import os
 import pathlib
 import json
+from typing import Optional
 
 
 _CONF_FILE_NAME = "tasks.json"
@@ -69,7 +70,7 @@ class Config(object):
         return conf
 
     @staticmethod
-    def _get_conf_file_path(cli_conf: typing.Union[str, None]) -> typing.Union[str, None]:
+    def _get_conf_file_path(cli_conf: Optional[str]) -> Optional[str]:
         if cli_conf:
             return cli_conf
 
@@ -86,7 +87,7 @@ class Config(object):
             return _DFLT_CONF_FILE_NAME
         return None
 
-    def __init__(self, cli_conf: typing.Union[str, None], cli_defs: list,
+    def __init__(self, cli_conf: Optional[str], cli_defs: list,
                  cli_args: typing.List[str]):
         self.expander = StringVarExpander()
         conf_path = Config._get_conf_file_path(cli_conf)
@@ -124,7 +125,7 @@ class Config(object):
                 verbose("{}='{}'", k, v)
             stop_raw_logging()
 
-    def default_task_name(self) -> typing.Union[str, None]:
+    def default_task_name(self) -> Optional[str]:
         return self.setting(GlobalKeys.DfltTask)
 
     def default_container_tool(self) -> str:
@@ -133,7 +134,7 @@ class Config(object):
     def default_container_shell_path(self) -> str:
         return self.setting(GlobalKeys.DfltContainerShellPath, default="/usr/bin/sh")
 
-    def default_shell_path(self) -> typing.Union[str, None]:
+    def default_shell_path(self) -> Optional[str]:
         return self.setting(GlobalKeys.DfltShellPath, None)
 
     def visible_tasks(self) -> typing.List[str]:
