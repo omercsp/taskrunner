@@ -25,8 +25,6 @@ class Config(object):
             raise TaskException(
                 f"Incompatible major configuration version for '{path}': " +
                 f"Found:{major}.{minor}, expected <= {VerValues.MAJOR,}.{VerValues.MINOR}")
-        if minor != VerValues.MINOR:
-            print(f"Incompatible minor configuration version for '{VerValues.MINOR}'")
 
     def _read_configuration(self, file_path: str, read_files: set = set()) -> dict:
         conf = {}
