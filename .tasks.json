@@ -18,12 +18,12 @@
 			"cwd": "{{taskRoot}}"
 		},
 		"upload-testpypi": {
-			"short_desc": "Build package",
+			"short_desc": "Build package to testpypi",
 			"commands": ["python3 -m twine upload --repository testpypi dist/*"],
 			"cwd": "{{taskRoot}}"
 		},
 		"upload-pypi": {
-			"short_desc": "Build package",
+			"short_desc": "Build package to pypi",
 			"commands": ["python3 -m twine upload dist/*"],
 			"cwd": "{{taskRoot}}"
 		},
@@ -41,6 +41,7 @@
 			"abstract": true
 		},
 		"test_pkg_testpypi": {
+			"short_desc": "Basic package test from testpypi",
 			"base": "test_pkg_base",
 			"c_env": {
 				"TASK_RUNNER_PKG_TEST_ENV": "1",
@@ -48,6 +49,7 @@
 			}
 		},
 		"test_pkg_pypi": {
+			"short_desc": "Basic package test from pypi",
 			"base": "test_pkg_base",
 			"c_env": {
 				"TASK_RUNNER_PKG_TEST_ENV": "1",
