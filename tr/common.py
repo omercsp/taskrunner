@@ -5,6 +5,8 @@ import typing
 import os
 import traceback
 import json
+import copy
+from typing import Optional
 
 TASK_YES_TOKEN = 'yes'
 TASK_NO_TOKEN = 'no'
@@ -45,29 +47,67 @@ def dict_value(d: dict, path: str, require=False, default=None) -> typing.Any:
     return default
 
 
+_const_vars_map: dict = {}
+_global_vars_map: dict = {}
+_default_vars_map: dict = {}
+
+
+def set_const_vars_map(vars_map: dict) -> None:
+    global _const_vars_map
+    global _default_vars_map
+    _const_vars_map = vars_map
+    _default_vars_map = vars_map
+
+
+def set_global_vars_map(vars_map: dict) -> None:
+    global _global_vars_map
+    global _default_vars_map
+    _global_vars_map = vars_map
+    _default_vars_map = copy.deepcopy(vars_map)
+    _default_vars_map.update(_const_vars_map)
+
+
+def dump_vars(vars_map: dict) -> None:
+    start_raw_logging()
+    for k, v in vars_map.items():
+        verbose("{}='{}'", k, v)
+    stop_raw_logging()
+
+
+def dump_defualt_vars() -> None:
+    dump_vars(_default_vars_map)
+
+
 class StringVarExpander(object):
     var_re = re.compile(r'{{\S*?}}')
 
-    def __init__(self):
-        self.curr_expansion_stack = []
-        self.map = {}
+    def __init__(self, vars_map: Optional[dict] = None):
+        if not vars_map:
+            self.vars_map = _default_vars_map
+        else:
+            self.vars_map = copy.deepcopy(_global_vars_map)
+            self.vars_map.update(vars_map)
+            self.vars_map.update(_const_vars_map)
+
+        self.expansion_stack = []
 
     def __call__(self, s: str) -> str:
-        self.curr_expansion_stack = []
+        if self.expansion_stack:
+            raise TaskException("Incomplete variable expansion?")
         return re.sub(StringVarExpander.var_re, self._expand_re, s)
 
     def _expand_re(self, match) -> str:
         var = match.group()[2:-2]
-        if var in self.curr_expansion_stack:
+        if var in self.expansion_stack:
             raise TaskException(f"Recursive expanded var '{var}'")
         if var.startswith("$"):
             return os.getenv(var[1:], "")
-        value = self.map.get(var, "")
+        value = self.vars_map.get(var, "")
         if type(value) is list or type(value) is dict:
             raise TaskException(f"Var expanded path '{var}' doesn't refer to valid type")
-        self.curr_expansion_stack.append(var)
+        self.expansion_stack.append(var)
         s = re.sub(StringVarExpander.var_re, self._expand_re, str(value))
-        self.curr_expansion_stack.pop()
+        self.expansion_stack.pop()
         return s
 
 

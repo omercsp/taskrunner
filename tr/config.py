@@ -46,8 +46,9 @@ class Config(object):
 
         info("Configuration file includes: {}", includes)
         read_files.add(file_path)
+        expander = StringVarExpander()
         for f in includes:
-            f = self.expander(f)
+            f = expander(f)
             if f in read_files:
                 raise TaskException(f"Include loop detected - '{f}'")
             included_conf = self._read_configuration(f, read_files)
@@ -89,41 +90,36 @@ class Config(object):
 
     def __init__(self, cli_conf: Optional[str], cli_defs: list,
                  cli_args: typing.List[str]):
-        self.expander = StringVarExpander()
         conf_path = Config._get_conf_file_path(cli_conf)
 
         #  Populate some variables early so they are available in
-        early_vars = {}
+        const_vars = {}
         cwd = os.getcwd()
-        early_vars[AutoVarsKeys.CWD] = cwd
+        const_vars[AutoVarsKeys.CWD] = cwd
         if conf_path:
-            early_vars[AutoVarsKeys.TASK_ROOT] = os.path.dirname(conf_path)
+            const_vars[AutoVarsKeys.TASK_ROOT] = os.path.dirname(conf_path)
         else:
-            early_vars[AutoVarsKeys.TASK_ROOT] = cwd
+            const_vars[AutoVarsKeys.TASK_ROOT] = cwd
 
+        const_vars[AutoVarsKeys.CLI_ARGS] = " ".join(cli_args)
+        set_const_vars_map(const_vars)
         self.conf = {}
         if conf_path:
-            self.expander.map = early_vars
             self.conf = self._read_configuration(conf_path)
             validate_config_file_schema(self.conf)
             self._check_config_file_version(conf_path)
 
         #  Always override configuration variables with hard coded ones
-        self.vars = self.conf.get(GlobalKeys.Variables, {})
-        self.vars.update(early_vars)
+        global_vars = self.conf.get(GlobalKeys.Variables, {})
         self.tasks = self.conf.get(GlobalKeys.Tasks, {})
-        self.vars[AutoVarsKeys.CLI_ARGS] = " ".join(cli_args)
         if cli_defs:
             for d in cli_defs:
                 key, val = parse_assignment_str(d)
-                self.vars[key] = val
-        self.expander.map = self.vars
+                global_vars[key] = val
+        set_global_vars_map(global_vars)
+
         if logging_enabled_for(logging.DEBUG):
-            verbose("Unexapnded variables:")
-            start_raw_logging()
-            for k, v in self.vars.items():
-                verbose("{}='{}'", k, v)
-            stop_raw_logging()
+            dump_defualt_vars()
 
     def default_task_name(self) -> Optional[str]:
         return self.setting(GlobalKeys.DfltTask)

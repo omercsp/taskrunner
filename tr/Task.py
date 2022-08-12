@@ -46,26 +46,27 @@ class Task(object):
         self.c_env = task_descriptor.get(TaskKeys.CEnv, {})
         self.c_sudo = task_descriptor.get(TaskKeys.CSudo, False)
 
-        self.expanded = False
+        self.expander = None
 
-    def expand_args(self, expander: StringVarExpander) -> None:
-        if self.expanded:
+    def expand_args(self) -> None:
+        if self.expander is not None:
             warn("Task '{}' is already expanded", self.name)
             return
+        self.expander = StringVarExpander()
         info(f"Expanding task '{self.name}'")
         self.expanded = True
         if self.env is not None:
-            self.env = {expander(k): expander(v) for k, v in self.env.items()}
+            self.env = {self.expander(k): self.expander(v) for k, v in self.env.items()}
         if self.cwd:
-            self.cwd = expander(self.cwd)
-        self.commands = [expander(c) for c in self.commands]
+            self.cwd = self.expander(self.cwd)
+        self.commands = [self.expander(c) for c in self.commands]
 
         if self.c_cwd:
-            self.c_cwd = expander(self.c_cwd)
+            self.c_cwd = self.expander(self.c_cwd)
         if self.c_image:
-            self.c_image = expander(self.c_image)
-        self.c_volumes = [expander(v) for v in self.c_volumes]
-        self.c_env = {expander(k): expander(v) for k, v in self.c_env.items()}
+            self.c_image = self.expander(self.c_image)
+        self.c_env = {self.expander(k): self.expander(v) for k, v in self.c_env.items()}
+        self.c_volumes = [self.expander(v) for v in self.c_volumes]
 
     def _simple_cmd_arr(self, cmd) -> list:
         info("Preparing simple command")
