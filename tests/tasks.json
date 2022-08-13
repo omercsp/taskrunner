@@ -93,7 +93,7 @@
 			},
 			"commands": ["{{aux_dir}}/check_cwd.sh"]
 		},
-		"023_def_expansion": {
+		"023_var_expansion": {
 			"short_desc": "Validate variables expansion",
 			"env": {
 				"MY_ENV": "{{var2}}"
@@ -104,7 +104,7 @@
 				"echo __{{var0_1_2}}__"
 			]
 		},
-		"024_def_expansion_env": {
+		"024_var_expansion_env": {
 			"short_desc": "Validate variables expansion for environment variables",
 			"env": {
 				"MY_ENV0": "{{var0}}",
