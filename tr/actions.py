@@ -113,7 +113,7 @@ def show_task_info(args: Args, config: Config) -> None:
     task_name = _active_task_name(config, args)
     task = Task(task_name, config)
     if args.expand:
-        task.expand_args()
+        task.expand()
     _show_task(task, True)
 
 
@@ -205,7 +205,7 @@ def run_task(config: Config, args: Args) -> int:
     info("Running task '{}'", task_name)
     task = Task(task_name, config)
     args_update(task, args)
-    task.expand_args()
+    task.expand()
     if args.summary:
         _show_task(task, False)
         print("-" * 70)
