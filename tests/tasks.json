@@ -161,6 +161,15 @@
 				"args": "--env MY_ENV0=new_value --shell=yes --cwd {{optDir}} -c \"pwd; echo $MY_ENV0\""
 			}
 		},
+		"032_args_var_override": {
+			"short_desc": "Check variables override by CLI args",
+			"commands": [
+				"echo {{var0}}"
+			],
+			"meta" : {
+				"args": "-V var0=new_var0"
+			}
+		},
 		"040_config_file_include_defs": {
 			"short_desc": "Check variables from included files",
 			"commands": [
