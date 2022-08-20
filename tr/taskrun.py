@@ -40,14 +40,14 @@ def _parse_arguments() -> argparse.Namespace:
     parser.add_argument('-C', '--conf', metavar='CONF', help='configuration file to use',
                         default=None)
     parser.add_argument('--log_file', metavar='FILE', help='set log file', default='')
-    parser.add_argument('-V', '--variable', metavar='VAR', default=[], action='append',
-                        help='set a variable')
     subparsers = parser.add_subparsers(help='commands', dest='subparsers_name')
     subparsers.required = True
 
     task_target_parser = argparse.ArgumentParser(add_help=False)
     task_target_parser.add_argument('task', nargs='?', metavar='TASK', default=None,
                                     help='set task')
+    task_target_parser.add_argument('-V', '--variable', metavar='VAR', default=[], action='append',
+                                    help='set a variable')
     run_parser = subparsers.add_parser(__RUN_CMD, help='execute a task',
                                        parents=[task_target_parser])
     run_parser.add_argument('-c', '--command', metavar='CMD', default=None, action='append',

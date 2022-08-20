@@ -91,7 +91,10 @@ class Config(object):
 
     def __init__(self, args: Optional[Args]) -> None:
         self.args: Args = args  # type: ignore
-        cli_variables: list[str] = args.variable if args else []
+        try:
+            cli_variables: list[str] = args.variable  # type: ignore
+        except AttributeError:
+            cli_variables = []
         conf_path = Config._get_conf_file_path(args.conf if args else None)
 
         #  Populate some variables early so they are available in
