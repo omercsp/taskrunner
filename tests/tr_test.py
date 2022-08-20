@@ -75,8 +75,8 @@ def run_test_tasks(info: TestRunInfo) -> int:
         OK_STR = "OK"
         FAILED_STR = "Failed"
 
-    base_cmd = "{} -V task_cmd={} --log_file={} run --c-tool={}".format(
-        info.task_bin, info.task_bin, LOG_FILE, info.ctool)
+    base_cmd = "{} --log_file={} run --c-tool={}".format(
+        info.task_bin, LOG_FILE, info.ctool)
     rc = 0
     for t_name in info.task_list:
         try:
