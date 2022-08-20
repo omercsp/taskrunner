@@ -121,7 +121,11 @@ def run_test_tasks(info: TestRunInfo) -> int:
             else:
                 p = subprocess.Popen(run_task_cmd)
             cmd_rc = p.wait()
-
+            out_file = f"{OUTPUT_DIR}/{t_name}.out"
+            if cmd_rc == 255:
+                print(f"{FAILED_STR}, Internal task error, task output:")
+                subprocess.Popen(["cat", out_file]).wait()
+                return 1
             allowed_rc = t_meta.get("allowed_rc", [0])
             if cmd_rc not in allowed_rc:
                 rc = 1
@@ -133,7 +137,6 @@ def run_test_tasks(info: TestRunInfo) -> int:
             if not info.diff:
                 print(f"{OK_STR} (output not validated)")
                 continue
-            out_file = f"{OUTPUT_DIR}/{t_name}.out"
             if output_gen_cmd:
                 expected_file = INTERMEIDATE_EXPECTED
             else:

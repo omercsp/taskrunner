@@ -113,16 +113,19 @@ def _parse_arguments():
     # TODO: Not sure what pyright wants with this type ignore
     argcomplete.autocomplete(parser, always_complete_options=False,
                              default_completer=_tasks_complete)  # type: ignore
-    return parser.parse_args(tr_argv), cmds_argv
+    try:
+        return parser.parse_args(tr_argv), cmds_argv
+    except SystemExit:
+        raise TaskException("")
 
 
 def task_runner_main() -> int:
-    args, cmds_args = _parse_arguments()
-    init_logging(args.log_file, args.verbose)
-
-    info("args='{}'", sys.argv[1:])
-    info("cmd_args={}", cmds_args)
     try:
+        args, cmds_args = _parse_arguments()
+        init_logging(args.log_file, args.verbose)
+
+        info("args='{}'", sys.argv[1:])
+        info("cmd_args={}", cmds_args)
 
         if args.subparsers_name == __DUMP_CONFIG_SCHEMA_CMD:
             dump_config_file_schema()
@@ -147,5 +150,5 @@ def task_runner_main() -> int:
 
     except TaskException as e:
         error_and_print(str(e))
-        return 1
+        return 255
     return 0
