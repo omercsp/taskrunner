@@ -9,7 +9,7 @@
 	"tasks": {
 		"test": {
 			"short_desc": "Run test",
-			"commands": ["tests/tr_test"],
+			"commands": ["tests/tr_test {{cliArgs}}"],
 			"cwd": "{{taskRoot}}"
 		},
 		"build": {
