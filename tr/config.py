@@ -89,7 +89,7 @@ class Config(object):
         return None
 
     def __init__(self, cli_conf: Optional[str], cli_defs: list,
-                 cli_args: typing.List[str]):
+                 task_cli_args: typing.List[str]):
         conf_path = Config._get_conf_file_path(cli_conf)
 
         #  Populate some variables early so they are available in
@@ -101,7 +101,7 @@ class Config(object):
         else:
             const_vars[AutoVarsKeys.TASK_ROOT] = cwd
 
-        const_vars[AutoVarsKeys.CLI_ARGS] = " ".join(cli_args)
+        const_vars[AutoVarsKeys.TASK_CLI_ARGS] = " ".join(task_cli_args)
         set_const_vars_map(const_vars)
         self.conf = {}
         if conf_path:

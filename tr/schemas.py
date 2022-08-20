@@ -15,7 +15,7 @@ class VerKeys(object):
 class AutoVarsKeys(object):
     TASK_ROOT = "taskRoot"
     CWD = "cwd"
-    CLI_ARGS = "cliArgs"
+    TASK_CLI_ARGS = "cliArgs"
 
 
 class TaskKeys(object):
