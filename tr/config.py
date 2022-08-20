@@ -4,6 +4,7 @@ import os
 import pathlib
 import json
 from typing import Optional
+from argparse import Namespace as Args
 
 
 _CONF_FILE_NAME = "tasks.json"
@@ -88,9 +89,10 @@ class Config(object):
             return _DFLT_CONF_FILE_NAME
         return None
 
-    def __init__(self, cli_conf: Optional[str], cli_defs: list,
-                 task_cli_args: typing.List[str]):
-        conf_path = Config._get_conf_file_path(cli_conf)
+    def __init__(self, args: Optional[Args]) -> None:
+        self.args: Args = args  # type: ignore
+        cli_variables: list[str] = args.variable if args else []
+        conf_path = Config._get_conf_file_path(args.conf if args else None)
 
         #  Populate some variables early so they are available in
         const_vars = {}
@@ -100,9 +102,11 @@ class Config(object):
             const_vars[AutoVarsKeys.TASK_ROOT] = os.path.dirname(conf_path)
         else:
             const_vars[AutoVarsKeys.TASK_ROOT] = cwd
-
-        const_vars[AutoVarsKeys.TASK_CLI_ARGS] = " ".join(task_cli_args)
+        if args and args.__contains__(AutoVarsKeys.TASK_CLI_ARGS):
+            const_vars[AutoVarsKeys.TASK_CLI_ARGS] = " ".join(
+                args.__getattribute__(AutoVarsKeys.TASK_CLI_ARGS))
         set_const_vars_map(const_vars)
+
         self.conf = {}
         if conf_path:
             self.conf = self._read_configuration(conf_path)
@@ -112,10 +116,9 @@ class Config(object):
         #  Always override configuration variables with hard coded ones
         global_vars = self.conf.get(GlobalKeys.Variables, {})
         self.tasks = self.conf.get(GlobalKeys.Tasks, {})
-        if cli_defs:
-            for d in cli_defs:
-                key, val = parse_assignment_str(d)
-                global_vars[key] = val
+        for d in cli_variables:
+            key, val = parse_assignment_str(d)
+            global_vars[key] = val
         set_global_vars_map(global_vars)
 
         if logging_enabled_for(logging.DEBUG):

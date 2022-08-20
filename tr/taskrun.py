@@ -1,4 +1,5 @@
 from tr.config import *
+from tr.schemas import AutoVarsKeys
 import tr.actions as actions
 import argparse
 import argcomplete
@@ -21,11 +22,11 @@ def _tasks_complete(**kwargs):
         return []
     if (parser_name == __RUN_CMD or parser_name == __INFO_CMD or parser_name == __DUMP_TASK_CMD) \
        and parsed_args.task is None:
-        return Config(None, [], []).visible_tasks()
+        return Config(None).visible_tasks()
     return []
 
 
-def _parse_arguments():
+def _parse_arguments() -> argparse.Namespace:
     try:
         ex_args_idx = sys.argv.index('--')
         tr_argv = sys.argv[1:ex_args_idx]
@@ -39,7 +40,7 @@ def _parse_arguments():
     parser.add_argument('-C', '--conf', metavar='CONF', help='configuration file to use',
                         default=None)
     parser.add_argument('--log_file', metavar='FILE', help='set log file', default='')
-    parser.add_argument('-V', '--variable', metavar='VAR', default=None, action='append',
+    parser.add_argument('-V', '--variable', metavar='VAR', default=[], action='append',
                         help='set a variable')
     subparsers = parser.add_subparsers(help='commands', dest='subparsers_name')
     subparsers.required = True
@@ -114,18 +115,20 @@ def _parse_arguments():
     argcomplete.autocomplete(parser, always_complete_options=False,
                              default_completer=_tasks_complete)  # type: ignore
     try:
-        return parser.parse_args(tr_argv), cmds_argv
+        args = parser.parse_args(tr_argv)
     except SystemExit:
         raise TaskException("")
+    args.__setattr__(AutoVarsKeys.TASK_CLI_ARGS, cmds_argv)
+    return args
 
 
 def task_runner_main() -> int:
     try:
-        args, cmds_args = _parse_arguments()
+        args = _parse_arguments()
         init_logging(args.log_file, args.verbose)
 
         info("args='{}'", sys.argv[1:])
-        info("cmd_args={}", cmds_args)
+        info("cmd_args={}", args.__getattribute__(AutoVarsKeys.TASK_CLI_ARGS))
 
         if args.subparsers_name == __DUMP_CONFIG_SCHEMA_CMD:
             dump_config_file_schema()
@@ -134,19 +137,17 @@ def task_runner_main() -> int:
             dump_task_schema()
             return 0
 
-        config = Config(args.conf, args.variable, cmds_args)
+        config = Config(args)
         if args.subparsers_name == __RUN_CMD:
-            return actions.run_task(config, args)
+            return actions.run_task(config)
         elif args.subparsers_name == __LIST_CMD:
-            actions.list_tasks(config, args.all, args.names_only)
+            actions.list_tasks(config)
         elif args.subparsers_name == __INFO_CMD:
-            actions.show_task_info(args=args, config=config)
+            actions.show_task_info(config)
         elif args.subparsers_name == __DUMP_CONFIG_CMD:
             actions.dump_config(config)
         elif args.subparsers_name == __DUMP_TASK_CMD:
-            actions.dump_task(config, args)
-        else:
-            raise TaskException("Unknown command")  # Should never happen
+            actions.dump_task(config)
 
     except TaskException as e:
         error_and_print(str(e))

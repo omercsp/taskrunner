@@ -3,11 +3,14 @@ import textwrap
 from argparse import Namespace as Args
 
 
-def _active_task_name(config: Config, args) -> str:
-    task_name = config.default_task_name() if args.task is None else args.task
-    if task_name is None:
+def _active_task_name(config: Config) -> str:
+    if config.args and config.args.task:
+        task = config.args.task
+    else:
+        task = config.default_task_name()
+    if task is None:
         raise TaskException("No main task name was given")
-    return task_name
+    return task
 
 
 def _show_task(task: Task, full_details: bool) -> None:
@@ -109,15 +112,17 @@ def _show_task(task: Task, full_details: bool) -> None:
         count += 1
 
 
-def show_task_info(args: Args, config: Config) -> None:
-    task_name = _active_task_name(config, args)
+def show_task_info(config: Config) -> None:
+    task_name = _active_task_name(config)
     task = Task(task_name, config)
-    if args.expand:
+    if config.args.expand:
         task.expand()
     _show_task(task, True)
 
 
-def list_tasks(config: Config, show_all: bool, names_only: bool):
+def list_tasks(config: Config):
+    show_all: bool = config.args.all
+    names_only: bool = config.args.names_only
     info("Listing tasks show_all={} names_only={}", show_all, names_only)
     print_fmt = "{:<24}{:<6}{}"
     err_print_fmt = "{:<30}{}"
@@ -200,22 +205,22 @@ def args_update(task, args: Args) -> None:
             task.c_env[e_name] = e_value
 
 
-def run_task(config: Config, args: Args) -> int:
-    task_name = _active_task_name(config, args)
+def run_task(config: Config) -> int:
+    task_name = _active_task_name(config)
     info("Running task '{}'", task_name)
     task = Task(task_name, config)
-    args_update(task, args)
+    args_update(task, config.args)
     task.expand()
-    if args.summary:
+    if config.args.summary:
         _show_task(task, False)
         print("-" * 70)
         sys.stdout.flush()
     return task.run()
 
 
-def dump_task(config: Config, args: Args):
-    task_name = _active_task_name(config, args)
-    print(json.dumps(config.get_task_desc(task_name, args.includes), indent=4))
+def dump_task(config: Config):
+    task_name = _active_task_name(config)
+    print(json.dumps(config.get_task_desc(task_name, config.args.includes), indent=4))
 
 
 def dump_config(config: Config):
