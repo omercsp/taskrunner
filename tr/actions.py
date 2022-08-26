@@ -203,6 +203,9 @@ def args_update(task, args: Args) -> None:
         for e in args.c_env:
             e_name, e_value = parse_assignment_str(e)
             task.c_env[e_name] = e_value
+    for v in args.variable:
+        key, val = parse_assignment_str(v)
+        task.vars_map[key] = val
 
 
 def run_task(config: Config) -> int:

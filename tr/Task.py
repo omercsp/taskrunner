@@ -46,13 +46,14 @@ class Task(object):
         self.c_env = task_descriptor.get(TaskKeys.CEnv, {})
         self.c_sudo = task_descriptor.get(TaskKeys.CSudo, False)
 
+        self.vars_map = task_descriptor.get(TaskKeys.Variables, {})
         self.expander = None
 
     def expand(self) -> None:
         if self.expander is not None:
             warn("Task '{}' is already expanded", self.name)
             return
-        self.expander = StringVarExpander()
+        self.expander = StringVarExpander(self.vars_map)
         info(f"Expanding task '{self.name}'")
         self.expanded = True
         if self.env is not None:

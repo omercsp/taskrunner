@@ -91,10 +91,6 @@ class Config(object):
 
     def __init__(self, args: Optional[Args]) -> None:
         self.args: Args = args  # type: ignore
-        try:
-            cli_variables: list[str] = args.variable  # type: ignore
-        except AttributeError:
-            cli_variables = []
         conf_path = Config._get_conf_file_path(args.conf if args else None)
 
         #  Populate some variables early so they are available in
@@ -116,13 +112,8 @@ class Config(object):
             validate_config_file_schema(self.conf)
             self._check_config_file_version(conf_path)
 
-        #  Always override configuration variables with hard coded ones
-        global_vars = self.conf.get(GlobalKeys.Variables, {})
         self.tasks = self.conf.get(GlobalKeys.Tasks, {})
-        for d in cli_variables:
-            key, val = parse_assignment_str(d)
-            global_vars[key] = val
-        set_global_vars_map(global_vars)
+        set_global_vars_map(self.conf.get(GlobalKeys.Variables, {}))
 
         if logging_enabled_for(logging.DEBUG):
             dump_defualt_vars()
@@ -168,10 +159,14 @@ class Config(object):
 
         hidden = base_task.get(TaskKeys.Hidden, False)
         abstract = base_task.get(TaskKeys.Abstract, False)
+        base_variables = base_task.get(TaskKeys.Variables, {})
 
         # We about to modify the included object, so deep copy it
         ret_task = self._task_desc(ret_task_name, included_list=included_list).copy()
+        variables = ret_task.get(TaskKeys.Variables, {})
+        variables.update(base_variables)
         ret_task.update(base_task)
+        ret_task[TaskKeys.Variables] = variables
         ret_task[TaskKeys.Hidden] = hidden
         ret_task[TaskKeys.Abstract] = abstract
         return ret_task

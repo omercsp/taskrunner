@@ -39,5 +39,6 @@
         "a command",
         "another command",
         "yet another command"
-    ]
+    ],
+    "variables": {}
 }
