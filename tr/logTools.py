@@ -46,7 +46,7 @@ class TrLogging(object):
             else:
                 self._logger.log(verbosity, f"{self._frame_str()}: {msg_args}")
             return
-        assert(type(msg_args) is tuple)
+        assert type(msg_args) is tuple
         if self.raw_format:
             self._logger.log(verbosity, msg_args[0].format(*msg_args[1:]))
         else:
