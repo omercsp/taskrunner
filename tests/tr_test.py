@@ -78,6 +78,8 @@ def run_test_tasks(info: TestRunInfo) -> int:
     base_cmd = "{} --log_file={} run --c-tool={}".format(
         info.task_bin, LOG_FILE, info.ctool)
     rc = 0
+    env = os.environ
+    env["task_bin"] = info.task_bin
     for t_name in info.task_list:
         try:
             task = info.tasks[t_name]
@@ -117,9 +119,9 @@ def run_test_tasks(info: TestRunInfo) -> int:
         try:
             if info.diff:
                 with open(f"{OUTPUT_DIR}/{t_name}.out", "w") as f:
-                    p = subprocess.Popen(run_task_cmd, stderr=f, stdout=f)
+                    p = subprocess.Popen(run_task_cmd, stderr=f, stdout=f, env=env)
             else:
-                p = subprocess.Popen(run_task_cmd)
+                p = subprocess.Popen(run_task_cmd, env=env)
             cmd_rc = p.wait()
             out_file = f"{OUTPUT_DIR}/{t_name}.out"
             if cmd_rc == 255:
