@@ -1,0 +1,7 @@
+global_env_value
+task_override_var0
+task_override_var1
+var2
+task_own_var0
+task_own_var1
+var2 task_override_var0 task_own_var1

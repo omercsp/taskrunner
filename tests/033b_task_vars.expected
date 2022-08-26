@@ -1,0 +1,7 @@
+derived_task_env_value
+derived_task_override_var0
+task_override_var1
+var2
+task_own_var0
+task_own_var1
+var2 derived_task_override_var0 task_own_var1
