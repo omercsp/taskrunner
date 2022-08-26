@@ -23,6 +23,7 @@
 * `abstract` - Abastrct tasks are not allowed to be run. This setting is useful when there's a need to mark task as a base task, while preventing it from being wrongfuly ran. Abstract tasks are implictly hidden. (type: Boolean, default value: `false`).
 * `base` - An optional task name to inherit from. Any current task settings override inherited settings (type: string, empty default value).
 * `meta` - A dictionary for the user own use. TR does not refer to values in this object (type: object, empty default value).
+* `variables` - A dictionary for task sepecific variables. These variables are not exposed to other tasks with the exception of tasks that inherit this task. Task variables override global variables with the same name.
 
 ## Task Container Settings
 * `c_image` - Image name for container tool to use. Unless set, the task isn't ran inside a container. If `c_exec` is set to `true`, `c_image` *doesn't* refer to an image, but to container that is expected to be running before the task is executed. See `c_exec` setting for more details (type: string, empty default value).

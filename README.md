@@ -70,7 +70,7 @@ Not very complicated, but can get tedious when actively developing cmake files a
 {
 	"version": {
 		"major": 4,
-		"minor": 1
+		"minor": 2
 	},
 	"tasks": {
 		"cmake": {
@@ -115,7 +115,7 @@ Now lets assume there's a need to occasionally run another task, similar to the 
 {
 	"version": {
 		"major": 4,
-		"minor": 1
+		"minor": 2
 	},
 	"tasks": {
 		"cmake": {
@@ -187,40 +187,72 @@ As these new projects name imply, they are built around `make` and `scons` build
 This section will describe some of advanced configuration and usage topics. For a detailed list of all configuration settings, refer to the [configuration documentation](settings.md)
 
 ## Variables
-A user can set her own variables that can be used through out the configuration. These variables are set in the `variables` object in the top level of the configuration file. A variable `VAR` is evaluated to strings, and can be referred to as `{{VAR}}` in most of the task properties. Variables can be used in commands, environment variables, container names, container volumes, etc.
+TR allows definitions of variables to be used through out the configuration.
+- Variables are evaluated as strings.
+- A variable `VAR` can be referred as `{{VAR}}`
+- Variables can be used in the following task properties: commands, environment variables, current working directory, container image, container working directory and container volumes.
+- A variable can be defined using other variables
+
+There are 3 types of variables with different priorities:
+
+1. Global variables - Defined in global level using `variables` as key word. They are available for every task with the scope of the tasks file.
+2. Task variables - Defined in task definitions level using `variables` as key word. They are available for the task they are defined in and those inherit from it. Inherited variables are overridden by the inheriting task variables. All task variables override global variables with the same name.
+3. System variables - set by TR and will override any variables with the same name. The following variables are defined:
+   - `cwd` - for the current working directory
+   - `taskRoot` - for the path of the directory the found configuration file was found. This is helpful when a task needs to refer to a directory relatively to the project (see previous examples for its usage).
+   - `cliArgs` - refers for arguments given by the user through CLI. See section about [passing command CLI arguments](#passing-command-line-arguments-to-commands)
+
+*TR auto variables override any user variable*, so avoid setting variables with reserved names.
+
+The following example show the different types of variables definition and usage.
+
 ```json
 {
 	"version": {
 		"major": 4,
-		"minor": 1
+		"minor": 2
 	},
 	"variables": {
-		"ENV_NAME": "my_env_name",
-		"ENV_VALUE": "my_env_value"
+		"ENV_NAME": "global_env_name",
+		"ENV_VALUE": "global_env_value",
+		"var0": "global_var0_value",
+		"var1": "global_var1_value"
 	},
 	"tasks": {
-		"task1": {
+		"task0": {
+			"variables": {
+				"var1": "task0_var1_value",
+				"var2": "task0_var2_value"
+			},
 			"env": {
 				"{{ENV_NAME}}": "{{ENV_VALUE}}"
 			},
 			"commands": [
-				"printenv {{ENV_NAME}}"
+				"printenv {{ENV_NAME}}",
+				"echo {{var0}}",
+				"echo {{var1}}",
+				"echo {{var2}}"
 			]
+		},
+		"task1": {
+			"base": "task0",
+			"variables": {
+				"ENV_VALUE": "task1_env_value",
+				"var2": "task1_var2_value"
+			},
+			"env": {
+				"{{ENV_NAME}}": "{{ENV_VALUE}}"
+			}
 		}
 	}
 }
 ```
 
-### Auto variables
-Regardless of the user defined variables, TR automatically defines the following variables:
-1. `{{cwd}}` - for the current working directory
-2. `{{taskRoot}}` - for the path of the directory the found configuration file was found. This is helpful when a task needs to refer to a directory relatively to the project (see previous examples for its usage).
-3. `{{cliArgs}}` - refers for arguments given by the user through CLI. See section about [passing command CLI arguments](#passing-command-line-arguments-to-commands)
-
-*TR auto variables override any user variable*, so avoid setting variables with reserved names.
+In the above example, a few global vars are defined. `task0` overrides the global `var1` and sets its own `var2`. `task1` overrides the inherited `task0` `var2`. Note the environment variable setting using the TR variables.
+See the [inheritance section](#Inheritance) for more deatils about task inheritance.
 
 ### Environment variables
-Environment variables can be referred with `{{$VAR}}`, where `VAR` is the variable name.
+Environment variables can be referred with `{{$VAR}}`, where `VAR` is the variable name. Environment variables can be used whereever TR variables can be used. Note the difference between environment variables used in the task setting and environment variables that are set for a given task using the `env` keyword.
 
 ## Container based tasks
 TR includes special support for running tasks inside a container. The main container setting is `c_image` defining a container image to use. The following task runs `make` inside a container with a volume, CWD set, tty allocated, interactive mode, wrapped in a `/usr/bin/sh -c`:
@@ -251,7 +283,7 @@ A task might inherit another task settings by using the `base` settings. If task
 {
 	"version": {
 		"major": 4,
-		"minor": 1
+		"minor": 2
 	},
 	"tasks": {
 		"base-task": {
