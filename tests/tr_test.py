@@ -117,11 +117,8 @@ def run_test_tasks(info: TestRunInfo) -> int:
         run_task_cmd = "{} {} {}".format(base_cmd, t_name, t_meta.get("args", ""))
         run_task_cmd = shlex.split(run_task_cmd)
         try:
-            if info.diff:
-                with open(f"{OUTPUT_DIR}/{t_name}.out", "w") as f:
-                    p = subprocess.Popen(run_task_cmd, stderr=f, stdout=f, env=env)
-            else:
-                p = subprocess.Popen(run_task_cmd, env=env)
+            f = open(f"{OUTPUT_DIR}/{t_name}.out", "w") if info.diff else None
+            p = subprocess.Popen(run_task_cmd, stderr=f, stdout=f, env=env)
             cmd_rc = p.wait()
             out_file = f"{OUTPUT_DIR}/{t_name}.out"
             if cmd_rc == 255:
