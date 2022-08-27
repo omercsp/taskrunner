@@ -163,9 +163,20 @@ def validate_task_schema(name: str, data: dict) -> None:
         raise TaskException(f"Task schema validation error for '{name}': {e.message}")
 
 
-def dump_config_file_schema() -> None:
-    print_dict(_config_file_schema)
+class SchemaDumpOpts(object):
+    ALL = "all"
+    CONFIG = "config"
+    TASK = "task"
+
+    CHOICES = [ALL, CONFIG, TASK]
 
 
-def dump_task_schema() -> None:
-    print_dict(_task_schema)
+
+def dump_schema(dump_type: str) -> None:
+    if dump_type == SchemaDumpOpts.CONFIG:
+        print_dict(_config_file_schema)
+    elif dump_type == SchemaDumpOpts.TASK:
+        print_dict(_task_schema)
+    elif dump_type == SchemaDumpOpts.ALL:
+        _config_file_schema[GlobalKeys.Tasks] = _task_schema
+        print_dict(_config_file_schema)

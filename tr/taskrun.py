@@ -10,6 +10,7 @@ __LIST_CMD = "list"
 __INFO_CMD = "info"
 __DUMP_TASK_CMD = "dump"
 __DUMP_CONFIG_CMD = "dump_config"
+__DUMP_SCHEMA_CMD = "dump_schema"
 __DUMP_CONFIG_SCHEMA_CMD = "dump_config_schema"
 __DUMP_TASK_SCHEMA_CMD = "dump_task_schema"
 
@@ -107,8 +108,9 @@ def _parse_arguments() -> argparse.Namespace:
     list_parser.add_argument('--names-only', action='store_true', default=False,
                              help=argparse.SUPPRESS)
 
-    subparsers.add_parser(__DUMP_CONFIG_SCHEMA_CMD, help='dump configuration file schema')
-    subparsers.add_parser(__DUMP_TASK_SCHEMA_CMD, help='dump task schema')
+    dump_parser = subparsers.add_parser(__DUMP_SCHEMA_CMD, help='dump configuration file schema')
+    dump_parser.add_argument('-t', '--type', choices=SchemaDumpOpts.CHOICES, default=SchemaDumpOpts.ALL);
+
     subparsers.add_parser(__DUMP_CONFIG_CMD, help='dump configuration')
 
     # TODO: Not sure what pyright wants with this type ignore
@@ -130,11 +132,8 @@ def task_runner_main() -> int:
         info("args='{}'", sys.argv[1:])
         info("cmd_args={}", args.__getattribute__(AutoVarsKeys.TASK_CLI_ARGS))
 
-        if args.subparsers_name == __DUMP_CONFIG_SCHEMA_CMD:
-            dump_config_file_schema()
-            return 0
-        if args.subparsers_name == __DUMP_TASK_SCHEMA_CMD:
-            dump_task_schema()
+        if args.subparsers_name == __DUMP_SCHEMA_CMD:
+            dump_schema(args.type)
             return 0
 
         config = Config(args)
