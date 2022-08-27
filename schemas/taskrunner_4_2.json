@@ -1,0 +1,159 @@
+{
+    "type": "object",
+    "properties": {
+        "version": {
+            "type": "object",
+            "properties": {
+                "major": {
+                    "type": "number",
+                    "minValue": 0
+                },
+                "minor": {
+                    "type": "number",
+                    "minValue": 1
+                }
+            }
+        },
+        "include": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "minLength": 1
+            }
+        },
+        "use_default_include": {
+            "type": "boolean"
+        },
+        "tasks": {
+            "type": "object"
+        },
+        "suppress": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "minLength": 1
+            }
+        },
+        "variables": {
+            "type": "object"
+        },
+        "default_task": {
+            "type": "string"
+        },
+        "default_shell_path": {
+            "type": "string",
+            "minLength": 1
+        },
+        "default_container_tool": {
+            "type": "string",
+            "minLength": 1
+        }
+    },
+    "required": [
+        "version"
+    ],
+    "additionalProperties": false,
+    "tasks": {
+        "type": "object",
+        "properties": {
+            "base": {
+                "type": "string",
+                "minLength": 1
+            },
+            "short_desc": {
+                "type": "string",
+                "maxLength": 75
+            },
+            "description": {
+                "type": "string"
+            },
+            "commands": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "minLength": 1
+                }
+            },
+            "cwd": {
+                "type": "string",
+                "minLength": 1
+            },
+            "shell": {
+                "type": "boolean"
+            },
+            "shell_path": {
+                "type": "string",
+                "minLength": 1
+            },
+            "env": {
+                "type": "object",
+                "additionalProperties": {
+                    "type": "string"
+                }
+            },
+            "stop_on_error": {
+                "type": "boolean"
+            },
+            "hidden": {
+                "type": "boolean"
+            },
+            "abstract": {
+                "type": "boolean"
+            },
+            "variables": {
+                "type": "object"
+            },
+            "c_image": {
+                "type": "string"
+            },
+            "c_container_tool": {
+                "type": "string"
+            },
+            "c_volumes": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "c_interactive": {
+                "type": "boolean"
+            },
+            "c_tty": {
+                "type": "boolean"
+            },
+            "c_remove": {
+                "type": "boolean"
+            },
+            "c_flags": {
+                "type": "string"
+            },
+            "c_exec": {
+                "type": "boolean"
+            },
+            "c_cwd": {
+                "type": "string",
+                "minLength": 1
+            },
+            "c_shell": {
+                "type": "boolean"
+            },
+            "c_shell_path": {
+                "type": "string",
+                "minLength": 1
+            },
+            "c_sudo": {
+                "type": "boolean"
+            },
+            "c_env": {
+                "type": "object",
+                "additionalProperties": {
+                    "type": "string"
+                }
+            },
+            "meta": {
+                "type": "object"
+            }
+        },
+        "additionalProperties": false
+    }
+}
