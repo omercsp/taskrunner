@@ -17,6 +17,7 @@
 * `stop_on_error` - Determines weather to stop on first error in case of multiple commands are set for the task (type: Boolean, default value: `false`)
 * `cwd` - Sets the working directory for commands to run (type: string. If not set, the current working directory is use as the commands working directory as well).
 * `env` - Dictionary of `"key": "val"`. Each pair will define an environment variable to set when running the task's commands (type: object, empty default value).
+* `env_inherit` - Sets weather the task environment variables are inherited from the system set of variables or not. (type: boolean, default value: `true`)
 * `shell` - Sets if the commands in this tasks are ran with a wrapping shell. In general this should be not used unless the task's commands require shell semantics like redirection. (type: Boolean, default value: `false`)
 * `shell_path` - Path for shell to use if `shell` is set to true (type: string, default value: the global `default_shell_path` value, which is `/usr/bin/sh` if unmodified)
 * `hidden` - Hides task from being listed by default. Hidden tasks can still be listed using `--all` flag. (type: Boolean, default value: `false`).

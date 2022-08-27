@@ -4,7 +4,7 @@ import jsonschema
 
 class VerValues(object):
     MAJOR: int = 4
-    MINOR: int = 3
+    MINOR: int = 4
 
 
 class VerKeys(object):
@@ -26,6 +26,7 @@ class TaskKeys(object):
     Shell = "shell"
     ShellPath = "shell_path"
     Env = "env"
+    EnvInherit = "env_inherit"
     Cwd = "cwd"
     Base = "base"
     Hidden = "hidden"
@@ -85,6 +86,7 @@ _task_schema = {
                 "type": "string"
             }
         },
+        TaskKeys.EnvInherit: {"type": "boolean"},
         TaskKeys.StopOnError: {"type": "boolean"},
         TaskKeys.Hidden: {"type": "boolean"},
         TaskKeys.Abstract: {"type": "boolean"},

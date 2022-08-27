@@ -28,7 +28,8 @@ class Task(object):
         self.shell = task_descriptor.get(TaskKeys.Shell, False)
         self.shell_path = task_descriptor.get(
             TaskKeys.ShellPath, config.default_shell_path())
-        self.env = task_descriptor.get(TaskKeys.Env, None)
+        self.env_inherit = task_descriptor.get(TaskKeys.EnvInherit, True)
+        self.env = task_descriptor.get(TaskKeys.Env, {})
         self.abstract = task_descriptor.get(TaskKeys.Abstract, False)
 
         self.c_image = task_descriptor.get(TaskKeys.CImage, None)
@@ -56,8 +57,7 @@ class Task(object):
         self.expander = StringVarExpander(self.vars_map)
         info(f"Expanding task '{self.name}'")
         self.expanded = True
-        if self.env is not None:
-            self.env = {self.expander(k): self.expander(v) for k, v in self.env.items()}
+        self.env = {self.expander(k): self.expander(v) for k, v in self.env.items()}
         if self.cwd:
             self.cwd = self.expander(self.cwd)
         self.commands = [self.expander(c) for c in self.commands]
@@ -112,8 +112,13 @@ class Task(object):
         info("Running command (joined):")
         raw_msg(cmd_str)
         p = None
+        if self.env_inherit:
+            env = os.environ
+            env.update(self.env)
+        else:
+            env = self.env
         try:
-            p = subprocess.Popen(cmd, shell=self.shell, executable=self.shell_path, env=self.env,
+            p = subprocess.Popen(cmd, shell=self.shell, executable=self.shell_path, env=env,
                                  cwd=self.cwd)
             return p.wait()
 
