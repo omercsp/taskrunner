@@ -54,6 +54,7 @@ def _show_task(task: Task, full_details: bool) -> None:
             print_val(shell_title, "/usr/bin/sh")
         else:
             print_val(shell_title, task.shell_path)
+    print_bool("Inherit environment", task.env_inherit)
     count = 0
     if task.env:
         print("Environment:")

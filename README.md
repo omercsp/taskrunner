@@ -254,6 +254,8 @@ See the [inheritance section](#Inheritance) for more deatils about task inherita
 ### Environment variables
 Environment variables can be referred with `{{$VAR}}`, where `VAR` is the variable name. Environment variables can be used whereever TR variables can be used. Note the difference between environment variables used in the task setting and environment variables that are set for a given task using the `env` keyword.
 
+When a task is invoked its commands are invoked with the current set of system environment variables merged with task specific variables if such exist either from the task configuration or from CLI. Task variables take precedence over system variables. This behavior can be modified by setting the task's `env_inherit`. Set to `false`, TR ignores the system environment variables, and passes the task commands only the task environment variables. By default `env_inherit` is set to `true`.
+
 ## Container based tasks
 TR includes special support for running tasks inside a container. The main container setting is `c_image` defining a container image to use. The following task runs `make` inside a container with a volume, CWD set, tty allocated, interactive mode, wrapped in a `/usr/bin/sh -c`:
 ```json
