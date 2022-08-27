@@ -4,6 +4,7 @@ import os
 import json
 import subprocess
 import shlex
+import copy
 
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -78,8 +79,8 @@ def run_test_tasks(info: TestRunInfo) -> int:
     base_cmd = "{} --log_file={} run --c-tool={}".format(
         info.task_bin, LOG_FILE, info.ctool)
     rc = 0
-    env = os.environ
-    env["task_bin"] = info.task_bin
+    default_env = os.environ
+    default_env["task_bin"] = info.task_bin
     for t_name in info.task_list:
         try:
             task = info.tasks[t_name]
@@ -116,9 +117,16 @@ def run_test_tasks(info: TestRunInfo) -> int:
                         f"Error running expected output generation command for task '{t_name}'")
         run_task_cmd = "{} {} {}".format(base_cmd, t_name, t_meta.get("args", ""))
         run_task_cmd = shlex.split(run_task_cmd)
+        task_meta_env = t_meta.get("env", None)
+        if task_meta_env:
+            task_env = copy.deepcopy(default_env)
+            for k, v in task_meta_env.items():
+                task_env[k] = v
+        else:
+            task_env = default_env
         try:
             f = open(f"{OUTPUT_DIR}/{t_name}.out", "w") if info.diff else None
-            p = subprocess.Popen(run_task_cmd, stderr=f, stdout=f, env=env)
+            p = subprocess.Popen(run_task_cmd, stderr=f, stdout=f, env=task_env)
             cmd_rc = p.wait()
             out_file = f"{OUTPUT_DIR}/{t_name}.out"
             if cmd_rc == 255:
