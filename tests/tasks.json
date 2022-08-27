@@ -77,6 +77,31 @@
 				"{{task_cmd}} --conf {{aux_dir}}/tasks-for-list.json list -a"
 			]
 		},
+        "env_inherit_base": {
+            "env": { "int_var": "int_var_value" },
+			"commands": [
+                "printenv int_var",
+                "printenv ext_var"
+			],
+			"abstract": true
+        },
+		"015a_env_inherit": {
+            "base": "env_inherit_base",
+			"short_desc": "Check environment inheritance (enabled)",
+            "meta": {
+                "env": { "ext_var": "ext_var_value" }
+            },
+            "env_inherit": true
+		},
+		"015b_env_no_inherit": {
+			"short_desc": "Check environment inheritance (disabled)",
+            "base": "env_inherit_base",
+            "env_inherit": false,
+            "meta": {
+                "env": { "ext_var": "ext_var_value" },
+				"allowed_rc": [1]
+            }
+        },
 		"020_workdir_root": {
 			"short_desc": "Validate working directory as /",
 			"cwd": "/",
