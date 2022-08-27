@@ -4,7 +4,7 @@ import jsonschema
 
 class VerValues(object):
     MAJOR: int = 4
-    MINOR: int = 2
+    MINOR: int = 3
 
 
 class VerKeys(object):
@@ -53,6 +53,7 @@ class TaskKeys(object):
 
 
 class GlobalKeys(object):
+    Schema = "$schema"
     Include = "include"
     UseDfltInclude = "use_default_include"
     Version = "version"
@@ -117,6 +118,10 @@ _task_schema = {
 _config_file_schema = {
     "type": "object",
     "properties": {
+        GlobalKeys.Schema: {
+            "type": "string",
+            "minLength": 1
+        },
         GlobalKeys.Version: {
             "type": "object",
             "properties": {
