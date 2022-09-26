@@ -13,10 +13,10 @@ TASK_NO_TOKEN = 'no'
 
 
 class TaskException(Exception):
-    def __init__(self, error):
+    def __init__(self, error: str) -> None:
         self.error = error
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.error
 
 
@@ -81,7 +81,7 @@ def dump_defualt_vars() -> None:
 class StringVarExpander(object):
     var_re = re.compile(r'{{\S*?}}')
 
-    def __init__(self, vars_map: Optional[dict] = None):
+    def __init__(self, vars_map: Optional[dict] = None) -> None:
         if not vars_map:
             self.vars_map = _default_vars_map
         else:
@@ -111,16 +111,16 @@ class StringVarExpander(object):
         return s
 
 
-def parse_assignment_str(s: str):
+def parse_assignment_str(s: str) -> typing.Tuple[str, str]:
     parts = s.split('=', maxsplit=1)
     if len(parts) == 1:
         return s, ""
     return parts[0], parts[1]
 
 
-def bt():
+def bt() -> None:
     traceback.print_stack(file=sys.stdout)
 
 
-def print_dict(d: dict):
+def print_dict(d: dict) -> None:
     print(json.dumps(d, indent=4))

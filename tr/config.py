@@ -171,7 +171,7 @@ class Config(object):
         ret_task[TaskKeys.Abstract] = abstract
         return ret_task
 
-    def get_task_desc(self, name: str, includes: bool):
+    def get_task_desc(self, name: str, includes: bool) -> typing.Dict[str, typing.Any]:
         verbose("Task '{}' requested, with_inclusions={}", name, includes)
         if includes:
             return self._task_desc(name, set())

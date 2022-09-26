@@ -178,7 +178,6 @@ class SchemaDumpOpts(object):
     CHOICES = [ALL, CONFIG, TASK]
 
 
-
 def dump_schema(dump_type: str) -> None:
     if dump_type == SchemaDumpOpts.CONFIG:
         print_dict(_config_file_schema)

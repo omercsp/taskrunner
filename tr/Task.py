@@ -6,7 +6,7 @@ import signal
 
 
 class Task(object):
-    def _check_empty_setting(self, s, title):
+    def _check_empty_setting(self, s, title) -> None:
         if len(s) > 0:
             return
         raise TaskException(f"Expanded {title} for task '{self.name}' is empty")
@@ -78,7 +78,7 @@ class Task(object):
         except ValueError as e:
             raise TaskException(f"Illegal command '{cmd}' for task '{self.name}' - {e}")
 
-    def _container_cmd_arr(self, cmd) -> list:
+    def _container_cmd_arr(self, cmd) -> typing.List[str]:
         info("Preparing container command")
         cmd_array = ["sudo", self.c_tool] if self.c_sudo else [self.c_tool]
         cmd_array.append("exec" if self.c_exec else "run")

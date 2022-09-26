@@ -11,11 +11,9 @@ __INFO_CMD = "info"
 __DUMP_TASK_CMD = "dump"
 __DUMP_CONFIG_CMD = "dump_config"
 __DUMP_SCHEMA_CMD = "dump_schema"
-__DUMP_CONFIG_SCHEMA_CMD = "dump_config_schema"
-__DUMP_TASK_SCHEMA_CMD = "dump_task_schema"
 
 
-def _tasks_complete(**kwargs):
+def _tasks_complete(**kwargs) -> typing.List[str]:
     try:
         parsed_args: argparse.Namespace = kwargs['parsed_args']
         parser_name = parsed_args.subparsers_name
@@ -109,7 +107,8 @@ def _parse_arguments() -> argparse.Namespace:
                              help=argparse.SUPPRESS)
 
     dump_parser = subparsers.add_parser(__DUMP_SCHEMA_CMD, help='dump configuration file schema')
-    dump_parser.add_argument('-t', '--type', choices=SchemaDumpOpts.CHOICES, default=SchemaDumpOpts.ALL);
+    dump_parser.add_argument('-t', '--type', choices=SchemaDumpOpts.CHOICES,
+                             default=SchemaDumpOpts.ALL)
 
     subparsers.add_parser(__DUMP_CONFIG_CMD, help='dump configuration')
 

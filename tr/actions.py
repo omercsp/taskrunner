@@ -14,13 +14,13 @@ def _active_task_name(config: Config) -> str:
 
 
 def _show_task(task: Task, full_details: bool) -> None:
-    def print_val(title: str, value: typing.Any):
+    def print_val(title: str, value: typing.Any) -> None:
         print(f"{title:<24}{value:<}")
 
-    def print_bool(title, value: bool):
+    def print_bool(title, value: bool) -> None:
         print_val(title, "Yes" if value else "No")
 
-    def print_blob(title: str, text: str):
+    def print_blob(title: str, text: str) -> None:
         if text is None or len(text) == 0:
             print(title)
             return
@@ -121,7 +121,7 @@ def show_task_info(config: Config) -> None:
     _show_task(task, True)
 
 
-def list_tasks(config: Config):
+def list_tasks(config: Config) -> None:
     show_all: bool = config.args.all
     names_only: bool = config.args.names_only
     info("Listing tasks show_all={} names_only={}", show_all, names_only)
@@ -222,10 +222,10 @@ def run_task(config: Config) -> int:
     return task.run()
 
 
-def dump_task(config: Config):
+def dump_task(config: Config) -> None:
     task_name = _active_task_name(config)
     print(json.dumps(config.get_task_desc(task_name, config.args.includes), indent=4))
 
 
-def dump_config(config: Config):
+def dump_config(config: Config) -> None:
     print(json.dumps(config.conf, indent=4))
