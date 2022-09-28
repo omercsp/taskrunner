@@ -246,7 +246,7 @@
 		"base_container_test": {
 			"short_desc": "Basic container support",
 			"commands": [
-				"pwd; echo $CENV0; cat /etc/os-release | grep PRETTY_NAME; cat /aux/volume_file.txt" ],
+				"pwd; echo $CENV0; cat /etc/os-release | grep -E \"^(ID|VERSION_ID)\"; cat /aux/volume_file.txt" ],
 			"c_cwd": "/opt",
 			"c_shell": true,
 			"c_env": {
@@ -264,7 +264,7 @@
 		},
 		"051_container_rocky": {
 			"base": "base_container_test",
-			"short_desc": "Basic container support o/Ubuntu 20.04",
+			"short_desc": "Basic container support o/Rocky 8.5",
 			"c_image": "docker.io/rockylinux/rockylinux:8.5"
 		},
 		"info_task_base": {
