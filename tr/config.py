@@ -20,13 +20,6 @@ class Config(object):
             raise TaskException(f"Error parsing {file_path} - {e}")
         return data
 
-    def _check_config_file_version(self, path: str) -> None:
-        major = self.conf[GlobalKeys.Version][VerKeys.Major]
-        minor = self.conf[GlobalKeys.Version][VerKeys.Minor]
-        if major != VerValues.MAJOR or minor > VerValues.MINOR:
-            raise TaskException(
-                f"Incompatible major configuration version for '{path}': " +
-                f"Found:{major}.{minor}, expected <= {VerValues.MAJOR,}.{VerValues.MINOR}")
 
     def _read_configuration(self, file_path: str, read_files: set = set()) -> dict:
         conf = {}
@@ -110,7 +103,6 @@ class Config(object):
         if conf_path:
             self.conf = self._read_configuration(conf_path)
             validate_config_file_schema(self.conf)
-            self._check_config_file_version(conf_path)
 
         self.tasks = self.conf.get(GlobalKeys.Tasks, {})
         set_global_vars_map(self.conf.get(GlobalKeys.Variables, {}))

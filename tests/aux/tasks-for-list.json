@@ -1,8 +1,4 @@
 {
-	"version": {
-		"major": 4,
-		"minor": 2
-	},
 	"include": ["{{taskRoot}}/tasks-for-list-include.json"],
 	"tasks": {
 		"task_1": {
