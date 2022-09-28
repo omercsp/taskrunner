@@ -1,8 +1,5 @@
 {
-	"version": {
-		"major": 4,
-		"minor": 2
-	},
+	"$schema": "/home/omer/devel/taskrunner/schemas/taskrunner_v0.7.json",
 	"include": ["{{taskRoot}}/base_tasks_b.json"],
 	"variables": {
 		"aux_dir": "{{taskRoot}}/aux",

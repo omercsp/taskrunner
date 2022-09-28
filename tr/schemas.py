@@ -57,7 +57,6 @@ class GlobalKeys(object):
     Schema = "$schema"
     Include = "include"
     UseDfltInclude = "use_default_include"
-    Version = "version"
     Tasks = "tasks"
     Suppress = "suppress"
     Variables = _CommonKeys.Variables
@@ -124,13 +123,6 @@ _config_file_schema = {
             "type": "string",
             "minLength": 1
         },
-        GlobalKeys.Version: {
-            "type": "object",
-            "properties": {
-                VerKeys.Major: {"type": "number", "minValue": 0},
-                VerKeys.Minor: {"type": "number", "minValue": 1}
-            }
-        },
         GlobalKeys.Include: {
             "type": "array",
             "items": {"type": "string", "minLength": 1}
@@ -150,7 +142,6 @@ _config_file_schema = {
         },
         GlobalKeys.DfltContainerTool: {"type": "string", "minLength": 1},
     },
-    "required": [GlobalKeys.Version],
     "additionalProperties": False
 }
 
