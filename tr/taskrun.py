@@ -1,3 +1,4 @@
+from tr import TR_BASE_VERSION
 from tr.config import *
 from tr.schemas import AutoVarsKeys
 import tr.actions as actions
@@ -34,7 +35,8 @@ def _parse_arguments() -> argparse.Namespace:
         tr_argv = sys.argv[1:]
         cmds_argv = []
     yes_no: typing.List[str] = [TASK_YES_TOKEN, TASK_NO_TOKEN]
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(prog='task')
+    parser.add_argument('--version', action='version', version=f'%(prog)s {TR_BASE_VERSION}')
     parser.add_argument('-v', '--verbose', action='count', help='log file verbosity', default=0)
     parser.add_argument('-C', '--conf', metavar='CONF', help='configuration file to use',
                         default=None)
