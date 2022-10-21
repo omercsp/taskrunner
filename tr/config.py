@@ -141,8 +141,9 @@ class Config(object):
 
     def _task_desc(self, name: str, included_list: set) -> dict:
         if name in included_list:
-            raise TaskException(f"Include loop detected for '{name}'")
+            raise TaskException(f"Ineritance loop detected for task '{name}'")
 
+        included_list.add(name)
         base_task = self._raw_task_obj(name)
 
         ret_task_name = base_task.get(TaskKeys.Base, None)
