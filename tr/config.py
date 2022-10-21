@@ -143,6 +143,7 @@ class Config(object):
         if name in included_list:
             raise TaskException(f"Include loop detected for '{name}'")
 
+        included_list.add(name)
         base_task = self._raw_task_obj(name)
 
         ret_task_name = base_task.get(TaskKeys.Base, None)
