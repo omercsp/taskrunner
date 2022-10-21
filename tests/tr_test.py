@@ -105,18 +105,18 @@ def run_test_tasks(info: TestRunInfo) -> int:
         #  Check if this test needs to created the expected output file on the fly
         if output_gen_cmd:
             try:
-                with open(INTERMEIDATE_EXPECTED, "r+") as f:
-                    f.truncate()
+                with open(INTERMEIDATE_EXPECTED, "r+") as out_file:
+                    out_file.truncate()
                     output_gen_cmd_rc = subprocess.run(
-                        output_gen_cmd, shell=True, stdout=f, stderr=f, text=True).returncode
+                        output_gen_cmd, shell=True, stdout=out_file, stderr=out_file, text=True).returncode
             except OSError as e:
                 output_gen_cmd_rc = 1
             finally:
                 if output_gen_cmd_rc:
                     raise TaskTestException(
                         f"Error running expected output generation command for task '{t_name}'")
-        run_task_cmd = "{} {} {}".format(base_cmd, t_name, t_meta.get("args", ""))
-        run_task_cmd = shlex.split(run_task_cmd)
+        #  The '*' is for list spreading
+        run_task_cmd = [*shlex.split(base_cmd), t_name, *shlex.split(t_meta.get("args", ""))]
         task_meta_env = t_meta.get("env", None)
         if task_meta_env:
             task_env = copy.deepcopy(default_env)
@@ -125,13 +125,13 @@ def run_test_tasks(info: TestRunInfo) -> int:
         else:
             task_env = default_env
         try:
-            f = open(f"{OUTPUT_DIR}/{t_name}.out", "w") if info.diff else None
-            p = subprocess.Popen(run_task_cmd, stderr=f, stdout=f, env=task_env)
+            out_file_path = f"{OUTPUT_DIR}/{t_name}.out"
+            out_file = open(out_file_path, "w") if info.diff else None
+            p = subprocess.Popen(run_task_cmd, stderr=out_file, stdout=out_file, env=task_env)
             cmd_rc = p.wait()
-            out_file = f"{OUTPUT_DIR}/{t_name}.out"
             if cmd_rc == 255:
                 print(f"{FAILED_STR}, Internal task error, task output:")
-                subprocess.Popen(["cat", out_file]).wait()
+                subprocess.Popen(["cat", out_file_path]).wait()
                 return 1
             allowed_rc = t_meta.get("allowed_rc", [0])
             if cmd_rc not in allowed_rc:
@@ -148,7 +148,7 @@ def run_test_tasks(info: TestRunInfo) -> int:
                 expected_file = INTERMEIDATE_EXPECTED
             else:
                 expected_file = f"{SCRIPT_DIR}/{t_name}.expected"
-            diff_cmd = f"diff -u {expected_file} {out_file}"
+            diff_cmd = f"diff -u {expected_file} {out_file_path}"
             pr = subprocess.run(diff_cmd.split(), stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT, encoding='utf-8')
             if not pr.returncode and not pr.stdout:
