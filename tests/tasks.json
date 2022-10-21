@@ -304,6 +304,16 @@
 					"{{task_dump_cmd}} info_task",
 					"{{task_dump_cmd}} -i info_task"
 				]
+		},
+		"080_recursive_fail": {
+                        "base": "080_recursive_fail",
+			"short_desc": "Recursive task failure",
+                        "commands": [
+                                "echo This should never be printed"
+                        ],
+                        "meta": {
+                                "allowed_rc": [255]
+                        }
 		}
 	},
 	"use_default_include": false,
