@@ -74,31 +74,39 @@
 				"{{task_cmd}} --conf {{aux_dir}}/tasks-for-list.json list -a"
 			]
 		},
-        "env_inherit_base": {
-            "env": { "int_var": "int_var_value" },
+		"env_inherit_base": {
+			"env": {
+				"int_var": "int_var_value"
+			},
 			"commands": [
-                "printenv int_var",
-                "printenv ext_var"
+				"printenv int_var",
+				"printenv ext_var"
 			],
 			"abstract": true
-        },
+		},
 		"015a_env_inherit": {
-            "base": "env_inherit_base",
+			"base": "env_inherit_base",
 			"short_desc": "Check environment inheritance (enabled)",
-            "meta": {
-                "env": { "ext_var": "ext_var_value" }
-            },
-            "env_inherit": true
+			"meta": {
+				"env": {
+					"ext_var": "ext_var_value"
+				}
+			},
+			"env_inherit": true
 		},
 		"015b_env_no_inherit": {
 			"short_desc": "Check environment inheritance (disabled)",
-            "base": "env_inherit_base",
-            "env_inherit": false,
-            "meta": {
-                "env": { "ext_var": "ext_var_value" },
-				"allowed_rc": [1]
-            }
-        },
+			"base": "env_inherit_base",
+			"env_inherit": false,
+			"meta": {
+				"env": {
+					"ext_var": "ext_var_value"
+				},
+				"allowed_rc": [
+					1
+				]
+			}
+		},
 		"020_workdir_root": {
 			"short_desc": "Validate working directory as /",
 			"cwd": "/",
@@ -190,21 +198,21 @@
 			"commands": [
 				"echo {{var0}}"
 			],
-			"meta" : {
+			"meta": {
 				"args": "-V var0=new_var0"
 			}
 		},
 		"033_task_vars": {
 			"short_desc": "Check variables override by CLI args",
-            "variables":{
-                "var0": "task_override_var0",
-                "var1": "task_override_var1",
-                "tvar0": "task_own_var0",
-                "tvar1": "task_own_var1",
-                "complex_var": "{{var2}} {{nothing}} {{var0}} {{tvar1}}"
-            },
+			"variables": {
+				"var0": "task_override_var0",
+				"var1": "task_override_var1",
+				"tvar0": "task_own_var0",
+				"tvar1": "task_own_var1",
+				"complex_var": "{{var2}} {{nothing}} {{var0}} {{tvar1}}"
+			},
 			"env": {
-				"{{env_name}}": "{{env_value}}"
+					"{{env_name}}": "{{env_value}}"
 			},
 			"commands": [
 				"printenv {{env_name}}",
@@ -217,13 +225,13 @@
 			]
 		},
 		"033b_task_vars": {
-            "base": "033_task_vars",
+			"base": "033_task_vars",
 			"short_desc": "Check variables override by CLI args",
-            "variables":{
-                "var0": "derived_task_override_var0",
+			"variables": {
+				"var0": "derived_task_override_var0",
 				"env_value": "derived_task_env_value"
-            }
-        },
+			}
+		},
 		"040_config_file_include_defs": {
 			"short_desc": "Check variables from included files",
 			"commands": [
@@ -234,11 +242,15 @@
 		},
 		"041_included": {
 			"short_desc": "Check overridden task, 1 deep",
-			"commands": [ "echo main config file" ]
+			"commands": [
+				"echo main config file"
+			]
 		},
 		"042_included": {
 			"short_desc": "Check overridden task, 2 deep",
-			"commands": [ "echo main config file" ]
+			"commands": [
+				"echo main config file"
+			]
 		},
 		"base_container_test": {
 			"short_desc": "Basic container support",
@@ -304,18 +316,20 @@
 					"{{task_dump_cmd}} info_task",
 					"{{task_dump_cmd}} -i info_task"
 				]
+			},
+			"080_recursive_fail": {
+				"base": "080_recursive_fail",
+				"short_desc": "Recursive task failure",
+				"commands": [
+					"echo This should never be printed"
+				],
+				"meta": {
+					"allowed_rc": [
+						255
+					]
+				}
+			}
 		},
-		"080_recursive_fail": {
-                        "base": "080_recursive_fail",
-			"short_desc": "Recursive task failure",
-                        "commands": [
-                                "echo This should never be printed"
-                        ],
-                        "meta": {
-                                "allowed_rc": [255]
-                        }
-		}
-	},
-	"use_default_include": false,
-	"default_container_tool": "/usr/bin/podman"
-}
+		"use_default_include": false,
+		"default_container_tool": "/usr/bin/podman"
+	}
