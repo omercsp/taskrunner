@@ -129,14 +129,14 @@ def run_test_tasks(info: TestRunInfo) -> int:
             out_file = open(out_file_path, "w") if info.diff else None
             p = subprocess.Popen(run_task_cmd, stderr=out_file, stdout=out_file, env=task_env)
             cmd_rc = p.wait()
-            if cmd_rc == 255:
-                print(f"{FAILED_STR}, Internal task error, task output:")
-                subprocess.Popen(["cat", out_file_path]).wait()
-                return 1
             allowed_rc = t_meta.get("allowed_rc", [0])
             if cmd_rc not in allowed_rc:
                 rc = 1
                 print(f"{FAILED_STR}, unallowed return code '{cmd_rc}' (allowed={allowed_rc})")
+                if out_file:
+                    print("Output file tail:\n----------")
+                    subprocess.Popen(["tail", out_file_path]).wait()
+                print("\ntaskrunner log tail:\n----------------")
                 subprocess.Popen(["tail", "/tmp/task_runner.log"]).wait()
                 if info.stop_on_failure:
                     return 1
