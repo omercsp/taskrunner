@@ -1,17 +1,19 @@
-Name                    Flags Description
-----                    ----- -----------
-bad_task                      <error: No such task 'no-such-task'>
-not_abstract_task       *     Inherits abstract task from included file
-task_1                        A task to remember
-task_2                        A task that remembers
-unhidden_task                 Task based on a hidden task
-Name                    Flags Description
-----                    ----- -----------
-abstract_task           A     Inherits abstract class from included file
-bad_task                      <error: No such task 'no-such-task'>
-hidden_task             H     A task that is hidden
-not_abstract_but_hidden H     Inherits abstract task, but still hidden
-not_abstract_task       *     Inherits abstract task from included file
-task_1                        A task to remember
-task_2                        A task that remembers
-unhidden_task                 Task based on a hidden task
+Name                                      Flags       Description
+----                                      -----       -----------
+a_very_long_task_name_with_lots_of_wo...              Even longer description string with lots and lots of...
+bad_task                                  <error: No such task 'no-such-task'>
+not_abstract_task                         *           Inherits abstract task from included file
+task_1                                                A task to remember
+task_2                                                A task that remembers
+unhidden_task                                         Task based on a hidden task
+Name                                      Flags       Description
+----                                      -----       -----------
+a_very_long_task_name_with_lots_of_wo...              Even longer description string with lots and lots of...
+abstract_task                             A           Inherits abstract class from included file
+bad_task                                  <error: No such task 'no-such-task'>
+hidden_task                               H           A task that is hidden
+not_abstract_but_hidden                   H           Inherits abstract task, but still hidden
+not_abstract_task                         *           Inherits abstract task from included file
+task_1                                                A task to remember
+task_2                                                A task that remembers
+unhidden_task                                         Task based on a hidden task

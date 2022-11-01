@@ -122,11 +122,24 @@ def show_task_info(config: Config) -> None:
 
 
 def list_tasks(config: Config) -> None:
+    def _display_token(token: Optional[str], max_len: int) -> str:
+        if not token:
+            return ""
+        if len(token) < max_len:
+            return token
+        return f"{token[:max_len - 3]}..."
+
+    _max_name_print_len = 40
+    _max_desc_print_len = 55
+    _flags_str_len = 10
+    # 2 for spaces between description and flags
+    _error_max_str_len = _max_desc_print_len + _flags_str_len + 2
     show_all: bool = config.args.all
     names_only: bool = config.args.names_only
     info("Listing tasks show_all={} names_only={}", show_all, names_only)
-    print_fmt = "{:<24}{:<6}{}"
-    err_print_fmt = "{:<30}{}"
+    #  This is hard to decipher, but '{{}}' is a way to escape a '{}'
+    print_fmt = f"{{:<{_max_name_print_len}}}  {{:<{_flags_str_len}}}  {{}}"
+    err_print_fmt = f"{{:<{_max_name_print_len}}}  {{}}"
     default_task_name = config.default_task_name()
 
     if not names_only:
@@ -136,18 +149,15 @@ def list_tasks(config: Config) -> None:
         try:
             t = Task(task_name, config=config)
         except TaskException as e:
-            print(err_print_fmt.format(task_name, f"<error: {e}>"))
+            error_str = _display_token(f"<error: {e}>", _error_max_str_len)
+            name_str = _display_token(task_name, _max_name_print_len)
+            print(err_print_fmt.format(name_str, error_str))
             continue
         if not show_all and (t.hidden or t.abstract):
             continue
         if names_only:
             print(task_name, end=' ')
             continue
-
-        if t.short_desc:
-            desc = t.short_desc if len(t.short_desc) <= 55 else t.short_desc[:52] + "..."
-        else:
-            desc = ""
 
         flags = ""
         if t.abstract:
@@ -157,7 +167,8 @@ def list_tasks(config: Config) -> None:
         elif task_name == default_task_name:
             flags += "*"
 
-        print(print_fmt.format(task_name, flags, desc[-55:]))
+        print(print_fmt.format(_display_token(task_name, _max_name_print_len),
+              flags, _display_token(t.short_desc, _max_desc_print_len)))
 
 
 def args_update(task, args: Args) -> None:

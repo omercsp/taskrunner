@@ -30,6 +30,9 @@
 		"bad_task": {
 			"base": "no-such-task",
 			"short_desc": "This will not be displayed"
+		},
+		"a_very_long_task_name_with_lots_of_words_and whatever": {
+			"short_desc": "Even longer description string with lots and lots of words"
 		}
 	},
 	"default_task": "not_abstract_task",
