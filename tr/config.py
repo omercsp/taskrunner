@@ -91,9 +91,10 @@ class Config(object):
         cwd = os.getcwd()
         const_vars[AutoVarsKeys.CWD] = cwd
         if conf_path:
-            const_vars[AutoVarsKeys.TASK_ROOT] = os.path.dirname(conf_path)
-        else:
-            const_vars[AutoVarsKeys.TASK_ROOT] = cwd
+            conf_dir_name = os.path.dirname(conf_path)
+            if conf_dir_name:
+                const_vars[AutoVarsKeys.TASK_ROOT] = os.path.dirname(conf_path)
+        const_vars.setdefault(AutoVarsKeys.TASK_ROOT, cwd)
         if args and args.__contains__(AutoVarsKeys.TASK_CLI_ARGS):
             const_vars[AutoVarsKeys.TASK_CLI_ARGS] = " ".join(
                 args.__getattribute__(AutoVarsKeys.TASK_CLI_ARGS))
