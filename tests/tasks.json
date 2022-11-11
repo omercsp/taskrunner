@@ -397,6 +397,47 @@
 					255
 				]
 			}
+		},
+		"090_pre_post_base": {
+			"commands": [
+				"echo \"XXX\""
+			],
+			"abstract": true
+		},
+		"090a_pre_post": {
+			"base": "090_pre_post_base",
+			"short_desc": "Pre/Post commands test (a)",
+			"pre_commands": [
+				"echo \"YYY\""
+			],
+			"post_commands": [
+				"echo \"ZZZ\""
+			]
+		},
+		"090b_pre_post": {
+			"short_desc": "Pre/Post commands test (b)",
+			"pre_commands": [
+				"echo \"AAA\""
+			],
+			"commands": [
+				"echo \"BBB\""
+			],
+			"post_commands": [
+				"echo \"CCC\""
+			]
+		},
+		"090c_pre_post": {
+			"base": "090b_pre_post",
+			"short_desc": "Pre/Post commands test (c)",
+			"pre_commands": [
+				"echo \"111\""
+			],
+			"commands": [
+				"echo \"222\""
+			],
+			"post_commands": [
+				"echo \"333\""
+			]
 		}
 	},
 	"use_default_include": false,
