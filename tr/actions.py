@@ -78,7 +78,7 @@ def _show_task(task: Task, full_details: bool) -> None:
         if task.c_shell:
             print_val("  Shell path:", task.c_shell_path)
         if task.c_flags:
-            print_blob("  Run/Exec flags:", task.c_flags)
+            print_blob("  Additional flags:", task.c_flags)
         if task.c_cwd:
             print_blob("  Working directory:", _task_str(task.c_cwd))
         if len(task.c_volumes) == 1:
