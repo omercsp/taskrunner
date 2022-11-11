@@ -1,6 +1,8 @@
 {
 	"$schema": "/home/omer/devel/taskrunner/schemas/taskrunner_v0.7.json",
-	"include": ["{{taskRoot}}/base_tasks_b.json"],
+	"include": [
+		"{{taskRoot}}/base_tasks_b.json"
+	],
 	"variables": {
 		"aux_dir": "{{taskRoot}}/aux",
 		"var0": "var0",
@@ -18,7 +20,9 @@
 	"tasks": {
 		"001_simple": {
 			"short_desc": "Simple echo",
-			"commands": [ "echo \"XXX\"" ]
+			"commands": [
+				"echo \"XXX\""
+			]
 		},
 		"001b_simple": {
 			"base": "001_simple",
@@ -26,13 +30,19 @@
 		},
 		"002_simple_env": {
 			"short_desc": "Simple echo with environment variable",
-			"env": {"V0": "42"},
-			"commands": ["printenv V0"]
+			"env": {
+				"V0": "42"
+			},
+			"commands": [
+				"printenv V0"
+			]
 		},
 		"002b_simple_env": {
 			"base": "002_simple_env",
 			"short_desc": "Simple echo with environment variable (based on 002_simple_env)",
-			"env": {"V0": "43"}
+			"env": {
+				"V0": "43"
+			}
 		},
 		"003_stop_on_error": {
 			"short_desc": "Validate stop on error behavior",
@@ -43,7 +53,9 @@
 				"echo message2"
 			],
 			"meta": {
-				"allowed_rc": [1]
+				"allowed_rc": [
+					1
+				]
 			}
 		},
 		"004_continue_on_error": {
@@ -51,21 +63,29 @@
 			"short_desc": "Validate continue on error behavior",
 			"stop_on_error": false,
 			"meta": {
-				"allowed_rc": [1]
+				"allowed_rc": [
+					1
+				]
 			}
 		},
 		"005_bash_multi_cmds_no_fail": {
 			"short_desc": "Validate mulit bash commands not allowed to fail",
 			"shell": true,
-			"commands":  ["true && echo message1 && false && echo message2"],
+			"commands": [
+				"true && echo message1 && false && echo message2"
+			],
 			"meta": {
-				"allowed_rc": [1]
+				"allowed_rc": [
+					1
+				]
 			}
 		},
 		"006_bash_multi_cmds_allow_fail": {
 			"short_desc": "Validate mulit bash commands allowed to fail",
 			"shell": true,
-			"commands":  ["true; echo message1; false; echo message2"]
+			"commands": [
+				"true; echo message1; false; echo message2"
+			]
 		},
 		"010_list_tasks": {
 			"short_desc": "Validate working directory as /",
@@ -110,12 +130,16 @@
 		"020_workdir_root": {
 			"short_desc": "Validate working directory as /",
 			"cwd": "/",
-			"commands":  ["pwd"]
+			"commands": [
+				"pwd"
+			]
 		},
 		"021_workdir_opt": {
 			"short_desc": "Validate working directory as /opt",
 			"cwd": "/opt",
-			"commands":  ["pwd"]
+			"commands": [
+				"pwd"
+			]
 		},
 		"022_workdir_taskroot": {
 			"short_desc": "Validate working directory as task root (autodef)",
@@ -123,7 +147,9 @@
 			"env": {
 				"EXPECTED_PWD": "{{taskRoot}}"
 			},
-			"commands": ["{{aux_dir}}/check_cwd.sh"]
+			"commands": [
+				"{{aux_dir}}/check_cwd.sh"
+			]
 		},
 		"023_var_expansion": {
 			"short_desc": "Validate variables expansion",
@@ -174,7 +200,7 @@
 				"echo \"no args\"",
 				"echo {{cliArgs}}"
 			],
-			"meta" : {
+			"meta": {
 				"args": "-- If I had wings..."
 			}
 		},
@@ -189,7 +215,7 @@
 				"MY_ENV0": "orig_value"
 			},
 			"shell": false,
-			"meta" : {
+			"meta": {
 				"args": "--env MY_ENV0=new_value --shell=yes --cwd {{optDir}} -c \"pwd; echo $MY_ENV0\""
 			}
 		},
@@ -212,7 +238,7 @@
 				"complex_var": "{{var2}} {{nothing}} {{var0}} {{tvar1}}"
 			},
 			"env": {
-					"{{env_name}}": "{{env_value}}"
+				"{{env_name}}": "{{env_value}}"
 			},
 			"commands": [
 				"printenv {{env_name}}",
@@ -255,7 +281,8 @@
 		"base_container_test": {
 			"short_desc": "Basic container support",
 			"commands": [
-				"pwd; echo $CENV0; cat /etc/os-release | grep -E \"^(ID|VERSION_ID)\"; cat /aux/volume_file.txt" ],
+				"pwd; echo $CENV0; cat /etc/os-release | grep -E \"^(ID|VERSION_ID)\"; cat /aux/volume_file.txt"
+			],
 			"c_cwd": "/opt",
 			"c_shell": true,
 			"c_env": {
@@ -282,7 +309,9 @@
 			"c_remove": false,
 			"c_exec": true,
 			"c_interactive": true,
-			"c_volumes": ["/to-be-mapped-to-opt:{{optDir}}"],
+			"c_volumes": [
+				"/to-be-mapped-to-opt:{{optDir}}"
+			],
 			"c_shell": true,
 			"c_shell_path": "/usr/bin/acme-shell"
 		},
@@ -305,31 +334,31 @@
 		},
 		"060_info": {
 			"short_desc": "Validate task info",
-				"commands": [
-					"{{task_info_cmd}} info_task",
-					"{{task_info_cmd}} -x info_task"
-				]
+			"commands": [
+				"{{task_info_cmd}} info_task",
+				"{{task_info_cmd}} -x info_task"
+			]
 		},
 		"061_dump": {
 			"short_desc": "Validate task dump",
-				"commands": [
-					"{{task_dump_cmd}} info_task",
-					"{{task_dump_cmd}} -i info_task"
-				]
-			},
-			"080_recursive_fail": {
-				"base": "080_recursive_fail",
-				"short_desc": "Recursive task failure",
-				"commands": [
-					"echo This should never be printed"
-				],
-				"meta": {
-					"allowed_rc": [
-						255
-					]
-				}
-			}
+			"commands": [
+				"{{task_dump_cmd}} info_task",
+				"{{task_dump_cmd}} -i info_task"
+			]
 		},
-		"use_default_include": false,
-		"default_container_tool": "/usr/bin/podman"
-	}
+		"080_recursive_fail": {
+			"base": "080_recursive_fail",
+			"short_desc": "Recursive task failure",
+			"commands": [
+				"echo This should never be printed"
+			],
+			"meta": {
+				"allowed_rc": [
+					255
+				]
+			}
+		}
+	},
+	"use_default_include": false,
+	"default_container_tool": "/usr/bin/podman"
+}

@@ -5,22 +5,31 @@
 	"tasks": {
 		"test": {
 			"short_desc": "Run test",
-			"commands": ["tests/tr_test {{cliArgs}}"],
+			"commands": [
+				"tests/tr_test {{cliArgs}}"
+			],
 			"cwd": "{{taskRoot}}"
 		},
 		"build": {
 			"short_desc": "Build package",
-			"commands": ["rm -rf dist", "python3 -m build"],
+			"commands": [
+				"rm -rf dist",
+				"python3 -m build"
+			],
 			"cwd": "{{taskRoot}}"
 		},
 		"upload-testpypi": {
 			"short_desc": "Build package to testpypi",
-			"commands": ["python3 -m twine upload --repository testpypi dist/*"],
+			"commands": [
+				"python3 -m twine upload --repository testpypi dist/*"
+			],
 			"cwd": "{{taskRoot}}"
 		},
 		"upload-pypi": {
 			"short_desc": "Build package to pypi",
-			"commands": ["python3 -m twine upload dist/*"],
+			"commands": [
+				"python3 -m twine upload dist/*"
+			],
 			"cwd": "{{taskRoot}}"
 		},
 		"test_pkg_base": {
