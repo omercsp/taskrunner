@@ -87,7 +87,7 @@ def run_test_tasks(info: TestRunInfo) -> int:
         except KeyError:
             raise TaskTestException(f"Unknown task '{t_name}'")
         t_meta = task.get("meta", {})
-        if task.get("abstract", False):
+        if task.get("abstract", False) or t_meta.get("internal", False):
             continue
         print_t_name = "{:<40}".format(
             Colors.BOLD + t_name + Colors.RESET if info.show_colors else t_name)
