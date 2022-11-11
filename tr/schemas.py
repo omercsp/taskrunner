@@ -33,7 +33,9 @@ class TaskKeys(object):
     Abstract = "abstract"
     ShortDesc = "short_desc"
     LongDesc = "description"
+    PreCommands = "pre_commands"
     Commands = "commands"
+    PostCommands = "post_commands"
     StopOnError = "stop_on_error"
     Meta = "meta"
     Variables = _CommonKeys.Variables
@@ -73,6 +75,14 @@ _task_schema = {
         TaskKeys.ShortDesc: {"type": "string", "maxLength": 75},
         TaskKeys.LongDesc: {"type": "string"},
         TaskKeys.Commands: {
+            "type": "array",
+            "items": {"type": "string", "minLength": 1}
+        },
+        TaskKeys.PostCommands: {
+            "type": "array",
+            "items": {"type": "string", "minLength": 1}
+        },
+        TaskKeys.PreCommands: {
             "type": "array",
             "items": {"type": "string", "minLength": 1}
         },

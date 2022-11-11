@@ -140,6 +140,15 @@ class Config(object):
         except KeyError:
             raise TaskException(f"No such task '{name}'")
 
+    @staticmethod
+    def _consolidate_commands(task_desc: dict) -> None:
+            task_desc[TaskKeys.Commands] = \
+               task_desc.get(TaskKeys.PreCommands, []) + \
+               task_desc.get(TaskKeys.Commands, []) + \
+               task_desc.get(TaskKeys.PostCommands, [])
+            task_desc.pop(TaskKeys.PreCommands, None)
+            task_desc.pop(TaskKeys.PostCommands, None)
+
     def _task_desc(self, name: str, included_list: set) -> dict:
         if name in included_list:
             raise TaskException(f"Ineritance loop detected for task '{name}'")
@@ -149,6 +158,7 @@ class Config(object):
 
         ret_task_name = base_task.get(TaskKeys.Base, None)
         if ret_task_name is None:
+            Config._consolidate_commands(base_task)
             return base_task
 
         hidden = base_task.get(TaskKeys.Hidden, False)
@@ -159,10 +169,12 @@ class Config(object):
         ret_task = self._task_desc(ret_task_name, included_list=included_list).copy()
         variables = ret_task.get(TaskKeys.Variables, {})
         variables.update(base_variables)
+
         ret_task.update(base_task)
         ret_task[TaskKeys.Variables] = variables
         ret_task[TaskKeys.Hidden] = hidden
         ret_task[TaskKeys.Abstract] = abstract
+        Config._consolidate_commands(ret_task)
         return ret_task
 
     def get_task_desc(self, name: str, includes: bool) -> typing.Dict[str, typing.Any]:
