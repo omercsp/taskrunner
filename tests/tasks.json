@@ -289,7 +289,7 @@
 				"CENV0": "value0"
 			},
 			"c_volumes": [
-				"{{cwd}}/aux:/aux"
+				"{{taskRoot}}/aux:/aux"
 			],
 			"abstract": true
 		},
