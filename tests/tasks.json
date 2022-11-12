@@ -44,6 +44,32 @@
 				"V0": "43"
 			}
 		},
+		"002c_env_inherit": {
+			"base": "002_simple_env",
+			"short_desc": "Inherit environment variable from",
+			"env": {
+				"V1": "43"
+			},
+			"post_commands": [
+				"printenv V1"
+			]
+		},
+		"002d_no_env_inherit": {
+			"base": "002_simple_env",
+			"short_desc": "Don't inherit environment from base",
+			"env": {
+				"V1": "43"
+			},
+			"inherit_env": false,
+			"pre_commands": [
+				"printenv V1"
+			],
+			"meta": {
+				"allowed_rc": [
+					1
+				]
+			}
+		},
 		"003_stop_on_error": {
 			"short_desc": "Validate stop on error behavior",
 			"commands": [
@@ -258,6 +284,15 @@
 				"env_value": "derived_task_env_value"
 			}
 		},
+		"033c_task_vars_no_inherit": {
+			"base": "033_task_vars",
+			"short_desc": "Check variables override by CLI args",
+			"inherit_variables": false,
+			"variables": {
+				"var1": "derived_task_override_var1",
+				"var2": "derived_task_override_var2"
+			}
+		},
 		"040_config_file_include_defs": {
 			"short_desc": "Check variables from included files",
 			"commands": [
@@ -302,6 +337,16 @@
 			"base": "base_container_test",
 			"short_desc": "Basic container support o/Rocky 8.5",
 			"c_image": "docker.io/rockylinux/rockylinux:8.5"
+		},
+		"052_container_no_inherit": {
+			"base": "base_container_test",
+			"short_desc": "Check no inheritance settings for container",
+			"c_image": "docker.io/rockylinux/rockylinux:8.5",
+			"c_inherit_volumes": false,
+			"c_inherit_env": false,
+			"c_volumes": [
+				"{{taskRoot}}/aux2:/aux"
+			]
 		},
 		"info_task": {
 			"short_desc": "Dummy task for info/dump validations",
