@@ -43,8 +43,6 @@
         "{{var0}}": "{{var1}}",
         "{{var1}}": "{{var0}}"
     },
-    "hidden": false,
-    "abstract": false,
     "cwd": "{{optDir}}",
     "commands": [
         "a command",
@@ -62,8 +60,7 @@
         "/to-be-mapped-to-opt:{{optDir}}"
     ],
     "c_shell": true,
-    "c_shell_path": "/usr/bin/acme-shell",
-    "variables": {}
+    "c_shell_path": "/usr/bin/acme-shell"
 }
 
 ----- Task descriptor, container, ,exec, no inclusion ------
@@ -87,8 +84,6 @@
         "{{var0}}": "{{var1}}",
         "{{var1}}": "{{var0}}"
     },
-    "hidden": false,
-    "abstract": false,
     "cwd": "{{optDir}}",
     "commands": [
         "a command",
@@ -107,7 +102,6 @@
     ],
     "c_shell": false,
     "c_shell_path": "/usr/bin/acme-shell",
-    "variables": {},
     "c_exec": true,
     "c_flags": "--priviliged"
 }

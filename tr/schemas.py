@@ -26,6 +26,7 @@ class TaskKeys(object):
     Shell = "shell"
     ShellPath = "shell_path"
     Env = "env"
+    InheritEnv = "inherit_env"
     InheritOsEnv = "inherit_os_env"
     Cwd = "cwd"
     Base = "base"
@@ -39,10 +40,12 @@ class TaskKeys(object):
     StopOnError = "stop_on_error"
     Meta = "meta"
     Variables = _CommonKeys.Variables
+    InheritVariables = "inherit_variables"
     # Container settings
     CImage = "c_image"
     CTool = "c_container_tool"
     CVolumes = "c_volumes"
+    CInheritVolumes = "c_inherit_volumes"
     CInteractive = "c_interactive"
     CTty = "c_tty"
     CFlags = "c_flags"
@@ -52,6 +55,7 @@ class TaskKeys(object):
     CShell = "c_shell"
     CShellPath = "c_shell_path"
     CEnv = "c_env"
+    CInheritEnv = "c_inherit_env"
     CCwd = "c_cwd"
 
 
@@ -96,16 +100,19 @@ _task_schema = {
             }
         },
         TaskKeys.InheritOsEnv: {"type": "boolean"},
+        TaskKeys.InheritEnv: {"type": "boolean"},
         TaskKeys.StopOnError: {"type": "boolean"},
         TaskKeys.Hidden: {"type": "boolean"},
         TaskKeys.Abstract: {"type": "boolean"},
         TaskKeys.Variables: {"type": "object"},
+        TaskKeys.InheritVariables: {"type": "boolean"},
         TaskKeys.CImage: {"type": "string"},
         TaskKeys.CTool: {"type": "string"},
         TaskKeys.CVolumes: {
             "type": "array",
             "items": {"type": "string"}
         },
+        TaskKeys.CInheritVolumes: {"type": "boolean"},
         TaskKeys.CInteractive: {"type": "boolean"},
         TaskKeys.CTty: {"type": "boolean"},
         TaskKeys.CRemove: {"type": "boolean"},
@@ -121,6 +128,7 @@ _task_schema = {
                 "type": "string"
             }
         },
+        TaskKeys.CInheritEnv: {"type": "boolean"},
         TaskKeys.Meta: {"type": "object"},
     },
     "additionalProperties": False

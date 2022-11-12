@@ -3,7 +3,7 @@ from tr.common import *
 import os
 import pathlib
 import json
-from typing import Optional
+from typing import Optional, Set
 from argparse import Namespace as Args
 
 
@@ -149,33 +149,58 @@ class Config(object):
             task_desc.pop(TaskKeys.PreCommands, None)
             task_desc.pop(TaskKeys.PostCommands, None)
 
+    @staticmethod
+    def update_task_desc(tgt_desc: dict, derived_desc:dict, merge: typing.Set[str]) -> None:
+        for k, v in derived_desc.items():
+            value_type = type(v)
+            if k in merge and not (value_type is dict or value_type is list):
+                raise TaskException(f"Unmergeable value '{k}' {type(v)}")
+
+            if k in merge and k in tgt_desc:
+                if value_type is dict:
+                    if type(tgt_desc[k]) is not dict:
+                        raise TaskException(f"Expecetd dictionary for key '{k}'")
+                    tgt_desc[k].update(v)
+                    continue
+                if value_type is list:
+                    if type(tgt_desc[k]) is not list:
+                        raise TaskException(f"Expecetd list for key '{k}'")
+                    tgt_desc[k] += v
+                    continue
+            tgt_desc[k] = v
+
+
     def _task_desc(self, name: str, included_list: set) -> dict:
         if name in included_list:
             raise TaskException(f"Ineritance loop detected for task '{name}'")
 
         included_list.add(name)
-        base_task = self._raw_task_obj(name)
+        derived_desc = self._raw_task_obj(name)
 
-        ret_task_name = base_task.get(TaskKeys.Base, None)
-        if ret_task_name is None:
-            Config._consolidate_commands(base_task)
-            return base_task
+        ret_task_name = derived_desc.get(TaskKeys.Base, None)
+        if ret_task_name is None or not ret_task_name.strip():
+            Config._consolidate_commands(derived_desc)
+            return derived_desc
 
-        hidden = base_task.get(TaskKeys.Hidden, False)
-        abstract = base_task.get(TaskKeys.Abstract, False)
-        base_variables = base_task.get(TaskKeys.Variables, {})
+        merge = set()
+        if derived_desc.get(TaskKeys.InheritVariables, True):
+            merge.add(TaskKeys.Variables)
+        if derived_desc.get(TaskKeys.InheritEnv, True):
+            merge.add(TaskKeys.Env)
+        if derived_desc.get(TaskKeys.CInheritEnv, True):
+            merge.add(TaskKeys.CEnv)
+        if derived_desc.get(TaskKeys.CInheritVolumes, True):
+            merge.add(TaskKeys.CVolumes)
 
         # We about to modify the included object, so deep copy it
-        ret_task = self._task_desc(ret_task_name, included_list=included_list).copy()
-        variables = ret_task.get(TaskKeys.Variables, {})
-        variables.update(base_variables)
+        ret_desc = self._task_desc(ret_task_name, included_list=included_list).copy()
+        for k in [TaskKeys.Hidden, TaskKeys.Abstract, TaskKeys.InheritEnv, TaskKeys.InheritVariables,
+                  TaskKeys.CInheritEnv, TaskKeys.CInheritVolumes]:
+            ret_desc.pop(k, None)
+        Config.update_task_desc(ret_desc, derived_desc, merge)
 
-        ret_task.update(base_task)
-        ret_task[TaskKeys.Variables] = variables
-        ret_task[TaskKeys.Hidden] = hidden
-        ret_task[TaskKeys.Abstract] = abstract
-        Config._consolidate_commands(ret_task)
-        return ret_task
+        Config._consolidate_commands(ret_desc)
+        return ret_desc
 
     def get_task_desc(self, name: str, includes: bool) -> typing.Dict[str, typing.Any]:
         verbose("Task '{}' requested, with_inclusions={}", name, includes)
