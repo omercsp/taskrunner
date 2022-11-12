@@ -196,9 +196,9 @@
 		"030_args_handling": {
 			"short_desc": "Check arguments handling",
 			"commands": [
-				"echo {{cliArgs}}",
+				"echo cliArgs={{cliArgs}}",
 				"echo \"no args\"",
-				"echo {{cliArgs}}"
+				"echo cliArgs={{cliArgs}}"
 			],
 			"meta": {
 				"args": "-- If I had wings..."
@@ -242,12 +242,12 @@
 			},
 			"commands": [
 				"printenv {{env_name}}",
-				"echo {{var0}}",
-				"echo {{var1}}",
-				"echo {{var2}}",
-				"echo {{tvar0}}",
-				"echo {{tvar1}}",
-				"echo {{complex_var}}"
+				"echo var0={{var0}}",
+				"echo var1={{var1}}",
+				"echo var2={{var2}}",
+				"echo tvar0={{tvar0}}",
+				"echo tvar1={{tvar1}}",
+				"echo complex_var={{complex_var}}"
 			]
 		},
 		"033b_task_vars": {
@@ -261,9 +261,9 @@
 		"040_config_file_include_defs": {
 			"short_desc": "Check variables from included files",
 			"commands": [
-				"echo {{base_var0}}",
-				"echo {{base_var1}}",
-				"echo {{base_var2}}"
+				"echo base_var0={{base_var0}}",
+				"echo base_var1={{base_var1}}",
+				"echo base_var2={{base_var2}}"
 			]
 		},
 		"041_included": {

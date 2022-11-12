@@ -1,3 +1,3 @@
-from_base a 0
-from-base b 1
-from main tasks file
+base_var0=from_base a 0
+base_var1=from-base b 1
+base_var2=from main tasks file
