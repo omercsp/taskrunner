@@ -28,7 +28,7 @@ class Task(object):
         self.shell = task_descriptor.get(TaskKeys.Shell, False)
         self.shell_path = task_descriptor.get(
             TaskKeys.ShellPath, config.default_shell_path())
-        self.env_inherit = task_descriptor.get(TaskKeys.EnvInherit, True)
+        self.env_inherit = task_descriptor.get(TaskKeys.InheritOsEnv, True)
         self.env = task_descriptor.get(TaskKeys.Env, {})
         self.abstract = task_descriptor.get(TaskKeys.Abstract, False)
 

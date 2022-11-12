@@ -26,7 +26,7 @@ class TaskKeys(object):
     Shell = "shell"
     ShellPath = "shell_path"
     Env = "env"
-    EnvInherit = "env_inherit"
+    InheritOsEnv = "inherit_os_env"
     Cwd = "cwd"
     Base = "base"
     Hidden = "hidden"
@@ -95,7 +95,7 @@ _task_schema = {
                 "type": "string"
             }
         },
-        TaskKeys.EnvInherit: {"type": "boolean"},
+        TaskKeys.InheritOsEnv: {"type": "boolean"},
         TaskKeys.StopOnError: {"type": "boolean"},
         TaskKeys.Hidden: {"type": "boolean"},
         TaskKeys.Abstract: {"type": "boolean"},
