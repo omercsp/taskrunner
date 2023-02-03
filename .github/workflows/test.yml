@@ -8,42 +8,22 @@ defaults:
   run:
     shell: bash
 jobs:
-  linux:
-    runs-on: ubuntu-20.04
+  test:
     strategy:
       matrix:
         python-version: ["3.6", "3.7", "3.8", "3.9", "3.10", "3.11"]
+        os: ["ubuntu-20.04", "macos-latest"]
+    runs-on: ${{matrix.os}}
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
+      - name: Setup
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          podman pull docker.io/rockylinux/rockylinux:8.5
-          podman pull docker.io/library/ubuntu:20.04
+          tests/github/setup.sh
       - name: Run test
         run: |
-          tests/tr_test --no-colors
-  darwin:
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10"]
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          brew install coreutils
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-      - name: Run test
-        run: |
-          tests/tr_test --no-colors --no-containers
+          tests/github/run_test.sh
