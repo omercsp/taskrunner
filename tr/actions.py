@@ -84,16 +84,13 @@ def _show_task(task: Task, full_details: bool) -> None:
         if len(task.c_volumes) == 1:
             print_blob("  Volume:", _task_str(task.c_volumes[0]))
         elif len(task.c_volumes) > 1:
-            count = 0
             print("  Volumes:")
-            for vol in task.c_volumes:
-                print_blob(f"       [{count}]", _task_str(vol))
-                count += 1
+            for i ,vol in enumerate(task.c_volumes):
+                print_blob(f"       [{i}]", _task_str(vol))
         if task.c_env:
             print("  Environment:")
-            for k, v in task.c_env.items():
-                print_blob(f"       [{count}]", f"{k}={v}")
-                count += 1
+            for i, (k, v) in enumerate(task.c_env.items()):
+                print_blob(f"       [{i}]", f"{k}={v}")
 
     if len(task.commands) == 0:
         if task.c_image is None:
@@ -107,10 +104,8 @@ def _show_task(task: Task, full_details: bool) -> None:
 
     print_bool("Stop on error:", task.stop_on_error)
     print("Commands:")
-    count = 0
-    for cmd in task.commands:
-        print_blob(f"     [{count}]", _task_str(cmd))
-        count += 1
+    for i, cmd in enumerate(task.commands):
+        print_blob(f"     [{i}]", _task_str(cmd))
 
 
 def show_task_info(config: Config) -> None:
