@@ -1,3 +1,41 @@
 [build-system]
 requires = ["setuptools>=42"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "pytaskrunner"
+dynamic = ["version"]
+description = "Shell tasks managmement tool"
+authors = [
+    {name = "Omer Caspi", email = "omer.caspi@gmail.com"},
+]
+readme = "README.md"
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Utilities",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10"
+]
+dependencies = [
+	"argcomplete>=2.0.0",
+	"jsonschema>=3.2.0"
+]
+requires-python = ">=3.6,<4"
+
+[project.urls]
+"Homepage" = "https://github.com/omercsp/taskrunner"
+
+[project.scripts]
+task = "tr.taskrun:task_runner_main"
+
+[tool.setuptools]
+packages = ["tr"]
+
+[tool.setuptools.dynamic]
+version = {attr = "tr.__VERSION__"}
