@@ -21,7 +21,7 @@ The situation might get more complicated if other commands are needed as well - 
 With TR, all these problems are solved. All that is required is a project level configuration file defining a task named `my-task` to run the horrible `my-command...` and the command becomes available all over the project hierarchy, to all users with access to the project. `task list` can be used to see what tasks are available and `task info` to understand what they are doing. As long as TR is installed, moving the project to another machine will provide all the tasks with it.
 
 # Installation and requirements
-TR is python based tool, verified for python 3.6 and above.
+TR is python based tool, verified for python 3.7 and above. Older versions might work as well, but are not actively supported and packaged so manuall install is required.
 
 To install run `pip3 install pytaskrunner`.
 
