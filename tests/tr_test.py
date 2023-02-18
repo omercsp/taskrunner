@@ -32,8 +32,6 @@ def parse_arguments():
                         help='stop on test failure')
     parser.add_argument('--no-containers', action='store_true', default=False,
                         help='don\'t container based tests')
-    parser.add_argument('--pkg', action='store_true', default=False,
-                        help='assume taskrunner was installed by a package (pip)')
     ctool_grp = parser.add_mutually_exclusive_group()
     ctool_grp.add_argument('--ctool', choices=['docker', 'podman'], default='podman',
                            help='choose container tool')
@@ -59,7 +57,6 @@ class TestRunInfo(object):
         self.taskname = args.task
         self.show_colors = not args.no_colors
         self.skip_container_tests = args.no_containers
-        self.task_bin = "task" if args.pkg else f"{SCRIPT_DIR}/../task"
         self.ctool = args.ctool_path if args.ctool_path else args.ctool
 
 
@@ -76,11 +73,9 @@ def run_test_tasks(info: TestRunInfo) -> int:
         OK_STR = "OK"
         FAILED_STR = "Failed"
 
-    base_cmd = "{} --log_file={} run --c-tool={}".format(
-        info.task_bin, LOG_FILE, info.ctool)
+    base_cmd = "task --log_file={} run --c-tool={}".format(LOG_FILE, info.ctool)
     rc = 0
     default_env = os.environ
-    default_env["task_bin"] = info.task_bin
     for t_name in info.task_list:
         try:
             task = info.tasks[t_name]

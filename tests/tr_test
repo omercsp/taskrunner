@@ -1,5 +1,9 @@
 #!/bin/bash
 
+TEST_PKG=${TEST_PKG:-0}
+TEST_PYPI=${TEST_PYPI:-0}
+TR_TEST=tr_test.py
+
 # Stupid Apple
 if [[ ${OSTYPE} == 'darwin'* ]]; then
 	READLINK="greadlink"
@@ -9,5 +13,45 @@ fi
 
 SCRIPT_FILE="$(${READLINK} -f ${BASH_SOURCE[0]})"
 SCRIPT_DIR="$(dirname $SCRIPT_FILE)"
+venv_dir=""
 
-python3 ${SCRIPT_DIR}/tr_test.py "$@"
+_abort()
+{
+	echo $*
+	echo
+	exit 1
+}
+
+
+_build_pkg_venv()
+{
+    [[ -n ${VENV_ACTIVATE} ]] && \
+            _abort "Virtual environment is activate. Deactivate and run again"
+
+    if [[ ${TEST_PYPI} -eq 1 ]]; then
+            REPO_FLAGS="-i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple/"
+    fi
+    venv_dir=$(mktemp -d)
+    echo "Creating venv at ${venv_dir}"
+    python -m venv ${venv_dir}
+    source ${venv_dir}/bin/activate
+
+    pip install pytaskrunner
+    which task
+}
+
+_fini_pkg_env()
+{
+    deactivate
+    [[ -n ${venv_dir} && -d ${venv_dir} ]] && rm -rf ${venv_dir}
+}
+
+cd ${SCRIPT_DIR}
+[[ ! -e ${TR_TEST} ]] && _abort  "'${TR_TEST} can't be found in current directory"
+[[ ${TEST_PKG} -eq 1 ]] && _build_pkg_venv
+
+python3 ${TR_TEST} "$@"
+ret=$?
+[[ ${TEST_PKG} -eq 1 ]] && _fini_pkg_env
+
+exit ${ret}
