@@ -1,22 +1,26 @@
 #!/bin/bash
-# Stupid Apple
-if [[ ${OSTYPE} == 'darwin'* ]]; then
-	READLINK="greadlink"
-else
-	READLINK="readlink"
-fi
 
-SCRIPT_FILE="$(${READLINK} -f ${BASH_SOURCE[0]})"
-SCRIPT_DIR="$(dirname $SCRIPT_FILE)"
+_venv_activate()
+{
+	[[ -n ${VENV_ACTIVATE} ]] && return
 
-# Source virtual environment file if such exist
-if [[ -z ${VENV_ACTIVATE} ]]; then
-	for e in env venv .env .venv; do
+	# Stupid Apple
+	if [[ ${OSTYPE} == 'darwin'* ]]; then
+		READLINK="greadlink"
+	else
+		READLINK="readlink"
+	fi
+
+	SCRIPT_FILE="$(${READLINK} -f ${BASH_SOURCE[0]})"
+	SCRIPT_DIR="$(dirname $SCRIPT_FILE)"
+	for e in .venv venv env .env; do
 		activate_file=${SCRIPT_DIR}/${e}/bin/activate
-		if [[ -e ${activate_file} ]]; then
+		if [[ -f ${activate_file} ]]; then
 			source ${activate_file}
 			break
 		fi
 	done
-fi
+}
+
+_venv_activate
 python3 -m tr "$@"
