@@ -23,7 +23,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Setup
         run: |
-          tests/github/setup.sh
+          .github/scripts/setup.sh
       - name: Run test
         run: |
-          tests/github/run_test.sh
+          .github/scripts/run_test.sh
