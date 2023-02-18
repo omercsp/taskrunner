@@ -19,5 +19,4 @@ if [[ -z ${VENV_ACTIVATE} ]]; then
 		fi
 	done
 fi
-export PYTHONPATH=${SCRIPT_DIR}
-python3 ${SCRIPT_DIR}/task.py "$@"
+python3 -m tr "$@"

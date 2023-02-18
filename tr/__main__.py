@@ -125,7 +125,7 @@ def _parse_arguments() -> argparse.Namespace:
     return args
 
 
-def task_runner_main() -> int:
+def main() -> int:
     try:
         args = _parse_arguments()
         init_logging(args.log_file, args.verbose)
@@ -153,3 +153,7 @@ def task_runner_main() -> int:
         error_and_print(str(e))
         return 255
     return 0
+
+
+if __name__ == "__main__":
+    exit(main())

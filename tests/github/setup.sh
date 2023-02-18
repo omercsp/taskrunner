@@ -13,3 +13,5 @@ if [[ ${OS} == "Linux" ]]; then
 	podman pull docker.io/library/ubuntu:20.04
 fi
 
+pip install -e .
+
