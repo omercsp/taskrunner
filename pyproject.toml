@@ -35,6 +35,7 @@ task = "tr.__main__:main"
 
 [tool.setuptools]
 packages = ["tr"]
+package-dir = {'' = "src"}
 
 [tool.setuptools.dynamic]
 version = {attr = "tr.__VERSION__"}
