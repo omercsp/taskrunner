@@ -1,7 +1,7 @@
-_MAJOR_VER = 0
-_MINOR_VER = 9
-_FIX_VER = 1
-_BUILD_VER = 0
-TR_BASE_VERSION = f'{_MAJOR_VER}.{_MINOR_VER}.{_FIX_VER}'
-TR_FULL_VERSION = f'{_MAJOR_VER}.{_MINOR_VER}.{_FIX_VER}-{_BUILD_VER}'
-__VERSION__ = TR_FULL_VERSION
+import pkg_resources
+
+try:
+    _vnum = pkg_resources.get_distribution('pytaskrunner').version
+    version = f'v{_vnum}'
+except pkg_resources.DistributionNotFound:
+    version = 'v0.0.0'

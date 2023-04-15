@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=42"]
+requires = ["setuptools>=42", "setuptools-scm[toml]>=6.0.1"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -37,5 +37,5 @@ task = "tr.__main__:main"
 packages = ["tr"]
 package-dir = {'' = "src"}
 
-[tool.setuptools.dynamic]
-version = {attr = "tr.__VERSION__"}
+[tool.setuptools_scm]
+local_scheme = "dirty-tag"
