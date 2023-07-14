@@ -73,7 +73,7 @@ def run_test_tasks(info: TestRunInfo) -> int:
         OK_STR = "OK"
         FAILED_STR = "Failed"
 
-    base_cmd = "task --log_file={} run --c-tool={}".format(LOG_FILE, info.ctool)
+    base_cmd = "python -m tr --log_file={} run --c-tool={}".format(LOG_FILE, info.ctool)
     rc = 0
     default_env = os.environ
     for t_name in info.task_list:
