@@ -85,7 +85,7 @@ def _show_task(task: Task, full_details: bool) -> None:
             print_blob("  Volume:", _task_str(task.c_volumes[0]))
         elif len(task.c_volumes) > 1:
             print("  Volumes:")
-            for i ,vol in enumerate(task.c_volumes):
+            for i, vol in enumerate(task.c_volumes):
                 print_blob(f"       [{i}]", _task_str(vol))
         if task.c_env:
             print("  Environment:")

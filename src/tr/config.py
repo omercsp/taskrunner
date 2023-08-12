@@ -3,7 +3,7 @@ from tr.common import *
 import os
 import pathlib
 import json
-from typing import Optional, Set
+from typing import Optional
 from argparse import Namespace as Args
 
 
@@ -19,7 +19,6 @@ class Config(object):
         except (IOError, TypeError, ValueError, TaskException) as e:
             raise TaskException(f"Error parsing {file_path} - {e}")
         return data
-
 
     def _read_configuration(self, file_path: str, read_files: set = set()) -> dict:
         conf = {}
@@ -55,10 +54,10 @@ class Config(object):
 
         conf.update(orig_conf)
         tasks.update(orig_conf.get(GlobalKeys.Tasks, {}))
-        for supressed_task in conf.get(GlobalKeys.Suppress, []):
-            if supressed_task in tasks:
-                info("Removing suppressed task {}", supressed_task)
-                tasks.pop(supressed_task)
+        for suppressed_task in conf.get(GlobalKeys.Suppress, []):
+            if suppressed_task in tasks:
+                info("Removing suppressed task {}", suppressed_task)
+                tasks.pop(suppressed_task)
         conf[GlobalKeys.Tasks] = tasks
         variables.update(orig_conf.get(GlobalKeys.Variables, {}))
         conf[GlobalKeys.Variables] = variables
@@ -109,7 +108,7 @@ class Config(object):
         set_global_vars_map(self.conf.get(GlobalKeys.Variables, {}))
 
         if logging_enabled_for(logging.DEBUG):
-            dump_defualt_vars()
+            dump_default_vars()
 
     def default_task_name(self) -> Optional[str]:
         return self.setting(GlobalKeys.DfltTask)
@@ -142,15 +141,15 @@ class Config(object):
 
     @staticmethod
     def _consolidate_commands(task_desc: dict) -> None:
-            task_desc[TaskKeys.Commands] = \
-               task_desc.get(TaskKeys.PreCommands, []) + \
-               task_desc.get(TaskKeys.Commands, []) + \
-               task_desc.get(TaskKeys.PostCommands, [])
-            task_desc.pop(TaskKeys.PreCommands, None)
-            task_desc.pop(TaskKeys.PostCommands, None)
+        task_desc[TaskKeys.Commands] = \
+           task_desc.get(TaskKeys.PreCommands, []) + \
+           task_desc.get(TaskKeys.Commands, []) + \
+           task_desc.get(TaskKeys.PostCommands, [])
+        task_desc.pop(TaskKeys.PreCommands, None)
+        task_desc.pop(TaskKeys.PostCommands, None)
 
     @staticmethod
-    def update_task_desc(tgt_desc: dict, derived_desc:dict, merge: typing.Set[str]) -> None:
+    def update_task_desc(tgt_desc: dict, derived_desc: dict, merge: typing.Set[str]) -> None:
         for k, v in derived_desc.items():
             value_type = type(v)
             if k in merge and not (value_type is dict or value_type is list):
@@ -159,20 +158,19 @@ class Config(object):
             if k in merge and k in tgt_desc:
                 if value_type is dict:
                     if type(tgt_desc[k]) is not dict:
-                        raise TaskException(f"Expecetd dictionary for key '{k}'")
+                        raise TaskException(f"Expected dictionary for key '{k}'")
                     tgt_desc[k].update(v)
                     continue
                 if value_type is list:
                     if type(tgt_desc[k]) is not list:
-                        raise TaskException(f"Expecetd list for key '{k}'")
+                        raise TaskException(f"Expected list for key '{k}'")
                     tgt_desc[k] += v
                     continue
             tgt_desc[k] = v
 
-
     def _task_desc(self, name: str, included_list: set) -> dict:
         if name in included_list:
-            raise TaskException(f"Ineritance loop detected for task '{name}'")
+            raise TaskException(f"Inheritance loop detected for task '{name}'")
 
         included_list.add(name)
         derived_desc = self._raw_task_obj(name)
@@ -194,8 +192,8 @@ class Config(object):
 
         # We about to modify the included object, so deep copy it
         ret_desc = self._task_desc(ret_task_name, included_list=included_list).copy()
-        for k in [TaskKeys.Hidden, TaskKeys.Abstract, TaskKeys.InheritEnv, TaskKeys.InheritVariables,
-                  TaskKeys.CInheritEnv, TaskKeys.CInheritVolumes]:
+        for k in [TaskKeys.Hidden, TaskKeys.Abstract, TaskKeys.InheritEnv,
+                  TaskKeys.InheritVariables, TaskKeys.CInheritEnv, TaskKeys.CInheritVolumes]:
             ret_desc.pop(k, None)
         Config.update_task_desc(ret_desc, derived_desc, merge)
 
