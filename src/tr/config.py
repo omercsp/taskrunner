@@ -3,7 +3,7 @@ from tr.common import *
 import os
 import pathlib
 import json
-from typing import Optional, Set
+from typing import Optional
 from argparse import Namespace as Args
 
 
