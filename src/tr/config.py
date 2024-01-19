@@ -178,6 +178,9 @@ class Config(object):
         derived_desc = self._raw_task_obj(name)
 
         ret_task_name = derived_desc.get(TaskKeys.Base, None)
+        if ret_task_name is not None and not isinstance(ret_task_name, str):
+            raise TaskException((f"Invalid type base task name for task '{name}'."
+                                 f"Expected 'string' or 'None', got '{type(ret_task_name).__name__}'"))
         if ret_task_name is None or not ret_task_name.strip():
             Config._consolidate_commands(derived_desc)
             return derived_desc
