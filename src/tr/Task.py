@@ -56,7 +56,6 @@ class Task(object):
             return
         self.expander = StringVarExpander(self.vars_map)
         info(f"Expanding task '{self.name}'")
-        self.expanded = True
         self.env = {self.expander(k): self.expander(v) for k, v in self.env.items()}
         if self.cwd:
             self.cwd = self.expander(self.cwd)
@@ -131,7 +130,7 @@ class Task(object):
             raise TaskException("User interrupt")
 
     def run(self) -> int:
-        if not self.expanded:
+        if self.expander is None:
             raise TaskException("Task must be expanded before run")  # Should never happen
         if self.abstract:
             raise TaskException("Can't run abstract tasks")

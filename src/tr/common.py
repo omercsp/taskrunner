@@ -74,7 +74,7 @@ def dump_vars(vars_map: dict) -> None:
     stop_raw_logging()
 
 
-def dump_defualt_vars() -> None:
+def dump_default_vars() -> None:
     dump_vars(_default_vars_map)
 
 
