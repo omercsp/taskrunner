@@ -1,10 +1,13 @@
 from tr import version
-from tr.config import *
-from tr.schemas import AutoVarsKeys
-import tr.actions as actions
+from tr.actions import (dump_schema, run_task, SchemaDumpOpts, list_tasks, show_task_info,
+                        dump_config, dump_task)
+from tr.common import TaskException, TASK_YES_TOKEN, TASK_NO_TOKEN
+from tr.config import Config, AutoVarsKeys
+from tr.logTools import init_logging, info, error_and_print
 import argparse
 import argcomplete
 import sys
+
 
 __RUN_CMD = "run"
 __LIST_CMD = "list"
@@ -14,7 +17,7 @@ __DUMP_CONFIG_CMD = "dump_config"
 __DUMP_SCHEMA_CMD = "dump_schema"
 
 
-def _tasks_complete(**kwargs) -> typing.List[str]:
+def _tasks_complete(**kwargs) -> list[str]:
     try:
         parsed_args: argparse.Namespace = kwargs['parsed_args']
         parser_name = parsed_args.subparsers_name
@@ -34,7 +37,7 @@ def _parse_arguments() -> argparse.Namespace:
     except ValueError:
         tr_argv = sys.argv[1:]
         cmds_argv = []
-    yes_no: typing.List[str] = [TASK_YES_TOKEN, TASK_NO_TOKEN]
+    yes_no: list[str] = [TASK_YES_TOKEN, TASK_NO_TOKEN]
     parser = argparse.ArgumentParser(prog='task')
     parser.add_argument('--version', action='version', version=f'%(prog)s {version}')
     parser.add_argument('-v', '--verbose', action='count', help='log file verbosity', default=0)
@@ -139,15 +142,15 @@ def main() -> int:
 
         config = Config(args)
         if args.subparsers_name == __RUN_CMD:
-            return actions.run_task(config)
+            return run_task(config)
         elif args.subparsers_name == __LIST_CMD:
-            actions.list_tasks(config)
+            list_tasks(config)
         elif args.subparsers_name == __INFO_CMD:
-            actions.show_task_info(config)
+            show_task_info(config)
         elif args.subparsers_name == __DUMP_CONFIG_CMD:
-            actions.dump_config(config)
+            dump_config(config)
         elif args.subparsers_name == __DUMP_TASK_CMD:
-            actions.dump_task(config)
+            dump_task(config)
 
     except TaskException as e:
         error_and_print(str(e))

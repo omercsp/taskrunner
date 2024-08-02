@@ -1,0 +1,142 @@
+{
+	"variables": {
+		"task_info_cmd": "task info",
+		"task_dump_cmd": "task dump",
+		"test_cmd": "task run {{XEET_TEST_NAME}}"
+	},
+	"tests": [
+		{
+			"name": "task_base",
+			"verify_cmd": "{{XEET_ROOT}}/scripts/output_compare.sh",
+			"test_cmd": "{{test_cmd}}",
+			"abstract": true
+		},
+		{
+			"name": "001_simple",
+			"base": "task_base"
+		},
+		{
+			"name": "001b_simple",
+			"base": "task_base"
+		},
+		{
+			"name": "002_simple_env",
+			"base": "task_base"
+		},
+		{
+			"name": "002b_simple_env",
+			"base": "task_base"
+		},
+		{
+			"name": "004_continue_on_error",
+			"base": "task_base",
+			"allowed_return_codes": [1]
+		},
+		{
+			"name": "010_list_tasks",
+			"base": "task_base",
+			"shell": true,
+			"test_cmd": "task --conf tasks-for-list.json list;task --conf tasks-for-list.json list -a"
+		},
+		{
+			"name": "015a_os_env_inherit",
+			"base": "task_base",
+			"env": {
+				"ext_var": "ext_var_value"
+			}
+		},
+		{
+			"name": "015b_no_os_env_inherit",
+			"base": "015a_os_env_inherit",
+			"allowed_return_codes": [1]
+		},
+		{
+			"name": "020_workdir_root",
+			"base": "task_base"
+		},
+		{
+			"name": "021_workdir_opt",
+			"base": "task_base"
+		},
+		{
+			"name": "022_workdir_taskroot",
+			"base": "task_base"
+		},
+		{
+			"name": "023_var_expansion",
+			"base": "task_base"
+		},
+		{
+			"name": "024_var_expansion_env",
+			"base": "task_base"
+		},
+		{
+			"name": "025_env_whitespace",
+			"base": "task_base"
+		},
+		{
+			"name": "030_args_handling",
+			"base": "task_base",
+			"test_cmd": "{{test_cmd}} -- If I had wings..."
+		},
+		{
+			"name": "031_args_override",
+			"base": "task_base",
+			"test_cmd": "{{test_cmd}} --env MY_ENV0=new_value --shell=yes --cwd /opt -c \"pwd; echo $MY_ENV0\""
+		},
+		{
+			"name": "032_args_var_override",
+			"base": "task_base",
+			"test_cmd": "{{test_cmd}} -V var0=new_var0"
+		},
+		{
+			"name": "033_task_vars",
+			"base": "task_base"
+		},
+		{
+			"name": "033b_task_vars",
+			"base": "task_base"
+		},
+		{
+			"name": "033c_task_vars_no_inherit",
+			"base": "task_base"
+		},
+		{
+			"name": "040_config_file_include_defs",
+			"base": "task_base"
+		},
+		{
+			"name": "041_included",
+			"base": "task_base"
+		},
+		{
+			"name": "042_included",
+			"base": "task_base"
+		},
+		{
+			"name": "050_container_ubuntu",
+			"base": "task_base"
+		},
+		{
+			"name": "051_container_rocky",
+			"base": "task_base"
+		},
+		{
+			"name": "052_container_no_inherit",
+			"base": "task_base"
+		},
+		{
+			"name": "060_info",
+			"base": "task_base",
+			"shell": true,
+			"test_cmd":
+				"echo ----- Task info, simple, not expanded ------;{{task_info_cmd}} info_task;echo;echo ----- Task info, simple, expanded ------;{{task_info_cmd}} -x info_task;echo;echo ----- Task info, container, run, not expanded ------;{{task_info_cmd}} info_task_container;echo;echo ----- Task info, container, run, expanded ------;{{task_info_cmd}} -x info_task_container;echo;echo ----- Task info, container, exec, not expanded ------;{{task_info_cmd}} info_task_container_exec;echo;echo ----- Task info, container, exec, expanded ------;{{task_info_cmd}} -x info_task_container_exec"
+		},
+		{
+			"name": "061_dump",
+			"shell": true,
+			"test_cmd":
+				"echo ----- Task descriptor, simple ------;{{task_dump_cmd}} info_task;echo;echo ----- Task descriptor, container, no inclusion ------;{{task_dump_cmd}} info_task_container;echo;echo ----- Task descriptor, container, with inclusion ------;{{task_dump_cmd}} -i info_task_container;echo;echo ----- Task descriptor, container, ,exec, no inclusion ------;{{task_dump_cmd}} info_task_container_exec;echo;echo ----- Task descriptor, container, ,exec, with inclusion ------;{{task_dump_cmd}} -i info_task_container_exec"
+		}
+	]
+}

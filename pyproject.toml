@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=42", "setuptools-scm[toml]>=6.0.1"]
+requires = ["setuptools>=72", "setuptools_scm[toml]>=8.0.1"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -16,16 +16,16 @@ classifiers = [
     "Topic :: Utilities",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10"
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12"
 ]
 dependencies = [
 	"argcomplete>=2.0.0",
-	"jsonschema>=3.2.0"
+	"pydantic>=2.8",
+	"setuptools>=72"
 ]
-requires-python = ">=3.7,<4"
+requires-python = ">=3.10,<4"
 
 [project.urls]
 "Homepage" = "https://github.com/omercsp/taskrunner"

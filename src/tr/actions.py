@@ -85,7 +85,7 @@ def _show_task(task: Task, full_details: bool) -> None:
             print_blob("  Volume:", _task_str(task.c_volumes[0]))
         elif len(task.c_volumes) > 1:
             print("  Volumes:")
-            for i ,vol in enumerate(task.c_volumes):
+            for i, vol in enumerate(task.c_volumes):
                 print_blob(f"       [{i}]", _task_str(vol))
         if task.c_env:
             print("  Environment:")
@@ -141,12 +141,14 @@ def list_tasks(config: Config) -> None:
         print(print_fmt.format("Name", "Flags", "Description"))
         print(print_fmt.format("----", "-----", "-----------"))
     for task_name in sorted([*config.tasks]):
+        flags = ""
         try:
             t = Task(task_name, config=config)
         except TaskException as e:
             error_str = _display_token(f"<error: {e}>", _error_max_str_len)
             name_str = _display_token(task_name, _max_name_print_len)
-            print(err_print_fmt.format(name_str, error_str))
+            if not names_only:
+                print(err_print_fmt.format(name_str, error_str))
             continue
         if not show_all and (t.hidden or t.abstract):
             continue
@@ -228,9 +230,30 @@ def run_task(config: Config) -> int:
     return task.run()
 
 
+class SchemaDumpOpts(object):
+    ALL = "all"
+    CONFIG = "config"
+    TASK = "task"
+
+    CHOICES = [ALL, CONFIG, TASK]
+
+
+def dump_schema(dump_type: str) -> None:
+    if dump_type == SchemaDumpOpts.CONFIG:
+        print_dict(ConfigFileModel.model_json_schema())
+    elif dump_type == SchemaDumpOpts.TASK:
+        print_dict(TaskModel.model_json_schema())
+    elif dump_type == SchemaDumpOpts.ALL:
+        config_file_schema = ConfigFileModel.model_json_schema()
+        task_schema = TaskModel.model_json_schema()
+        config_file_schema["tasks"] = task_schema
+        print_dict(config_file_schema)
+
+
 def dump_task(config: Config) -> None:
     task_name = _active_task_name(config)
-    print(json.dumps(config.get_task_desc(task_name, config.args.includes), indent=4))
+    includes = set() if config.args.includes else None
+    print(json.dumps(config.task_desc(task_name, includes), indent=4))
 
 
 def dump_config(config: Config) -> None:

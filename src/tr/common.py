@@ -7,6 +7,7 @@ import traceback
 import json
 import copy
 from typing import Optional
+from pydantic import ValidationError
 
 TASK_YES_TOKEN = 'yes'
 TASK_NO_TOKEN = 'no'
@@ -124,3 +125,14 @@ def bt() -> None:
 
 def print_dict(d: dict) -> None:
     print(json.dumps(d, indent=4))
+
+
+def pydantic_errmsg(ve: ValidationError) -> str:
+    errs = []
+    for e in ve.errors():
+        try:
+            loc = "/".join(str(i) for i in e["loc"])
+            errs.append(f"{loc}: {e['msg']}")
+        except Exception:
+            errs.append(str(e))
+    return "\n".join(errs)

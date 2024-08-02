@@ -5,6 +5,8 @@ pyrightconfig.json
 __pycache__/
 tests/output
 tests/intermediate.expected
+tests/xeet.log
+tests/xeet.out
 
 # Virtual Environments
 .env/

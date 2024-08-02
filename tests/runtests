@@ -1,0 +1,10 @@
+#!/bin/bash
+set -e
+PROJ_ROOT=$(git rev-parse --show-toplevel)
+source ${PROJ_ROOT}/venv.inc.sh
+
+cd ${PROJ_ROOT}/tests
+cmd="xeet run --log-file=xeet.log -c xeet.json $*"
+echo "Running: ${cmd}"
+${cmd}
+

@@ -1,0 +1,131 @@
+----- Task info, simple, not expanded ------
+Task name:              info_task
+Short description:      Dummy task for info/dump validations
+Hidden:                 Yes
+Abstract:               Yes
+Use shell:              No
+Inherit environment     Yes
+Environment:
+     [0]                {{var0}}={{var1}}
+     [1]                {{var1}}={{var0}}
+Working directory:      {{optDir}}
+Stop on error:          Yes
+Commands:
+     [0]                a command
+     [1]                another command
+     [2]                yet another command
+
+----- Task info, simple, expanded ------
+Task name:              info_task
+Short description:      Dummy task for info/dump validations
+Hidden:                 Yes
+Abstract:               Yes
+Use shell:              No
+Inherit environment     Yes
+Environment:
+     [0]                var0=var1
+     [1]                var1=var0
+Working directory:      /opt
+Stop on error:          Yes
+Commands:
+     [0]                a command
+     [1]                another command
+     [2]                yet another command
+
+----- Task info, container, run, not expanded ------
+Task name:              info_task_container
+Short description:      Dummy task for info/dump validations
+Hidden:                 No
+Abstract:               No
+Use shell:              No
+Inherit environment     Yes
+Environment:
+     [0]                {{var0}}={{var1}}
+     [1]                {{var1}}={{var0}}
+Working directory:      {{optDir}}
+Container details:
+  Run image:            a-wonderfull-image
+  Remove:               No
+  Interactive:          Yes
+  Allocate tty:         No
+  Use shell:            Yes
+  Shell path:           /usr/bin/acme-shell
+  Volume:               /to-be-mapped-to-opt:{{optDir}}
+Stop on error:          Yes
+Commands:
+     [0]                a command
+     [1]                another command
+     [2]                yet another command
+
+----- Task info, container, run, expanded ------
+Task name:              info_task_container
+Short description:      Dummy task for info/dump validations
+Hidden:                 No
+Abstract:               No
+Use shell:              No
+Inherit environment     Yes
+Environment:
+     [0]                var0=var1
+     [1]                var1=var0
+Working directory:      /opt
+Container details:
+  Run image:            a-wonderfull-image
+  Remove:               No
+  Interactive:          Yes
+  Allocate tty:         No
+  Use shell:            Yes
+  Shell path:           /usr/bin/acme-shell
+  Volume:               /to-be-mapped-to-opt:/opt
+Stop on error:          Yes
+Commands:
+     [0]                a command
+     [1]                another command
+     [2]                yet another command
+
+----- Task info, container, exec, not expanded ------
+Task name:              info_task_container_exec
+Short description:      Dummy task for info/dump validations
+Hidden:                 No
+Abstract:               No
+Use shell:              No
+Inherit environment     Yes
+Environment:
+     [0]                {{var0}}={{var1}}
+     [1]                {{var1}}={{var0}}
+Working directory:      {{optDir}}
+Container details:
+  Execute in:           a-wonderfull-container
+  Interactive:          Yes
+  Allocate tty:         No
+  Use shell:            No
+  Additional flags:     --priviliged
+  Volume:               /to-be-mapped-to-opt:{{optDir}}
+Stop on error:          Yes
+Commands:
+     [0]                a command
+     [1]                another command
+     [2]                yet another command
+
+----- Task info, container, exec, expanded ------
+Task name:              info_task_container_exec
+Short description:      Dummy task for info/dump validations
+Hidden:                 No
+Abstract:               No
+Use shell:              No
+Inherit environment     Yes
+Environment:
+     [0]                var0=var1
+     [1]                var1=var0
+Working directory:      /opt
+Container details:
+  Execute in:           a-wonderfull-container
+  Interactive:          Yes
+  Allocate tty:         No
+  Use shell:            No
+  Additional flags:     --priviliged
+  Volume:               /to-be-mapped-to-opt:/opt
+Stop on error:          Yes
+Commands:
+     [0]                a command
+     [1]                another command
+     [2]                yet another command
