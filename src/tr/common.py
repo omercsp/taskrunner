@@ -6,6 +6,7 @@ import traceback
 import json
 import copy
 from typing import Any
+from pydantic import ValidationError
 
 TASK_YES_TOKEN = 'yes'
 TASK_NO_TOKEN = 'no'
@@ -77,7 +78,7 @@ def dump_default_vars() -> None:
     dump_vars(_default_vars_map)
 
 
-class StringVarExpander(object):
+class StringVarExpander:
     var_re = re.compile(r'{{\S*?}}')
 
     def __init__(self, vars_map: dict | None = None) -> None:
@@ -123,3 +124,21 @@ def bt() -> None:
 
 def print_dict(d: dict) -> None:
     print(json.dumps(d, indent=4))
+
+
+def pydantic_errmsg(ve: ValidationError) -> str:
+    errs = []
+    for e in ve.errors():
+        try:
+            loc_len = len(e["loc"])
+            if loc_len == 0:
+                loc = "<ROOT>"
+            elif loc_len == 1 and isinstance(e["loc"][0], int):
+                token = e["loc"][0]
+                loc = f"index {token}"
+            else:
+                loc = "/".join(str(i) for i in e["loc"])
+            errs.append(f"'{loc}': {e['msg']}")
+        except Exception:
+            errs.append(str(e))
+    return "\n".join(errs)
