@@ -1,12 +1,11 @@
 from tr.logTools import *
 import sys
 import re
-import typing
 import os
 import traceback
 import json
 import copy
-from typing import Optional
+from typing import Any
 
 TASK_YES_TOKEN = 'yes'
 TASK_NO_TOKEN = 'no'
@@ -33,7 +32,7 @@ def _dict_path_elements(path: str) -> list:
     return elements
 
 
-def dict_value(d: dict, path: str, require=False, default=None) -> typing.Any:
+def dict_value(d: dict, path: str, require=False, default=None) -> Any:
     elements = _dict_path_elements(path)
     field = d
     try:
@@ -81,7 +80,7 @@ def dump_default_vars() -> None:
 class StringVarExpander(object):
     var_re = re.compile(r'{{\S*?}}')
 
-    def __init__(self, vars_map: Optional[dict] = None) -> None:
+    def __init__(self, vars_map: dict | None = None) -> None:
         if not vars_map:
             self.vars_map = _default_vars_map
         else:
@@ -111,7 +110,7 @@ class StringVarExpander(object):
         return s
 
 
-def parse_assignment_str(s: str) -> typing.Tuple[str, str]:
+def parse_assignment_str(s: str) -> tuple[str, str]:
     parts = s.split('=', maxsplit=1)
     if len(parts) == 1:
         return s, ""

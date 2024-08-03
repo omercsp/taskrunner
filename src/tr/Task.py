@@ -77,7 +77,7 @@ class Task(object):
         except ValueError as e:
             raise TaskException(f"Illegal command '{cmd}' for task '{self.name}' - {e}")
 
-    def _container_cmd_arr(self, cmd) -> typing.List[str]:
+    def _container_cmd_arr(self, cmd) -> list[str]:
         info("Preparing container command")
         cmd_array = ["sudo", self.c_tool] if self.c_sudo else [self.c_tool]
         cmd_array.append("exec" if self.c_exec else "run")

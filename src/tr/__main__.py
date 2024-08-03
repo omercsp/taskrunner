@@ -14,7 +14,7 @@ __DUMP_CONFIG_CMD = "dump_config"
 __DUMP_SCHEMA_CMD = "dump_schema"
 
 
-def _tasks_complete(**kwargs) -> typing.List[str]:
+def _tasks_complete(**kwargs) -> list[str]:
     try:
         parsed_args: argparse.Namespace = kwargs['parsed_args']
         parser_name = parsed_args.subparsers_name
@@ -34,7 +34,7 @@ def _parse_arguments() -> argparse.Namespace:
     except ValueError:
         tr_argv = sys.argv[1:]
         cmds_argv = []
-    yes_no: typing.List[str] = [TASK_YES_TOKEN, TASK_NO_TOKEN]
+    yes_no: list[str] = [TASK_YES_TOKEN, TASK_NO_TOKEN]
     parser = argparse.ArgumentParser(prog='task')
     parser.add_argument('--version', action='version', version=f'%(prog)s {version}')
     parser.add_argument('-v', '--verbose', action='count', help='log file verbosity', default=0)
