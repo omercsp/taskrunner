@@ -14,7 +14,7 @@ def _active_task_name(config: Config) -> str:
 
 
 def _show_task(task: Task, full_details: bool) -> None:
-    def print_val(title: str, value: typing.Any) -> None:
+    def print_val(title: str, value: Any) -> None:
         print(f"{title:<24}{value:<}")
 
     def print_bool(title, value: bool) -> None:
@@ -117,7 +117,7 @@ def show_task_info(config: Config) -> None:
 
 
 def list_tasks(config: Config) -> None:
-    def _display_token(token: Optional[str], max_len: int) -> str:
+    def _display_token(token: str | None, max_len: int) -> str:
         if not token:
             return ""
         if len(token) < max_len:

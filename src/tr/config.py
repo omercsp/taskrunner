@@ -3,7 +3,7 @@ from tr.common import *
 import os
 import pathlib
 import json
-from typing import Optional
+from typing import Any
 from argparse import Namespace as Args
 
 
@@ -64,7 +64,7 @@ class Config(object):
         return conf
 
     @staticmethod
-    def _get_conf_file_path(cli_conf: Optional[str]) -> Optional[str]:
+    def _get_conf_file_path(cli_conf: str | None) -> str | None:
         if cli_conf:
             return cli_conf
 
@@ -81,7 +81,7 @@ class Config(object):
             return _DFLT_CONF_FILE_NAME
         return None
 
-    def __init__(self, args: Optional[Args]) -> None:
+    def __init__(self, args: Args | None) -> None:
         self.args: Args = args  # type: ignore
         conf_path = Config._get_conf_file_path(args.conf if args else None)
 
@@ -110,7 +110,7 @@ class Config(object):
         if logging_enabled_for(logging.DEBUG):
             dump_default_vars()
 
-    def default_task_name(self) -> Optional[str]:
+    def default_task_name(self) -> str | None:
         return self.setting(GlobalKeys.DfltTask)
 
     def default_container_tool(self) -> str:
@@ -119,10 +119,10 @@ class Config(object):
     def default_container_shell_path(self) -> str:
         return self.setting(GlobalKeys.DfltContainerShellPath, default="/usr/bin/sh")
 
-    def default_shell_path(self) -> Optional[str]:
+    def default_shell_path(self) -> str | None:
         return self.setting(GlobalKeys.DfltShellPath, None)
 
-    def visible_tasks(self) -> typing.List[str]:
+    def visible_tasks(self) -> list[str]:
         tasks = set()
         for name, task in self.tasks.items():
             if not task.get(TaskKeys.Hidden, False):
@@ -130,7 +130,7 @@ class Config(object):
         return list(tasks)
 
     #  Return anything. Types is forced by schema validations.
-    def setting(self, path: str, default=None) -> typing.Any:
+    def setting(self, path: str, default=None) -> Any:
         return dict_value(self.conf, path, default=default)
 
     def _raw_task_obj(self, name: str) -> dict:
@@ -149,7 +149,7 @@ class Config(object):
         task_desc.pop(TaskKeys.PostCommands, None)
 
     @staticmethod
-    def update_task_desc(tgt_desc: dict, derived_desc: dict, merge: typing.Set[str]) -> None:
+    def update_task_desc(tgt_desc: dict, derived_desc: dict, merge: set[str]) -> None:
         for k, v in derived_desc.items():
             value_type = type(v)
             if k in merge and not (value_type is dict or value_type is list):
@@ -204,7 +204,7 @@ class Config(object):
         Config._consolidate_commands(ret_desc)
         return ret_desc
 
-    def get_task_desc(self, name: str, includes: bool) -> typing.Dict[str, typing.Any]:
+    def get_task_desc(self, name: str, includes: bool) -> dict[str, Any]:
         verbose("Task '{}' requested, with_inclusions={}", name, includes)
         if includes:
             return self._task_desc(name, set())
