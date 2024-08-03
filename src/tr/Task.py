@@ -1,5 +1,4 @@
 from tr.config import Config
-from tr.schemas import TaskKeys, validate_task_schema
 from tr.logTools import info, warn, raw_msg, logging_enabled_for
 from tr.common import TaskException, StringVarExpander
 import logging
@@ -19,39 +18,45 @@ class Task(object):
         super().__init__()
         info("Initializing task '{}'", name)
         self.name = name
-        task_descriptor = config.get_task_desc(name, True)
-        validate_task_schema(name, task_descriptor)
+        model = config.task_model(name, True)
 
-        self.short_desc = task_descriptor.get(TaskKeys.ShortDesc, None)
-        self.long_desc = task_descriptor.get(TaskKeys.LongDesc, None)
-        self.hidden = task_descriptor.get(TaskKeys.Hidden, False)
-
-        self.stop_on_error = task_descriptor.get(TaskKeys.StopOnError, True)
-        self.commands = task_descriptor.get(TaskKeys.Commands, [])
-        self.cwd = task_descriptor.get(TaskKeys.Cwd, None)
-        self.shell = task_descriptor.get(TaskKeys.Shell, False)
-        self.shell_path = task_descriptor.get(
-            TaskKeys.ShellPath, config.default_shell_path())
-        self.env_inherit = task_descriptor.get(TaskKeys.InheritOsEnv, True)
-        self.env = task_descriptor.get(TaskKeys.Env, {})
-        self.abstract = task_descriptor.get(TaskKeys.Abstract, False)
-
-        self.c_image = task_descriptor.get(TaskKeys.CImage, None)
-        self.c_volumes = task_descriptor.get(TaskKeys.CVolumes, [])
-        self.c_interactive = task_descriptor.get(TaskKeys.CInteractive, False)
-        self.c_tty = task_descriptor.get(TaskKeys.CTty, False)
-        self.c_flags = task_descriptor.get(TaskKeys.CFlags, "")
-        self.c_exec = task_descriptor.get(TaskKeys.CExec, False)
-        self.c_rm = task_descriptor.get(TaskKeys.CRemove, True)
-        self.c_tool = task_descriptor.get(TaskKeys.CTool, config.default_container_tool())
-        self.c_shell = task_descriptor.get(TaskKeys.CShell, False)
-        self.c_shell_path = task_descriptor.get(TaskKeys.CShellPath,
-                                                config.default_container_shell_path())
-        self.c_cwd = task_descriptor.get(TaskKeys.CCwd, None)
-        self.c_env = task_descriptor.get(TaskKeys.CEnv, {})
-        self.c_sudo = task_descriptor.get(TaskKeys.CSudo, False)
-
-        self.vars_map = task_descriptor.get(TaskKeys.Variables, {})
+        self.short_desc = model.short_desc
+        self.long_desc = model.long_desc
+        self.hidden = model.hidden
+        self.stop_on_error = model.stop_on_error
+        self.commands = model.commands
+        self.cwd = model.cwd
+        self.shell = model.shell
+        if self.shell:
+            if model.shell_path:
+                self.shell_path = model.shell_path
+            else:
+                self.shell_path = config.default_shell_path
+        else:
+            self.shell_path = None
+        self.env_inherit = model.inherit_os_env
+        self.env = model.env
+        self.abstract = model.abstract
+        self.c_image = model.c_image if model.c_image else ""
+        self.c_volumes = model.c_volumes
+        self.c_interactive = model.c_interactive
+        self.c_tty = model.c_tty
+        self.c_flags = model.c_flags if model.c_flags else ""
+        self.c_exec = model.c_exec
+        self.c_rm = model.c_remove
+        if model.c_container_tool:
+            self.c_tool = model.c_container_tool
+        else:
+            self.c_tool = config.default_container_tool
+        self.c_shell = model.c_shell
+        if model.c_shell_path:
+            self.c_shell_path = model.c_shell_path
+        else:
+            self.c_shell_path = config.default_container_shell_path
+        self.c_cwd = model.c_cwd
+        self.c_env = model.c_env
+        self.c_sudo = model.c_sudo
+        self.vars_map = model.variables
         self.expander = None
 
     def expand(self) -> None:
@@ -83,7 +88,7 @@ class Task(object):
 
     def _container_cmd_arr(self, cmd) -> list[str]:
         info("Preparing container command")
-        cmd_array = ["sudo", self.c_tool] if self.c_sudo else [self.c_tool]
+        cmd_array: list[str] = ["sudo", self.c_tool] if self.c_sudo else [self.c_tool]
         cmd_array.append("exec" if self.c_exec else "run")
         if self.c_cwd:
             cmd_array += ["-w", self.c_cwd]
@@ -111,7 +116,7 @@ class Task(object):
         info("Command is {}", cmd_array)
         return cmd_array
 
-    def _run_cmd(self, cmd: list, cmd_str: str) -> int:
+    def _run_cmd(self, cmd: list[str], cmd_str: str) -> int:
         info("Running command (joined):")
         raw_msg(cmd_str)
         p = None
@@ -121,8 +126,8 @@ class Task(object):
         else:
             env = self.env
         try:
-            p = subprocess.Popen(cmd, shell=self.shell, executable=self.shell_path, env=env,
-                                 cwd=self.cwd)
+            p = subprocess.Popen(cmd, shell=self.shell,
+                                 executable=self.shell_path, env=env, cwd=self.cwd)
             return p.wait()
 
         except (OSError, FileNotFoundError) as e:
