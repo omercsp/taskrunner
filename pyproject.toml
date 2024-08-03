@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=42", "setuptools-scm[toml]>=6.0.1"]
+requires = ["setuptools>=72", "setuptools-scm[toml]>=6.0.1"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -22,7 +22,8 @@ classifiers = [
 ]
 dependencies = [
 	"argcomplete>=2.0.0",
-	"jsonschema>=3.2.0"
+	"jsonschema>=3.2.0",
+	"setuptools>=72"
 ]
 requires-python = ">=3.10,<4"
 
