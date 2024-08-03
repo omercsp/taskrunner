@@ -1,6 +1,6 @@
 /opt
 value0
+VERSION_ID="24.04"
 ID=ubuntu
 ID_LIKE=debian
-VERSION_ID="20.04"
 Data for a volumed file!

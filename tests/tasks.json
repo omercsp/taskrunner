@@ -329,18 +329,18 @@
 		},
 		"050_container_ubuntu": {
 			"base": "base_container_test",
-			"short_desc": "Basic container support o/Ubuntu 20.04",
-			"c_image": "docker.io/library/ubuntu:20.04"
+			"short_desc": "Basic container support o/Ubuntu 24.04",
+			"c_image": "docker.io/library/ubuntu:24.04"
 		},
 		"051_container_rocky": {
 			"base": "base_container_test",
-			"short_desc": "Basic container support o/Rocky 8.5",
-			"c_image": "docker.io/rockylinux/rockylinux:8.5"
+			"short_desc": "Basic container support o/Rocky 9.3",
+			"c_image": "docker.io/rockylinux/rockylinux:9.3"
 		},
 		"052_container_no_inherit": {
 			"base": "base_container_test",
 			"short_desc": "Check no inheritance settings for container",
-			"c_image": "docker.io/rockylinux/rockylinux:8.5",
+			"c_image": "docker.io/rockylinux/rockylinux:9.3",
 			"c_inherit_volumes": false,
 			"c_inherit_env": false,
 			"c_volumes": [
