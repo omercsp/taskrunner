@@ -1,19 +1,20 @@
-from tr import version
 from tr.config import Config
-from tr.schemas import AutoVarsKeys, SchemaDumpOpts, dump_schema
 from tr.common import TASK_YES_TOKEN, TASK_NO_TOKEN, TaskException
+from tr.config import Config, AutoVarsKeys
 from tr.logTools import init_logging, info, error_and_print
-import tr.actions as actions
+from tr.actions import (run_task, list_tasks, show_task_info, dump_task, dump_config, dump_schema,
+                        SchemaDumpOpts)
+from tr import version
 import argparse
 import argcomplete
 import sys
 
-__RUN_CMD = "run"
-__LIST_CMD = "list"
-__INFO_CMD = "info"
-__DUMP_TASK_CMD = "dump"
-__DUMP_CONFIG_CMD = "dump_config"
-__DUMP_SCHEMA_CMD = "dump_schema"
+_RUN_CMD = "run"
+_LIST_CMD = "list"
+_INFO_CMD = "info"
+_DUMP_TASK_CMD = "dump"
+_DUMP_CONFIG_CMD = "dump_config"
+_DUMP_SCHEMA_CMD = "dump_schema"
 
 
 def _tasks_complete(**kwargs) -> list[str]:
@@ -22,7 +23,7 @@ def _tasks_complete(**kwargs) -> list[str]:
         parser_name = parsed_args.subparsers_name
     except (KeyError, AttributeError):
         return []
-    if (parser_name == __RUN_CMD or parser_name == __INFO_CMD or parser_name == __DUMP_TASK_CMD) \
+    if (parser_name == _RUN_CMD or parser_name == _INFO_CMD or parser_name == _DUMP_TASK_CMD) \
        and parsed_args.task is None:
         return Config(None).visible_tasks()
     return []
@@ -51,7 +52,7 @@ def _parse_arguments() -> argparse.Namespace:
                                     help='set task')
     task_target_parser.add_argument('-V', '--variable', metavar='VAR', default=[], action='append',
                                     help='set a variable')
-    run_parser = subparsers.add_parser(__RUN_CMD, help='execute a task',
+    run_parser = subparsers.add_parser(_RUN_CMD, help='execute a task',
                                        parents=[task_target_parser])
     run_parser.add_argument('-c', '--command', metavar='CMD', default=None, action='append',
                             help='set command to run')
@@ -94,27 +95,27 @@ def _parse_arguments() -> argparse.Namespace:
     run_parser.add_argument('--c-cwd', metavar='DIR', default=None,
                             help='set container working directory')
 
-    info_parser = subparsers.add_parser(__INFO_CMD, help='show task info',
+    info_parser = subparsers.add_parser(_INFO_CMD, help='show task info',
                                         parents=[task_target_parser])
     info_parser.add_argument('-x', '--expand', help='expand values', action='store_true',
                              default=False)
 
-    dump_parser = subparsers.add_parser(__DUMP_TASK_CMD, help='dump a task',
+    dump_parser = subparsers.add_parser(_DUMP_TASK_CMD, help='dump a task',
                                         parents=[task_target_parser])
     dump_parser.add_argument('-i', '--includes', help='with inclusions',
                              action='store_true', default=False)
 
-    list_parser = subparsers.add_parser(__LIST_CMD, help='list tasks')
+    list_parser = subparsers.add_parser(_LIST_CMD, help='list tasks')
     list_parser.add_argument('-a', '--all', action='store_true', default=False,
                              help='show hidden and shadowed tasks')
     list_parser.add_argument('--names-only', action='store_true', default=False,
                              help=argparse.SUPPRESS)
 
-    dump_parser = subparsers.add_parser(__DUMP_SCHEMA_CMD, help='dump configuration file schema')
+    dump_parser = subparsers.add_parser(_DUMP_SCHEMA_CMD, help='dump configuration file schema')
     dump_parser.add_argument('-t', '--type', choices=SchemaDumpOpts.CHOICES,
                              default=SchemaDumpOpts.ALL)
 
-    subparsers.add_parser(__DUMP_CONFIG_CMD, help='dump configuration')
+    subparsers.add_parser(_DUMP_CONFIG_CMD, help='dump configuration')
 
     # TODO: Not sure what pyright wants with this type ignore
     argcomplete.autocomplete(parser, always_complete_options=False,
@@ -135,21 +136,21 @@ def main() -> int:
         info("args='{}'", sys.argv[1:])
         info("cmd_args={}", args.__getattribute__(AutoVarsKeys.TASK_CLI_ARGS))
 
-        if args.subparsers_name == __DUMP_SCHEMA_CMD:
+        if args.subparsers_name == _DUMP_SCHEMA_CMD:
             dump_schema(args.type)
             return 0
 
         config = Config(args)
-        if args.subparsers_name == __RUN_CMD:
-            return actions.run_task(config)
-        elif args.subparsers_name == __LIST_CMD:
-            actions.list_tasks(config)
-        elif args.subparsers_name == __INFO_CMD:
-            actions.show_task_info(config)
-        elif args.subparsers_name == __DUMP_CONFIG_CMD:
-            actions.dump_config(config)
-        elif args.subparsers_name == __DUMP_TASK_CMD:
-            actions.dump_task(config)
+        if args.subparsers_name == _RUN_CMD:
+            return run_task(config)
+        elif args.subparsers_name == _LIST_CMD:
+            list_tasks(config)
+        elif args.subparsers_name == _INFO_CMD:
+            show_task_info(config)
+        elif args.subparsers_name == _DUMP_CONFIG_CMD:
+            dump_config(config)
+        elif args.subparsers_name == _DUMP_TASK_CMD:
+            dump_task(config)
 
     except TaskException as e:
         error_and_print(str(e))

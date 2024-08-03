@@ -1,0 +1,317 @@
+{
+    "additionalProperties": false,
+    "properties": {
+        "$schema": {
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "null"
+                }
+            ],
+            "default": null,
+            "title": "$Schema"
+        },
+        "include": {
+            "items": {
+                "type": "string"
+            },
+            "title": "Include",
+            "type": "array"
+        },
+        "use_default_include": {
+            "default": false,
+            "title": "Use Default Include",
+            "type": "boolean"
+        },
+        "tasks": {
+            "title": "Tasks",
+            "type": "object"
+        },
+        "suppress": {
+            "items": {
+                "type": "string"
+            },
+            "title": "Suppress",
+            "type": "array"
+        },
+        "variables": {
+            "additionalProperties": {
+                "type": "string"
+            },
+            "title": "Variables",
+            "type": "object"
+        },
+        "default_task": {
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "null"
+                }
+            ],
+            "default": null,
+            "title": "Default Task"
+        },
+        "default_shell_path": {
+            "default": "/bin/sh",
+            "maxLength": 255,
+            "title": "Default Shell Path",
+            "type": "string"
+        },
+        "default_container_tool": {
+            "default": "/usr/bin/docker",
+            "maxLength": 255,
+            "title": "Default Container Tool",
+            "type": "string"
+        },
+        "default_container_shell_path": {
+            "default": "/bin/sh",
+            "maxLength": 255,
+            "title": "Default Container Shell Path",
+            "type": "string"
+        }
+    },
+    "title": "ConfigFileModel",
+    "type": "object",
+    "tasks": {
+        "additionalProperties": false,
+        "properties": {
+            "base": {
+                "anyOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ],
+                "default": null,
+                "title": "Base"
+            },
+            "short_desc": {
+                "anyOf": [
+                    {
+                        "maxLength": 75,
+                        "type": "string"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ],
+                "default": null,
+                "title": "Short Desc"
+            },
+            "long_desc": {
+                "anyOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ],
+                "default": null,
+                "title": "Long Desc"
+            },
+            "commands": {
+                "items": {
+                    "type": "string"
+                },
+                "title": "Commands",
+                "type": "array"
+            },
+            "cwd": {
+                "anyOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ],
+                "default": null,
+                "title": "Cwd"
+            },
+            "shell": {
+                "default": false,
+                "title": "Shell",
+                "type": "boolean"
+            },
+            "shell_path": {
+                "anyOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ],
+                "default": null,
+                "title": "Shell Path"
+            },
+            "env": {
+                "additionalProperties": {
+                    "type": "string"
+                },
+                "title": "Env",
+                "type": "object"
+            },
+            "inherit_os_env": {
+                "default": true,
+                "title": "Inherit Os Env",
+                "type": "boolean"
+            },
+            "inherit_env": {
+                "default": true,
+                "title": "Inherit Env",
+                "type": "boolean"
+            },
+            "stop_on_error": {
+                "default": true,
+                "title": "Stop On Error",
+                "type": "boolean"
+            },
+            "hidden": {
+                "default": false,
+                "title": "Hidden",
+                "type": "boolean"
+            },
+            "abstract": {
+                "default": false,
+                "title": "Abstract",
+                "type": "boolean"
+            },
+            "variables": {
+                "additionalProperties": {
+                    "type": "string"
+                },
+                "title": "Variables",
+                "type": "object"
+            },
+            "inherit_variables": {
+                "default": true,
+                "title": "Inherit Variables",
+                "type": "boolean"
+            },
+            "c_image": {
+                "anyOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ],
+                "default": null,
+                "title": "C Image"
+            },
+            "c_container_tool": {
+                "anyOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ],
+                "default": null,
+                "title": "C Container Tool"
+            },
+            "c_volumes": {
+                "items": {
+                    "type": "string"
+                },
+                "title": "C Volumes",
+                "type": "array"
+            },
+            "c_inherit_volumes": {
+                "default": true,
+                "title": "C Inherit Volumes",
+                "type": "boolean"
+            },
+            "c_interactive": {
+                "default": false,
+                "title": "C Interactive",
+                "type": "boolean"
+            },
+            "c_tty": {
+                "default": false,
+                "title": "C Tty",
+                "type": "boolean"
+            },
+            "c_flags": {
+                "anyOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ],
+                "default": null,
+                "title": "C Flags"
+            },
+            "c_exec": {
+                "default": false,
+                "title": "C Exec",
+                "type": "boolean"
+            },
+            "c_remove": {
+                "default": true,
+                "title": "C Remove",
+                "type": "boolean"
+            },
+            "c_sudo": {
+                "default": false,
+                "title": "C Sudo",
+                "type": "boolean"
+            },
+            "c_shell": {
+                "default": false,
+                "title": "C Shell",
+                "type": "boolean"
+            },
+            "c_shell_path": {
+                "anyOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ],
+                "default": null,
+                "title": "C Shell Path"
+            },
+            "c_env": {
+                "additionalProperties": {
+                    "type": "string"
+                },
+                "title": "C Env",
+                "type": "object"
+            },
+            "c_inherit_env": {
+                "default": true,
+                "title": "C Inherit Env",
+                "type": "boolean"
+            },
+            "c_cwd": {
+                "anyOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ],
+                "default": null,
+                "title": "C Cwd"
+            }
+        },
+        "title": "TaskModel",
+        "type": "object"
+    }
+}
