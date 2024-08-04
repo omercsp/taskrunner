@@ -1,6 +1,8 @@
 from tr import version
-from tr.config import *
-from tr.schemas import AutoVarsKeys
+from tr.config import Config
+from tr.schemas import AutoVarsKeys, SchemaDumpOpts, dump_schema
+from tr.common import TASK_YES_TOKEN, TASK_NO_TOKEN, TaskException
+from tr.logTools import init_logging, info, error_and_print
 import tr.actions as actions
 import argparse
 import argcomplete
