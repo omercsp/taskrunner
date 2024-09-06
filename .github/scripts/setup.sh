@@ -7,11 +7,10 @@ echo ${OS}
 [[ ${OS} == "Darwin" ]] && brew install coreutils
 
 python -m pip install --upgrade pip
-pip install -r requirements.txt
 if [[ ${OS} == "Linux" ]]; then
 	podman pull docker.io/rockylinux/rockylinux:9.3
 	podman pull docker.io/library/ubuntu:24.04
 fi
 
-pip install -e .
+pip install -e .[devel]
 

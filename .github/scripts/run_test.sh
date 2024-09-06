@@ -4,6 +4,10 @@
 
 OS=$(uname -s)
 
-opts="--no-colors"
-[[ ${OS} != "Linux" ]] && opts+=" --no-containers"
-tests/tr_test --no-colors ${opts}
+opts=""
+[[ ${OS} != "Linux" ]] && opts+="-X container"
+
+export USE_VENV=0
+cd ${GITHUB_WORKSPACE}/tests || exit 1
+
+xeet --no-colors run -c xeet.json ${opts}

@@ -1,0 +1,166 @@
+{
+	"variables":{
+		"base_cmd": "task run"
+	},
+	"tests": [
+		{
+			"name": "test_base",
+			"cwd": "{{XEET_ROOT}}",
+			"test_cmd": "{{base_cmd}} {{XEET_TEST_NAME}}",
+			"verify_cmd": "scripts/dflt_output_compare.sh",
+			"abstract": true
+		}
+		,{
+			"name": "001a_simple",
+			"base": "test_base"
+		}
+		,{
+			"name": "001b_simple",
+			"base": "test_base"
+		}
+		,{
+			"name": "002a_simple_env",
+			"base": "test_base"
+		}
+		,{
+			"name": "002b_simple_env",
+			"base": "test_base"
+		}
+		,{
+			"name": "002c_env_inherit",
+			"base": "test_base"
+		}
+		,{
+			"name": "002d_no_env_inherit",
+			"base": "test_base",
+			"allowed_return_codes": [1]
+		}
+		,{
+			"name": "003a_stop_on_error",
+			"base": "test_base",
+			"allowed_return_codes": [1]
+		}
+		,{
+			"name": "003b_continue_on_error",
+			"base": "test_base",
+			"allowed_return_codes": [1]
+		}
+		,{
+			"name": "004a_bash_multi_cmds_no_fail",
+			"base": "test_base",
+			"allowed_return_codes": [1]
+		}
+		,{
+			"name": "004b_bash_multi_cmds_allow_fail",
+			"base": "test_base"
+		}
+		,{
+			"name": "010_list_tasks",
+			"base": "test_base"
+		}
+		,{
+			"name": "015a_os_env_inherit",
+			"base": "test_base",
+			"env": { "ext_var": "ext_var_value" }
+		}
+		,{
+			"name": "015b_no_os_env_inherit",
+			"base": "015a_os_env_inherit",
+			"allowed_return_codes": [1]
+		}
+		,{
+			"name": "020a_workdir_root",
+			"base": "test_base"
+		}
+		,{
+			"name": "020b_workdir_opt",
+			"base": "test_base"
+		}
+		,{
+			"name": "020c_workdir_taskroot",
+			"base": "test_base"
+		}
+		,{
+			"name": "023_var_expansion",
+			"base": "test_base"
+		}
+		,{
+			"name": "024_var_expansion_env",
+			"base": "test_base"
+		}
+		,{
+			"name": "025_env_whitespace",
+			"base": "test_base"
+		}
+		,{
+			"name": "030_args_handling",
+			"test_cmd": "{{base_cmd}} {{XEET_TEST_NAME}} -- If I had wings...",
+			"base": "test_base"
+		}
+		,{
+			"name": "031_args_override",
+			"test_cmd": "{{base_cmd}} {{XEET_TEST_NAME}} --env MY_ENV0=new_value --shell=yes --cwd /opt -c \"pwd; echo $MY_ENV0\"",
+			"base": "test_base"
+		}
+		,{
+			"name": "032_args_var_override",
+			"test_cmd": "{{base_cmd}} {{XEET_TEST_NAME}} -V var0=new_var0",
+			"base": "test_base"
+		}
+		,{
+			"name": "033a_task_vars",
+			"base": "test_base",
+			"groups": ["vars"]
+		}
+		,{
+			"name": "033b_task_vars",
+			"base": "test_base",
+			"groups": ["vars"]
+		}
+		,{
+			"name": "033c_task_vars_no_inherit",
+			"base": "test_base",
+			"groups": ["vars"]
+		}
+		,{
+			"name": "040_config_file_include_defs",
+			"base": "test_base"
+		}
+		,{
+			"name": "041_included",
+			"base": "test_base"
+		}
+		,{
+			"name": "042_included",
+			"base": "test_base"
+		}
+		,{
+			"name": "050a_container_ubuntu",
+			"base": "test_base",
+			"groups": ["container"]
+		}
+		,{
+			"name": "050b_container_rocky",
+			"base": "test_base",
+			"groups": ["container"]
+		}
+		,{
+			"name": "051_container_no_inherit",
+			"base": "test_base",
+			"groups": ["container"]
+		}
+		,{
+			"name": "060_info",
+			"base": "test_base"
+		}
+		,{
+			"name": "061_dump",
+			"base": "test_base"
+		}
+		,{
+			"name": "080_recursive_fail",
+			"base": "test_base",
+			"allowed_return_codes": [255]
+		}
+	]
+}
