@@ -1,0 +1,40 @@
+{
+	"include": ["{{taskRoot}}/tasks-for-list-include.json"],
+	"tasks": {
+		"task_1": {
+			"short_desc": "A task to remember",
+			"commands": [ "do_something" ]
+		},
+		"task_2": {
+			"base": "task_1",
+			"short_desc": "A task that remembers"
+		},
+		"hidden_task": {
+			"short_desc": "A task that is hidden",
+			"commands": ["do something else"],
+			"hidden": true
+		},
+		"unhidden_task": {
+			"base": "hidden_task",
+			"short_desc": "Task based on a hidden task"
+		},
+		"not_abstract_task":{
+			"base": "abstract_task",
+			"short_desc": "Inherits abstract task from included file"
+		},
+		"not_abstract_but_hidden": {
+			"base": "abstract_task",
+			"short_desc": "Inherits abstract task, but still hidden",
+			"hidden": true
+		},
+		"bad_task": {
+			"base": "no-such-task",
+			"short_desc": "This will not be displayed"
+		},
+		"a_very_long_task_name_with_lots_of_words_and_whatever": {
+			"short_desc": "Even longer description string with lots and lots of words"
+		}
+	},
+	"default_task": "not_abstract_task",
+	"use_default_include": false
+}

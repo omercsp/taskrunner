@@ -1,0 +1,22 @@
+#!/bin/bash
+set -e
+
+_abort()
+{
+	echo "ERROR: $1"
+	exit 1
+}
+
+PROJ_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
+[[ -z "${PROJ_ROOT}" ]] && _abort "Could not find project root. Are you in the project directory?"
+
+HERE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cd ${HERE} || _abort "Could not cd to ${HERE}"
+
+if [[ -z "${VENV_ACTIVATE}" ]]; then
+	source ${PROJ_ROOT}/.venv/bin/activate || _abort "ERROR: Could not activate virtualenv"
+fi
+
+cmd="xeet run -c xeet.json $*"
+echo "Running: ${cmd}"
+${cmd}

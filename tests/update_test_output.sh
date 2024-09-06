@@ -1,0 +1,1 @@
+scripts/update_test_output.sh
