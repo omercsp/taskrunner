@@ -1,0 +1,64 @@
+#!/bin/bash
+set -e
+
+TEST_PKG=${TEST_PKG:-0}
+TEST_PYPI=${TEST_PYPI:-0}
+
+# Stupid Apple
+if [[ ${OSTYPE} == 'darwin'* ]]; then
+	READLINK="greadlink"
+else
+	READLINK="readlink"
+fi
+
+SCRIPT_FILE="$(${READLINK} -f ${BASH_SOURCE[0]})"
+SCRIPT_DIR="$(dirname $SCRIPT_FILE)"
+venv_dir=""
+
+_abort()
+{
+	echo "$@"
+	echo
+	exit 1
+}
+
+
+_build_pkg_venv()
+{
+	local repo_flags=""
+
+	[[ -n ${VENV_ACTIVATE} ]] && \
+	    _abort "Virtual environment is activate. Deactivate and run again"
+
+	if [[ ${TEST_PYPI} -eq 1 ]]; then
+	    repo_flags="-i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple/"
+	fi
+	venv_dir=$(mktemp -d)
+	echo "Creating venv at ${venv_dir}"
+	python -m venv ${venv_dir}
+	source ${venv_dir}/bin/activate
+	pip install --upgrade pip
+
+	# shellcheck disable=SC2102
+	pip install ${repo_flags} pytaskrunner[devel]
+}
+
+_fini_pkg_env()
+{
+    deactivate
+    [[ -n ${venv_dir} && -d ${venv_dir} ]] && rm -rf ${venv_dir}
+}
+
+_build_pkg_venv
+
+echo "============================"
+echo "Taskrunner tests direcotry: ${SCRIPT_DIR}"
+echo "VENV directory: ${venv_dir}"
+echo "xeet binary: $(which xeet)"
+echo "============================"
+xeet run -c ${SCRIPT_DIR}/xeet.json "$@"
+
+ret=$?
+_fini_pkg_env
+
+exit ${ret}
