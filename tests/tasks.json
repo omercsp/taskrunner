@@ -4,30 +4,27 @@
 		"{{taskRoot}}/base_tasks_b.json"
 	],
 	"variables": {
-		"aux_dir": "{{taskRoot}}/aux",
 		"var0": "var0",
 		"var1": "var1",
 		"var2": "var2",
 		"var0_1_2": "{{var0}} {{var1}} {{var2}}",
 		"base_var2": "from main tasks file",
-		"task_info_cmd": "task info",
-		"task_dump_cmd": "task dump",
 		"optDir": "/opt",
 		"env_name": "global_env_name",
 		"env_value": "global_env_value"
 	},
 	"tasks": {
-		"001_simple": {
+		"001a_simple": {
 			"short_desc": "Simple echo",
 			"commands": [
 				"echo \"XXX\""
 			]
 		},
 		"001b_simple": {
-			"base": "001_simple",
+			"base": "001a_simple",
 			"short_desc": "Simple echo (based on 001_simple)"
 		},
-		"002_simple_env": {
+		"002a_simple_env": {
 			"short_desc": "Simple echo with environment variable",
 			"env": {
 				"V0": "42"
@@ -37,75 +34,58 @@
 			]
 		},
 		"002b_simple_env": {
-			"base": "002_simple_env",
+			"base": "002a_simple_env",
 			"short_desc": "Simple echo with environment variable (based on 002_simple_env)",
 			"env": {
 				"V0": "43"
 			}
 		},
 		"002c_env_inherit": {
-			"base": "002_simple_env",
+			"base": "002a_simple_env",
 			"short_desc": "Inherit environment variable from",
 			"env": {
 				"V1": "43"
 			},
-			"post_commands": [
+			"commands": [
+				"printenv V0",
 				"printenv V1"
 			]
 		},
 		"002d_no_env_inherit": {
-			"base": "002_simple_env",
+			"base": "002a_simple_env",
 			"short_desc": "Don't inherit environment from base",
 			"env": {
 				"V1": "43"
 			},
 			"inherit_env": false,
-			"pre_commands": [
-				"printenv V1"
-			],
-			"meta": {
-				"allowed_rc": [
-					1
-				]
-			}
+			"commands": [
+				"printenv V1",
+				"printenv V0",
+				"echo shouldn't be printed as V0 is not inherited and previous printenv should fail"
+			]
 		},
-		"003_stop_on_error": {
+		"003a_stop_on_error": {
 			"short_desc": "Validate stop on error behavior",
 			"commands": [
 				"true",
 				"echo message1",
 				"false",
 				"echo message2"
-			],
-			"meta": {
-				"allowed_rc": [
-					1
-				]
-			}
+			]
 		},
-		"004_continue_on_error": {
-			"base": "003_stop_on_error",
+		"003b_continue_on_error": {
+			"base": "003a_stop_on_error",
 			"short_desc": "Validate continue on error behavior",
-			"stop_on_error": false,
-			"meta": {
-				"allowed_rc": [
-					1
-				]
-			}
+			"stop_on_error": false
 		},
-		"005_bash_multi_cmds_no_fail": {
+		"004a_bash_multi_cmds_no_fail": {
 			"short_desc": "Validate mulit bash commands not allowed to fail",
 			"shell": true,
 			"commands": [
 				"true && echo message1 && false && echo message2"
-			],
-			"meta": {
-				"allowed_rc": [
-					1
-				]
-			}
+			]
 		},
-		"006_bash_multi_cmds_allow_fail": {
+		"004b_bash_multi_cmds_allow_fail": {
 			"short_desc": "Validate mulit bash commands allowed to fail",
 			"shell": true,
 			"commands": [
@@ -114,9 +94,12 @@
 		},
 		"010_list_tasks": {
 			"short_desc": "Validate working directory as /",
+			"variables": {
+				"list_dir": "for_list_test"
+			},
 			"commands": [
-				"task --conf {{aux_dir}}/tasks-for-list.json list",
-				"task --conf {{aux_dir}}/tasks-for-list.json list -a"
+				"task --conf {{list_dir}}/tasks-for-list.json list",
+				"task --conf {{list_dir}}/tasks-for-list.json list -a"
 			]
 		},
 		"os_env_inherit_base": {
@@ -132,48 +115,34 @@
 		"015a_os_env_inherit": {
 			"base": "os_env_inherit_base",
 			"short_desc": "Check environment inheritance (enabled)",
-			"meta": {
-				"env": {
-					"ext_var": "ext_var_value"
-				}
-			},
 			"inherit_os_env": true
 		},
 		"015b_no_os_env_inherit": {
 			"short_desc": "Check environment inheritance (disabled)",
 			"base": "os_env_inherit_base",
-			"inherit_os_env": false,
-			"meta": {
-				"env": {
-					"ext_var": "ext_var_value"
-				},
-				"allowed_rc": [
-					1
-				]
-			}
+			"inherit_os_env": false
 		},
-		"020_workdir_root": {
+		"020a_workdir_root": {
 			"short_desc": "Validate working directory as /",
 			"cwd": "/",
 			"commands": [
 				"pwd"
 			]
 		},
-		"021_workdir_opt": {
+		"020b_workdir_opt": {
 			"short_desc": "Validate working directory as /opt",
 			"cwd": "/opt",
 			"commands": [
 				"pwd"
 			]
 		},
-		"022_workdir_taskroot": {
+		"020c_workdir_taskroot": {
 			"short_desc": "Validate working directory as task root (autodef)",
 			"cwd": "{{taskRoot}}",
-			"env": {
-				"EXPECTED_PWD": "{{taskRoot}}"
-			},
+			"shell": true,
+			"shell_path": "/bin/bash",
 			"commands": [
-				"{{aux_dir}}/check_cwd.sh"
+				"[[ \"$(pwd)\" == \"{{taskRoot}}\" ]] && echo Silence is golden"
 			]
 		},
 		"023_var_expansion": {
@@ -224,14 +193,11 @@
 				"echo cliArgs={{cliArgs}}",
 				"echo \"no args\"",
 				"echo cliArgs={{cliArgs}}"
-			],
-			"meta": {
-				"args": "-- If I had wings..."
-			}
+			]
 		},
 		"031_args_override": {
 			"short_desc": "Check task setting override by CLI",
-			"description": "Check some task settings override by CLI args (env, shell usage, cwd and command)",
+			"long_desc": "Check some task settings override by CLI args (env, shell usage, cwd and command)",
 			"commands": [
 				"false"
 			],
@@ -239,21 +205,15 @@
 			"env": {
 				"MY_ENV0": "orig_value"
 			},
-			"shell": false,
-			"meta": {
-				"args": "--env MY_ENV0=new_value --shell=yes --cwd {{optDir}} -c \"pwd; echo $MY_ENV0\""
-			}
+			"shell": false
 		},
 		"032_args_var_override": {
 			"short_desc": "Check variables override by CLI args",
 			"commands": [
 				"echo {{var0}}"
-			],
-			"meta": {
-				"args": "-V var0=new_var0"
-			}
+			]
 		},
-		"033_task_vars": {
+		"033a_task_vars": {
 			"short_desc": "Check variables override by CLI args",
 			"variables": {
 				"var0": "task_override_var0",
@@ -276,7 +236,7 @@
 			]
 		},
 		"033b_task_vars": {
-			"base": "033_task_vars",
+			"base": "033a_task_vars",
 			"short_desc": "Check variables override by CLI args",
 			"variables": {
 				"var0": "derived_task_override_var0",
@@ -284,7 +244,7 @@
 			}
 		},
 		"033c_task_vars_no_inherit": {
-			"base": "033_task_vars",
+			"base": "033a_task_vars",
 			"short_desc": "Check variables override by CLI args",
 			"inherit_variables": false,
 			"variables": {
@@ -315,7 +275,7 @@
 		"base_container_test": {
 			"short_desc": "Basic container support",
 			"commands": [
-				"pwd; echo $CENV0; cat /etc/os-release | grep -E \"^(ID|VERSION_ID)\"; cat /aux/volume_file.txt"
+				"pwd; echo $CENV0; cat /etc/os-release | grep -E \"^(ID|VERSION_ID)\"; cat /vol/volume_file.txt"
 			],
 			"c_cwd": "/opt",
 			"c_shell": true,
@@ -323,33 +283,33 @@
 				"CENV0": "value0"
 			},
 			"c_volumes": [
-				"{{taskRoot}}/aux:/aux"
+				"{{taskRoot}}/volumes/vol0:/vol"
 			],
 			"abstract": true
 		},
-		"050_container_ubuntu": {
+		"050a_container_ubuntu": {
 			"base": "base_container_test",
 			"short_desc": "Basic container support o/Ubuntu 24.04",
 			"c_image": "docker.io/library/ubuntu:24.04"
 		},
-		"051_container_rocky": {
+		"050b_container_rocky": {
 			"base": "base_container_test",
 			"short_desc": "Basic container support o/Rocky 9.3",
 			"c_image": "docker.io/rockylinux/rockylinux:9.3"
 		},
-		"052_container_no_inherit": {
+		"051_container_no_inherit": {
 			"base": "base_container_test",
 			"short_desc": "Check no inheritance settings for container",
 			"c_image": "docker.io/rockylinux/rockylinux:9.3",
 			"c_inherit_volumes": false,
 			"c_inherit_env": false,
 			"c_volumes": [
-				"{{taskRoot}}/aux2:/aux"
+				"{{taskRoot}}/volumes/vol1:/vol"
 			]
 		},
 		"info_task": {
 			"short_desc": "Dummy task for info/dump validations",
-			"description": "'task' running 'task'? blesphamy!",
+			"long_desc": "'task' running 'task'? blesphamy!",
 			"env": {
 				"{{var0}}": "{{var1}}",
 				"{{var1}}": "{{var0}}"
@@ -361,10 +321,7 @@
 				"a command",
 				"another command",
 				"yet another command"
-			],
-			"meta" : {
-				"internal": true
-			}
+			]
 		},
 		"info_task_container": {
 			"base": "info_task",
@@ -373,10 +330,7 @@
 			"c_interactive": true,
 			"c_volumes": ["/to-be-mapped-to-opt:{{optDir}}"],
 			"c_shell": true,
-			"c_shell_path": "/usr/bin/acme-shell",
-			"meta" : {
-				"internal": true
-			}
+			"c_shell_path": "/usr/bin/acme-shell"
 		},
 		"info_task_container_exec": {
 			"base": "info_task_container",
@@ -384,13 +338,13 @@
 			"c_exec": true,
 			"c_interactive": true,
 			"c_shell": false,
-			"c_flags": "--priviliged",
-			"meta" : {
-				"internal": true
-			}
+			"c_flags": "--priviliged"
 		},
 		"060_info": {
 			"short_desc": "Validate task info",
+			"variables": {
+				"task_info_cmd": "task info"
+			},
 			"commands": [
 				"echo ----- Task info, simple, not expanded ------",
 				"{{task_info_cmd}} info_task",
@@ -413,6 +367,9 @@
 		},
 		"061_dump": {
 			"short_desc": "Validate task dump",
+			"variables": {
+				"task_dump_cmd": "task dump"
+			},
 			"commands": [
 				"echo ----- Task descriptor, simple ------",
 				"{{task_dump_cmd}} info_task",
@@ -435,52 +392,6 @@
 			"short_desc": "Recursive task failure",
 			"commands": [
 				"echo This should never be printed"
-			],
-			"meta": {
-				"allowed_rc": [
-					255
-				]
-			}
-		},
-		"090_pre_post_base": {
-			"commands": [
-				"echo \"XXX\""
-			],
-			"abstract": true
-		},
-		"090a_pre_post": {
-			"base": "090_pre_post_base",
-			"short_desc": "Pre/Post commands test (a)",
-			"pre_commands": [
-				"echo \"YYY\""
-			],
-			"post_commands": [
-				"echo \"ZZZ\""
-			]
-		},
-		"090b_pre_post": {
-			"short_desc": "Pre/Post commands test (b)",
-			"pre_commands": [
-				"echo \"AAA\""
-			],
-			"commands": [
-				"echo \"BBB\""
-			],
-			"post_commands": [
-				"echo \"CCC\""
-			]
-		},
-		"090c_pre_post": {
-			"base": "090b_pre_post",
-			"short_desc": "Pre/Post commands test (c)",
-			"pre_commands": [
-				"echo \"111\""
-			],
-			"commands": [
-				"echo \"222\""
-			],
-			"post_commands": [
-				"echo \"333\""
 			]
 		}
 	},
