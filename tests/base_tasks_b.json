@@ -10,10 +10,7 @@
 		"041_included": {
 			"commands": [
 				"echo base b"
-			],
-			"meta": {
-				"comment": "should be overridden by a task in the maing tasks file"
-			}
+			]
 		}
 	},
 	"use_default_include": false
