@@ -31,9 +31,8 @@
 		},
 		"test_pkg_base": {
 			"short_desc": "Basic package test",
-			"cwd": "{{taskRoot}}/tests",
 			"commands": [
-				"./tr_test"
+				"{{taskRoot}}/tests/run_pkg_tests"
 			],
 			"abstract": true
 		},
@@ -41,7 +40,6 @@
 			"short_desc": "Basic package test from testpypi",
 			"base": "test_pkg_base",
 			"env": {
-				"TEST_PKG": "1",
 				"TEST_PYPI": "1"
 			}
 		},
@@ -49,7 +47,6 @@
 			"short_desc": "Basic package test from pypi",
 			"base": "test_pkg_base",
 			"env": {
-				"TEST_PKG": "1",
 				"TEST_PYPI": "0"
 			}
 		}
