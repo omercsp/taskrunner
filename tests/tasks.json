@@ -1,5 +1,5 @@
 {
-	"$schema": "/home/omer/devel/taskrunner/schemas/taskrunner_v0.7.json",
+	"$schema": "/home/omer/devel/taskrunner/schemas/taskrunner_v0.11.json",
 	"include": [
 		"{{taskRoot}}/base_tasks_b.json"
 	],
