@@ -1,0 +1,310 @@
+$schema: /home/omer/devel/taskrunner/schemas/taskrunner_v0.11.json
+include:
+  - '{{taskRoot}}/base_tasks_b.json'
+variables:
+  var0: var0
+  var1: var1
+  var2: var2
+  var0_1_2: '{{var0}} {{var1}} {{var2}}'
+  base_var2: from main tasks file
+  optDir: /opt
+  env_name: global_env_name
+  env_value: global_env_value
+tasks:
+  001a_simple:
+    short_desc: Simple echo
+    commands:
+      - echo "XXX"
+  001b_simple:
+    base: 001a_simple
+    short_desc: Simple echo (based on 001_simple)
+  002a_simple_env:
+    short_desc: Simple echo with environment variable
+    env:
+      V0: "42"
+    commands:
+      - printenv V0
+  002b_simple_env:
+    base: 002a_simple_env
+    short_desc: Simple echo with environment variable (based on 002_simple_env)
+    env:
+      V0: "43"
+  002c_env_inherit:
+    base: 002a_simple_env
+    short_desc: Inherit environment variable from
+    env:
+      V1: "43"
+    commands:
+      - printenv V0
+      - printenv V1
+  002d_no_env_inherit:
+    base: 002a_simple_env
+    short_desc: Don't inherit environment from base
+    env:
+      V1: "43"
+    inherit_env: false
+    commands:
+      - printenv V1
+      - printenv V0
+      - echo shouldn't be printed as V0 is not inherited and previous printenv should fail
+  003a_stop_on_error:
+    short_desc: Validate stop on error behavior
+    commands:
+      - "true"
+      - echo message1
+      - "false"
+      - echo message2
+  003b_continue_on_error:
+    base: 003a_stop_on_error
+    short_desc: Validate continue on error behavior
+    stop_on_error: false
+  004a_bash_multi_cmds_no_fail:
+    short_desc: Validate mulit bash commands not allowed to fail
+    shell: true
+    commands:
+      - true && echo message1 && false && echo message2
+  004b_bash_multi_cmds_allow_fail:
+    short_desc: Validate mulit bash commands allowed to fail
+    shell: true
+    commands:
+      - true; echo message1; false; echo message2
+  010_list_tasks:
+    short_desc: Validate working directory as /
+    variables:
+      list_dir: for_list_test
+    commands:
+      - task --conf {{list_dir}}/tasks-for-list.json list
+      - task --conf {{list_dir}}/tasks-for-list.json list -a
+  os_env_inherit_base:
+    env:
+      int_var: int_var_value
+    commands:
+      - printenv int_var
+      - printenv ext_var
+    abstract: true
+  015a_os_env_inherit:
+    base: os_env_inherit_base
+    short_desc: Check environment inheritance (enabled)
+    inherit_os_env: true
+  015b_no_os_env_inherit:
+    short_desc: Check environment inheritance (disabled)
+    base: os_env_inherit_base
+    inherit_os_env: false
+  020a_workdir_root:
+    short_desc: Validate working directory as /
+    cwd: /
+    commands:
+      - pwd
+  020b_workdir_opt:
+    short_desc: Validate working directory as /opt
+    cwd: /opt
+    commands:
+      - pwd
+  020c_workdir_taskroot:
+    short_desc: Validate working directory as task root (autodef)
+    cwd: '{{taskRoot}}'
+    shell: true
+    shell_path: /bin/bash
+    commands:
+      - '[[ "$(pwd)" == "{{taskRoot}}" ]] && echo Silence is golden'
+  023_var_expansion:
+    short_desc: Validate variables expansion
+    env:
+      MY_ENV: '{{var2}}'
+    commands:
+      - echo {{var0}} {{var0}}
+      - echo __{{var1}}__
+      - echo __{{var0_1_2}}__
+  024_var_expansion_env:
+    short_desc: Validate variables expansion for environment variables
+    env:
+      MY_ENV0: '{{var0}}'
+      MY_ENV1: '{{var1}}'
+      MY_ENV2: '{{var2}}'
+    shell: true
+    commands:
+      - echo __$MY_ENV0 XX $MY_ENV1 __${MY_ENV2}
+  025_env_whitespace:
+    short_desc: Check weird environment configrations
+    env:
+      ENV0: '   value0'
+      'ENV1   ': value1
+      '  ENV2': "\tvalue2"
+      ENV3: '"value3"'
+      ENV4: '''value4'''
+      ENV5: '''\\value5\t x'''
+    commands:
+      - printenv ENV0
+      - printenv 'ENV1   '
+      - printenv '  ENV2'
+      - printenv ENV3
+      - printenv ENV4
+      - printenv ENV5
+  030_args_handling:
+    short_desc: Check arguments handling
+    commands:
+      - echo cliArgs={{cliArgs}}
+      - echo "no args"
+      - echo cliArgs={{cliArgs}}
+  031_args_override:
+    short_desc: Check task setting override by CLI
+    long_desc: Check some task settings override by CLI args (env, shell usage, cwd and command)
+    commands:
+      - "false"
+    cwd: /nowhere
+    env:
+      MY_ENV0: orig_value
+    shell: false
+  032_args_var_override:
+    short_desc: Check variables override by CLI args
+    commands:
+      - echo {{var0}}
+  033a_task_vars:
+    short_desc: Check variables override by CLI args
+    variables:
+      var0: task_override_var0
+      var1: task_override_var1
+      tvar0: task_own_var0
+      tvar1: task_own_var1
+      complex_var: '{{var2}} {{nothing}} {{var0}} {{tvar1}}'
+    env:
+      '{{env_name}}': '{{env_value}}'
+    commands:
+      - printenv {{env_name}}
+      - echo var0={{var0}}
+      - echo var1={{var1}}
+      - echo var2={{var2}}
+      - echo tvar0={{tvar0}}
+      - echo tvar1={{tvar1}}
+      - echo complex_var={{complex_var}}
+  033b_task_vars:
+    base: 033a_task_vars
+    short_desc: Check variables override by CLI args
+    variables:
+      var0: derived_task_override_var0
+      env_value: derived_task_env_value
+  033c_task_vars_no_inherit:
+    base: 033a_task_vars
+    short_desc: Check variables override by CLI args
+    inherit_variables: false
+    variables:
+      var1: derived_task_override_var1
+      var2: derived_task_override_var2
+  040_config_file_include_defs:
+    short_desc: Check variables from included files
+    commands:
+      - echo base_var0={{base_var0}}
+      - echo base_var1={{base_var1}}
+      - echo base_var2={{base_var2}}
+  041_included:
+    short_desc: Check overridden task, 1 deep
+    commands:
+      - echo main config file
+  042_included:
+    short_desc: Check overridden task, 2 deep
+    commands:
+      - echo main config file
+  base_container_test:
+    short_desc: Basic container support
+    commands:
+      - pwd; echo $CENV0; cat /etc/os-release | grep -E "^(ID|VERSION_ID)"; cat /vol/volume_file.txt
+    c_cwd: /opt
+    c_shell: true
+    c_env:
+      CENV0: value0
+    c_volumes:
+      - '{{taskRoot}}/volumes/vol0:/vol'
+    abstract: true
+  050a_container_ubuntu:
+    base: base_container_test
+    short_desc: Basic container support o/Ubuntu 24.04
+    c_image: docker.io/library/ubuntu:24.04
+  050b_container_rocky:
+    base: base_container_test
+    short_desc: Basic container support o/Rocky 9.3
+    c_image: docker.io/rockylinux/rockylinux:9.3
+  051_container_no_inherit:
+    base: base_container_test
+    short_desc: Check no inheritance settings for container
+    c_image: docker.io/rockylinux/rockylinux:9.3
+    c_inherit_volumes: false
+    c_inherit_env: false
+    c_volumes:
+      - '{{taskRoot}}/volumes/vol1:/vol'
+  info_task:
+    short_desc: Dummy task for info/dump validations
+    long_desc: '''task'' running ''task''? blesphamy!'
+    env:
+      '{{var0}}': '{{var1}}'
+      '{{var1}}': '{{var0}}'
+    hidden: true
+    abstract: true
+    cwd: '{{optDir}}'
+    commands:
+      - a command
+      - another command
+      - yet another command
+  info_task_container:
+    base: info_task
+    c_image: a-wonderfull-image
+    c_remove: false
+    c_interactive: true
+    c_volumes:
+      - /to-be-mapped-to-opt:{{optDir}}
+    c_shell: true
+    c_shell_path: /usr/bin/acme-shell
+  info_task_container_exec:
+    base: info_task_container
+    c_image: a-wonderfull-container
+    c_exec: true
+    c_interactive: true
+    c_shell: false
+    c_flags: --priviliged
+  060_info:
+    short_desc: Validate task info
+    variables:
+      task_info_cmd: task info
+    commands:
+      - echo ----- Task info, simple, not expanded ------
+      - '{{task_info_cmd}} info_task'
+      - echo
+      - echo ----- Task info, simple, expanded ------
+      - '{{task_info_cmd}} -x info_task'
+      - echo
+      - echo ----- Task info, container, run, not expanded ------
+      - '{{task_info_cmd}} info_task_container'
+      - echo
+      - echo ----- Task info, container, run, expanded ------
+      - '{{task_info_cmd}} -x info_task_container'
+      - echo
+      - echo ----- Task info, container, exec, not expanded ------
+      - '{{task_info_cmd}} info_task_container_exec'
+      - echo
+      - echo ----- Task info, container, exec, expanded ------
+      - '{{task_info_cmd}} -x info_task_container_exec'
+  061_dump:
+    short_desc: Validate task dump
+    variables:
+      task_dump_cmd: task dump
+    commands:
+      - echo ----- Task descriptor, simple ------
+      - '{{task_dump_cmd}} info_task'
+      - echo
+      - echo ----- Task descriptor, container, no inclusion ------
+      - '{{task_dump_cmd}} info_task_container'
+      - echo
+      - echo ----- Task descriptor, container, with inclusion ------
+      - '{{task_dump_cmd}} -i info_task_container'
+      - echo
+      - echo ----- Task descriptor, container, ,exec, no inclusion ------
+      - '{{task_dump_cmd}} info_task_container_exec'
+      - echo
+      - echo ----- Task descriptor, container, ,exec, with inclusion ------
+      - '{{task_dump_cmd}} -i info_task_container_exec'
+  080_recursive_fail:
+    base: 080_recursive_fail
+    short_desc: Recursive task failure
+    commands:
+      - echo This should never be printed
+use_default_include: false
+default_container_tool: /usr/bin/podman

@@ -23,7 +23,8 @@ classifiers = [
 dependencies = [
 	"argcomplete>=2.0.0",
         "pydantic>=2.8",
-	"setuptools>=72"
+	"setuptools>=72",
+	"PyYAML>=6.0.2, <7.0"
 ]
 requires-python = ">=3.10,<4"
 
