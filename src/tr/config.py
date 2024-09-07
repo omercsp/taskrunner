@@ -8,10 +8,20 @@ import json
 from typing import Any
 from argparse import Namespace as Args
 from pydantic import BaseModel, Field, ConfigDict, ValidationError
+import yaml
 
 
-_CONF_FILE_NAME = "tasks.json"
-_DFLT_CONF_FILE_NAME = str(pathlib.Path.home()) + "/.config/" + _CONF_FILE_NAME
+_COMMON_CONF_FILES: list[str] = [".tasks.yaml", "tasks.yaml", ".tasks.json", "tasks.json"]
+_DFLT_CONF_DIR = str(pathlib.Path.home()) + "/.config/"
+_DFLT_CONF_FILES = [os.path.join(_DFLT_CONF_DIR, f) for f in _COMMON_CONF_FILES]
+
+
+def _find_default_config_file(directory: str) -> str | None:
+    for f in _COMMON_CONF_FILES:
+        file_path = os.path.join(directory, f)
+        if os.path.isfile(file_path):
+            return file_path
+    return None
 
 
 HIDDEN = "hidden"
@@ -93,10 +103,17 @@ def validate_task_model(name: str, data: dict) -> TaskModel:
 class Config:
     @staticmethod
     def _read_config_file(file_path: str) -> ConfigFileModel:
+        #  Find the configuration file extension
         try:
-            data: dict = json.load(open(file_path, 'r'))
+            ext = os.path.splitext(file_path)[1]
+            if ext == ".json":
+                data: dict = json.load(open(file_path, 'r'))
+            elif ext == ".yaml" or ext == ".yml":
+                data: dict = yaml.safe_load(open(file_path, 'r'))
+            else:
+                raise TaskException("Unsupported configuration file format")
             return validate_config_file_schema(data)
-        except (IOError, TypeError, ValueError, TaskException) as e:
+        except (IOError, TypeError, ValueError, TaskException, IndexError, yaml.YAMLError) as e:
             raise TaskException(f"Error parsing {file_path} - {e}")
 
     def _read_configuration(self, file_path: str, read_files: set | None = None) -> ConfigFileModel:
@@ -111,11 +128,12 @@ class Config:
         # Add the default configuration file to includes list but only for the original
         # configuration file, and the behavior isn't turned off (again, relevant ONLY to
         # original file)
+        dflt_conf_file_path = _find_default_config_file(_DFLT_CONF_DIR)
         if len(read_files) == 0 and \
-                file_path != _DFLT_CONF_FILE_NAME and \
-                os.path.isfile(_DFLT_CONF_FILE_NAME) and \
-                (base_config_model is None or base_config_model.use_default_include):
-            includes.insert(0, _DFLT_CONF_FILE_NAME)
+                file_path not in _DFLT_CONF_FILES and \
+                dflt_conf_file_path and \
+                base_config_model.use_default_include:
+            includes.insert(0, dflt_conf_file_path)
 
         included_tasks = {}
         included_variables = {}
@@ -140,16 +158,14 @@ class Config:
     def _get_conf_file_path() -> str | None:
         directory = os.getcwd()
         while True:
-            conf_path = directory + "/." + _CONF_FILE_NAME
-            if os.path.isfile(conf_path):
+            conf_path = _find_default_config_file(directory)
+            if conf_path:
                 return conf_path
             if directory == "/":
                 break
             directory = os.path.dirname(directory)
 
-        if os.path.isfile(_DFLT_CONF_FILE_NAME):
-            return _DFLT_CONF_FILE_NAME
-        return None
+        return _find_default_config_file(_DFLT_CONF_DIR)
 
     def __init__(self, args: Args | None) -> None:
         self.args: Args = args  # type: ignore
@@ -165,11 +181,11 @@ class Config:
         const_vars = {}
         cwd = os.getcwd()
         const_vars[AutoVarsKeys.CWD] = cwd
-        if conf_path:
-            conf_dir_name = os.path.dirname(conf_path)
-            if conf_dir_name:
-                const_vars[AutoVarsKeys.TASK_ROOT] = os.path.dirname(conf_path)
-        const_vars.setdefault(AutoVarsKeys.TASK_ROOT, cwd)
+        conf_dir_name = os.path.dirname(conf_path)
+        if conf_dir_name:
+            const_vars[AutoVarsKeys.TASK_ROOT] = os.path.dirname(conf_path)
+        else:
+            const_vars.setdefault(AutoVarsKeys.TASK_ROOT, cwd)
         if args and args.__contains__(AutoVarsKeys.TASK_CLI_ARGS):
             const_vars[AutoVarsKeys.TASK_CLI_ARGS] = " ".join(
                 args.__getattribute__(AutoVarsKeys.TASK_CLI_ARGS))

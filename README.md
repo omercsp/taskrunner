@@ -33,7 +33,7 @@ For installation from source:
 TR should work for any environment with compatible python, however it is developed on and maintained for Linux machines. CI tests are ran for MacOS as well without container support. It is known to work on Cygwin systems (again, without containers support).
 
 # Basic configuration and usage
-TR uses json configuration files (By default, named `.tasks.json`) to describe tasks. These tasks are available when the current work directory is anywhere in the directory hierarchy under the directory the configuration file was placed in - TR recursively looks for `.tasks.json` from the current working directory up to root.
+TR uses yaml or json configuration files (By default, named `.tasks.yaml`) to describe tasks. These tasks are available when the current work directory is anywhere in the directory hierarchy under the directory the configuration file was placed in - TR recursively looks for `.tasks.yaml` from the current working directory up to root.
 
 Once set, use the following commands:
 
@@ -41,7 +41,13 @@ Once set, use the following commands:
 2. Getting info on a task - by running `task info <TASK>`
 3. Listing available tasks  - by running `task list`
 
-As implied, configuration files are json files. Each task is a json object with a name and a list of commands to execute.
+## Configuration file search order
+TR searches for configuration files in the following order:
+1. The current working directory, and recursively up to the root directory.
+2. The user's home directory, in the `.config` directory.
+In any of these directories, the first configuration file found is used. TR searchs for the following files (in order): `.tasks.yaml`, `.tasks.yml`, `.tasks.json` and `tasks.json`.
+
+Configuration files may include other files, as well as the default configuration file located in the user's home directory. By default, the default configuration file is not included. This behaviour can be disabled by setting `use_default_include` to `true`.
 
 ## Example - building projects
 [_source code projects are used in the following examples, but any sort of task is valid - `scp` some files, start a service through `systemctl`, open a video with `vlc`, etc._]:
@@ -65,18 +71,15 @@ Often running basic `cmake` commands in such environments requires:
 1. Entering the project's `build` directory
 2. Running `cmake ..`
 
-Not very complicated, but can get tedious when actively developing cmake files all over the tree. By adding the following `.tasks.json` file into `cmake-project` directory, rerunning the relevant cmake command becomes trivial one-liner:
-```json
-{
-	"tasks": {
-		"cmake": {
-			"short_desc": "Run cmake",
-			"description": "Run 'cmake ..' for the cmake-project",
-			"commands": ["cmake .."],
-			"cwd": "{{taskRoot}}/build"
-		}
-	}
-}
+Not very complicated, but can get tedious when actively developing cmake files all over the tree. By adding the following `.tasks.yaml` file into `cmake-project` directory, rerunning the relevant cmake command becomes trivial one-liner:
+```yaml
+tasks:
+  cmake:
+    short_desc: Run cmake
+    description: Run 'cmake ..' for the cmake-project
+    commands:
+      - cmake ..
+    cwd: '{{taskRoot}}/build'
 ```
 **Once set, running `task run cmake` from _anywhere_ under `cmake-project` will run the `cmake ..` with  `cmake-project/build` as the working directory**.
 
@@ -106,35 +109,26 @@ Command:                cmake ..
 ```
 
 Now lets assume there's a need to occasionally run another task, similar to the one already defined. For example, with some `cmake` definition like `-DSOMEVAR=somevalue`. And another task that actually builds the project with `cmake --build .. -j8` , both, like the first task, need to be invoked from the `build` directory (Again, if you don't care about `cmake` and source building, don't worry about what each command does. Anything can be used here). Instead of remembering each command or placing these in shell scripts and then trying to remember where _they_ are, using TR tasks simplify the workflow:
-```json
-{
-	"tasks": {
-		"cmake": {
-			"short_desc": "Run cmake",
-			"description": "Run 'cmake ..' for the cmake-project",
-			"commands": [
-				"cmake .."
-			],
-			"cwd": "{{taskRoot}}/build"
-		},
-		"cmake-with-def": {
-			"short_desc": "Run cmake with cmake define flag",
-			"description": "Run 'cmake ..' for the cmake-project, with a cmake define flag",
-			"commands": [
-				"cmake -DSOMEVAR=somevalue .."
-			],
-			"cwd": "{{taskRoot}}/build"
-		},
-		"build": {
-			"short_desc": "Build the project",
-			"description": "Build the project using cmake's build command",
-			"commands": [
-				"cmake --build .."
-			],
-			"cwd": "{{taskRoot}}/build"
-		}
-	}
-}
+```yaml
+tasks:
+  cmake:
+    short_desc: Run cmake
+    description: Run 'cmake ..' for the cmake-project
+    commands:
+      - cmake ..
+    cwd: '{{taskRoot}}/build'
+  cmake-with-def:
+    short_desc: Run cmake with cmake define flag
+    description: Run 'cmake ..' for the cmake-project, with a cmake define flag
+    commands:
+      - cmake -DSOMEVAR=somevalue ..
+    cwd: '{{taskRoot}}/build'
+  build:
+    short_desc: Build the project
+    description: Build the project using cmake's build command
+    commands:
+      - cmake --build ..
+    cwd: '{{taskRoot}}/build'
 ```
 
 And now all commands are available, from any directory under `cmake-project`:
@@ -197,42 +191,31 @@ There are 3 types of variables with different priorities:
 
 The following example show the different types of variables definition and usage.
 
-```json
-{
-	"variables": {
-		"ENV_NAME": "global_env_name",
-		"ENV_VALUE": "global_env_value",
-		"var0": "global_var0_value",
-		"var1": "global_var1_value"
-	},
-	"tasks": {
-		"task0": {
-			"variables": {
-				"var1": "task0_var1_value",
-				"var2": "task0_var2_value"
-			},
-			"env": {
-				"{{ENV_NAME}}": "{{ENV_VALUE}}"
-			},
-			"commands": [
-				"printenv {{ENV_NAME}}",
-				"echo {{var0}}",
-				"echo {{var1}}",
-				"echo {{var2}}"
-			]
-		},
-		"task1": {
-			"base": "task0",
-			"variables": {
-				"ENV_VALUE": "task1_env_value",
-				"var2": "task1_var2_value"
-			},
-			"env": {
-				"{{ENV_NAME}}": "{{ENV_VALUE}}"
-			}
-		}
-	}
-}
+```yaml
+variables:
+  ENV_NAME: global_env_name
+  ENV_VALUE: global_env_value
+  var0: global_var0_value
+  var1: global_var1_value
+tasks:
+  task0:
+    variables:
+      var1: task0_var1_value
+      var2: task0_var2_value
+    env:
+      '{{ENV_NAME}}': '{{ENV_VALUE}}'
+    commands:
+      - printenv {{ENV_NAME}}
+      - echo {{var0}}
+      - echo {{var1}}
+      - echo {{var2}}
+  task1:
+    base: task0
+    variables:
+      ENV_VALUE: task1_env_value
+      var2: task1_var2_value
+    env:
+      '{{ENV_NAME}}': '{{ENV_VALUE}}'
 ```
 
 In the above example, a few global vars are defined. `task0` overrides the global `var1` and sets its own `var2`. `task1` overrides the inherited `task0` `var2`. Note the environment variable setting using the TR variables.
@@ -245,19 +228,18 @@ When a task is invoked its commands are invoked with the current set of system e
 
 ## Container based tasks
 TR includes special support for running tasks inside a container. The main container setting is `c_image` defining a container image to use. The following task runs `make` inside a container with a volume, CWD set, tty allocated, interactive mode, wrapped in a `/usr/bin/sh -c`:
-```json
-"build": {
-	"short_desc": "Build",
-	"c_image": "localhost/media-builder:latest",
-	"c_volumes": [
-		"{cwd}:{cwd}"
-	],
-	"c_tty": true,
-	"c_interactive": true,
-	"c_shell": true,
-	"c_cwd": "{{taskRoot}}"
-	"commands": ["ls -l"],
-},
+```yaml
+build:
+  short_desc: Build
+  c_image: localhost/media-builder:latest
+  c_volumes:
+    - '{cwd}:{cwd}'
+  c_tty: true
+  c_interactive: true
+  c_shell: true
+  c_cwd: '{{taskRoot}}'
+  commands:
+    - ls -l
 ```
 The actual command the task invokes is `/usr/bin/docker -i -t --rm -w {{taskRoot}} -v {{cwd}}:{{cwd}} localhost/media-builder:latest /usr/bin/sh -c "ls -l"`.
 
@@ -268,27 +250,21 @@ For a detailed list of all container configuration settings, refer to the [confi
 ## Inheritance
 A task might inherit another task settings by using the `base` settings. If task `a` inherits task `b`, all of `b`'s settings are inherited. Setting redefined in task `a` will override inherited setting. The following example demonstrates how to utilize task inheritance for creating multiple tasks with similar characteristics that differ in a small details (working directory):
 
-```json
-{
-	"tasks": {
-		"base-task": {
-			"abstract": true,
-			"commands": ["very_complicated command --with --lots=of --flags and arguments"],
-			"env": {
-				"and": "some",
-				"environment": "variables"
-			}
-		},
-		"task-1": {
-			"base": "base-task",
-			"cwd": "/opt/task-1_dir"
-		},
-		"task-2": {
-			"base": "base-task",
-			"cwd": "/opt/task-2_dir"
-		}
-	}
-}
+```yaml
+tasks:
+  base-task:
+    abstract: true
+    commands:
+      - very_complicated command --with --lots=of --flags and arguments
+    env:
+      and: some
+      environment: variables
+  task-1:
+    base: base-task
+    cwd: /opt/task-1_dir
+  task-2:
+    base: base-task
+    cwd: /opt/task-2_dir
 ```
 
 ## Configuration files inclusion
@@ -299,11 +275,11 @@ A special file located in `${HOME}/.config/tasks.json` is always included if it 
 ### Passing command line arguments to commands
 Command line arguments are transferred to a task run with the `--` convention: text written after the 'dash dash' token is transferred as an arguments. The arguments aren't passed to the commands automatically. In order for a command to use CLI arguments, it must be explicitly use it with the `{{cliArgs}}` variable. The allows fine grain control of which commands and where inside the command the CLI arguments are used. In fact, since arguments are translates to a TR variable, `{{cliArgs}}` can be used in every setting with variables support.
 Running `task run ls -- -l somefile.txt` in the following task will run `ls -l somefile.txt`:
-```json
-"ls": {
-	"commands": ["ls {{cliArgs}}"],
-	"short_desc": "Clean build"
-}
+```yaml
+ls:
+  commands:
+    - ls {{cliArgs}}
+  short_desc: Clean build
 ```
 
 ## TR CLI options
