@@ -1,4 +1,5 @@
 {
+	"$schema": "/home/omer/devel/taskrunner/schemas/taskrunner_v0.11.json",
 	"tasks": {
 		"test": {
 			"short_desc": "Run test",
