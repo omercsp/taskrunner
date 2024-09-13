@@ -5,8 +5,10 @@ import os
 import traceback
 import json
 import copy
+import yaml
 from typing import Any
 from pydantic import ValidationError
+from enum import Enum
 
 TASK_YES_TOKEN = 'yes'
 TASK_NO_TOKEN = 'no'
@@ -124,6 +126,25 @@ def bt() -> None:
 
 def print_dict(d: dict) -> None:
     print(json.dumps(d, indent=4))
+
+
+def sort_dict(item: dict):
+    return {k: sort_dict(v) if isinstance(v, dict) else v for k, v in sorted(item.items())}
+
+
+class DictDumpFmt(str, Enum):
+    JSON = "json"
+    YAML = "yaml"
+
+
+def dump_dict(d: dict, sort: bool, fmt: str) -> str:
+    if sort:
+        d = sort_dict(d)
+
+    if fmt == DictDumpFmt.YAML:
+        return yaml.dump(d, sort_keys=False)
+    else:
+        return json.dumps(d, indent=4)
 
 
 def pydantic_errmsg(ve: ValidationError) -> str:
