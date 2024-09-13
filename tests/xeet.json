@@ -135,6 +135,31 @@
 			"base": "test_base"
 		}
 		,{
+			"name": "043a_cmds_override",
+			"base": "test_base",
+			"groups": ["cmds_inherit"]
+		}
+		,{
+			"name": "043b_cmds_inherit_before",
+			"base": "test_base",
+			"groups": ["cmds_inherit"]
+		}
+		,{
+			"name": "043c_cmds_inherit_after",
+			"base": "test_base",
+			"groups": ["cmds_inherit"]
+		}
+		,{
+			"name": "043d_cmds_inherit_ignore",
+			"base": "test_base",
+			"groups": ["cmds_inherit"]
+		}
+		,{
+			"name": "043e_cmds_inherit_depth_2",
+			"base": "test_base",
+			"groups": ["cmds_inherit"]
+		}
+		,{
 			"name": "050a_container_ubuntu",
 			"base": "test_base",
 			"groups": ["container"]
