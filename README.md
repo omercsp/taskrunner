@@ -27,8 +27,7 @@ To install run `pip3 install pytaskrunner`.
 
 For installation from source:
 1. Clone the repository
-2. Install the requirements using pip `pip3 install -r requirements.txt`
-3. Make sure the executable file `task` is accessible from to the execution search path (i.e. $PATH and so)
+2. Install the requirements using pip `pip3 install <path to cloned repository>`
 
 TR should work for any environment with compatible python, however it is developed on and maintained for Linux machines. CI tests are ran for MacOS as well without container support. It is known to work on Cygwin systems (again, without containers support).
 
