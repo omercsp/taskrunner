@@ -204,6 +204,36 @@ tasks:
     short_desc: Check overridden task, 2 deep
     commands:
       - echo main config file
+  base_cmds_inherit:
+    commands:
+      - echo base
+  043a_cmds_override:
+    base: base_cmds_inherit
+    short_desc: Check commands override
+    commands:
+      - echo derived
+  043b_cmds_inherit_before:
+    base: base_cmds_inherit
+    base_cmds: before
+    short_desc: Check commands before
+    commands:
+      - echo derived
+  043c_cmds_inherit_after:
+    base: base_cmds_inherit
+    base_cmds: after
+    short_desc: Check commands after
+    commands:
+      - echo derived
+  043d_cmds_inherit_ignore:
+    base: base_cmds_inherit
+    base_cmds: ignore
+    short_desc: Check forced ignore of commands
+  043e_cmds_inherit_depth_2:
+    base: 043b_cmds_inherit_before
+    base_cmds: before
+    commands:
+      - echo derived2
+    short_desc: Check forced ignore of commands
   base_container_test:
     short_desc: Basic container support
     commands:
