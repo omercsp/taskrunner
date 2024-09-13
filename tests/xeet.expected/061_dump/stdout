@@ -1,96 +1,96 @@
 ----- Task descriptor, simple ------
 {
-    "short_desc": "Dummy task for info/dump validations",
-    "long_desc": "'task' running 'task'? blesphamy!",
+    "abstract": true,
+    "commands": [
+        "a command",
+        "another command",
+        "yet another command"
+    ],
+    "cwd": "{{optDir}}",
     "env": {
         "{{var0}}": "{{var1}}",
         "{{var1}}": "{{var0}}"
     },
     "hidden": true,
-    "abstract": true,
-    "cwd": "{{optDir}}",
-    "commands": [
-        "a command",
-        "another command",
-        "yet another command"
-    ]
+    "long_desc": "'task' running 'task'? blesphamy!",
+    "short_desc": "Dummy task for info/dump validations"
 }
 
 ----- Task descriptor, container, no inclusion ------
 {
     "base": "info_task",
     "c_image": "a-wonderfull-image",
-    "c_remove": false,
     "c_interactive": true,
+    "c_remove": false,
+    "c_shell": true,
+    "c_shell_path": "/usr/bin/acme-shell",
     "c_volumes": [
         "/to-be-mapped-to-opt:{{optDir}}"
-    ],
-    "c_shell": true,
-    "c_shell_path": "/usr/bin/acme-shell"
+    ]
 }
 
 ----- Task descriptor, container, with inclusion ------
 {
-    "short_desc": "Dummy task for info/dump validations",
-    "long_desc": "'task' running 'task'? blesphamy!",
-    "env": {
-        "{{var0}}": "{{var1}}",
-        "{{var1}}": "{{var0}}"
-    },
-    "cwd": "{{optDir}}",
+    "base": "info_task",
+    "c_env": {},
+    "c_image": "a-wonderfull-image",
+    "c_interactive": true,
+    "c_remove": false,
+    "c_shell": true,
+    "c_shell_path": "/usr/bin/acme-shell",
+    "c_volumes": [
+        "/to-be-mapped-to-opt:{{optDir}}"
+    ],
     "commands": [
         "a command",
         "another command",
         "yet another command"
     ],
-    "base": "info_task",
-    "c_image": "a-wonderfull-image",
-    "c_remove": false,
-    "c_interactive": true,
-    "c_volumes": [
-        "/to-be-mapped-to-opt:{{optDir}}"
-    ],
-    "c_shell": true,
-    "c_shell_path": "/usr/bin/acme-shell",
-    "variables": {},
-    "c_env": {}
+    "cwd": "{{optDir}}",
+    "env": {
+        "{{var0}}": "{{var1}}",
+        "{{var1}}": "{{var0}}"
+    },
+    "long_desc": "'task' running 'task'? blesphamy!",
+    "short_desc": "Dummy task for info/dump validations",
+    "variables": {}
 }
 
 ----- Task descriptor, container, ,exec, no inclusion ------
 {
     "base": "info_task_container",
-    "c_image": "a-wonderfull-container",
     "c_exec": true,
+    "c_flags": "--priviliged",
+    "c_image": "a-wonderfull-container",
     "c_interactive": true,
-    "c_shell": false,
-    "c_flags": "--priviliged"
+    "c_shell": false
 }
 
 ----- Task descriptor, container, ,exec, with inclusion ------
 {
-    "short_desc": "Dummy task for info/dump validations",
-    "long_desc": "'task' running 'task'? blesphamy!",
-    "env": {
-        "{{var0}}": "{{var1}}",
-        "{{var1}}": "{{var0}}"
-    },
-    "cwd": "{{optDir}}",
+    "base": "info_task_container",
+    "c_env": {},
+    "c_exec": true,
+    "c_flags": "--priviliged",
+    "c_image": "a-wonderfull-container",
+    "c_interactive": true,
+    "c_remove": false,
+    "c_shell": false,
+    "c_shell_path": "/usr/bin/acme-shell",
+    "c_volumes": [
+        "/to-be-mapped-to-opt:{{optDir}}"
+    ],
     "commands": [
         "a command",
         "another command",
         "yet another command"
     ],
-    "base": "info_task_container",
-    "c_image": "a-wonderfull-container",
-    "c_remove": false,
-    "c_interactive": true,
-    "c_volumes": [
-        "/to-be-mapped-to-opt:{{optDir}}"
-    ],
-    "c_shell": false,
-    "c_shell_path": "/usr/bin/acme-shell",
-    "variables": {},
-    "c_env": {},
-    "c_exec": true,
-    "c_flags": "--priviliged"
+    "cwd": "{{optDir}}",
+    "env": {
+        "{{var0}}": "{{var1}}",
+        "{{var1}}": "{{var0}}"
+    },
+    "long_desc": "'task' running 'task'? blesphamy!",
+    "short_desc": "Dummy task for info/dump validations",
+    "variables": {}
 }
