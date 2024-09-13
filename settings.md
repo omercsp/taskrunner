@@ -23,6 +23,7 @@
 * `hidden` - Hides task from being listed by default. Hidden tasks can still be listed using `--all` flag. (type: Boolean, default value: `false`).
 * `abstract` - Abastrct tasks are not allowed to be run. This setting is useful when there's a need to mark task as a base task, while preventing it from being wrongfuly ran. Abstract tasks are implictly hidden. (type: Boolean, default value: `false`).
 * `base` - An optional task name to inherit from. Any current task settings override inherited settings (type: string, empty default value).
+* `base_cmds` - An optional setting of how to treat base commands. If set to `before`, the base commands are ran before the current task commands. If set to `after`, the base commands are ran after the current task commands. If set to `default`, the base commands are not ran at all if the any commands are defined; if there aren't any commands to this task, `default` will take the base commands as is. `ignore` value will ignore the base task commands regardless of the task commands existence. If the set to `ign (type: string, default value: `default`).
 * `meta` - A dictionary for the user own use. TR does not refer to values in this object (type: object, empty default value).
 * `variables` - A dictionary for task sepecific variables. These variables are not exposed to other tasks with the exception of tasks that inherit this task. Task variables override global variables with the same name.
 

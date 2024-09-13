@@ -10,6 +10,7 @@ from argparse import Namespace as Args
 from pydantic import BaseModel, Field, ConfigDict, ValidationError, AliasChoices
 from copy import deepcopy
 import yaml
+from enum import Enum
 
 
 _COMMON_CONF_FILES: list[str] = [".tasks.yaml", "tasks.yaml", ".tasks.json", "tasks.json"]
@@ -30,14 +31,24 @@ ABSTRACT = "abstract"
 INCLUDE = "include"
 TASKS = "tasks"
 VARIABLES = "variables"
+COMMANDS = "commands"
 ENV = "env"
 C_VOLUMES = "c_volumes"
 C_ENV = "c_env"
 
 
+class _CmdsInherit(str, Enum):
+    Ignore = "ignore"
+    Default = "default"
+    Before = "before"
+    After = "after"
+
+
 class TaskModel(BaseModel):
     model_config = ConfigDict(extra='forbid')
     base: str | None = None
+    base_cmds: _CmdsInherit = Field(_CmdsInherit.Default,
+                                    validation_alias=AliasChoices("base_cmds", "base_commands"))
     short_desc: str | None = Field(None, max_length=75,
                                    validation_alias=AliasChoices("short_desc", "short_description"))
     long_desc: str | None = Field(None, validation_alias=AliasChoices("long_desc", "description"))
@@ -273,9 +284,25 @@ class Config:
         if task_model.c_inherit_volumes:
             task_model.c_volumes += base_task_desc.get(C_VOLUMES, [])
 
+        base_commands = base_task_desc.pop(COMMANDS, [])
+        commands = []
+        if not task_model.commands:
+            if task_model.base_cmds == _CmdsInherit.Default:
+                commands = base_commands
+            elif task_model.base_cmds != _CmdsInherit.Ignore:
+                commands = task_model.commands
+        elif base_commands:
+            if task_model.base_cmds == _CmdsInherit.Before:
+                commands = base_commands + task_model.commands
+            elif task_model.base_cmds == _CmdsInherit.After:
+                commands = task_model.commands + base_commands
+            else:
+                commands = task_model.commands
+
         unified_desc = {}
         unified_desc.update(base_task_desc)
         unified_desc.update(task_desc)
+        unified_desc[COMMANDS] = commands
         unified_desc[VARIABLES] = tmp_vars
         unified_desc[ENV] = tmp_env
         unified_desc[C_ENV] = tmp_c_env
