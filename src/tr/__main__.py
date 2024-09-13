@@ -1,5 +1,5 @@
 from tr.config import Config
-from tr.common import TASK_YES_TOKEN, TASK_NO_TOKEN, TaskException
+from tr.common import TASK_YES_TOKEN, TASK_NO_TOKEN, TaskException, DictDumpFmt
 from tr.config import Config, AutoVarsKeys
 from tr.logTools import init_logging, info, error_and_print
 from tr.actions import (run_task, list_tasks, show_task_info, dump_task, dump_config, dump_schema,
@@ -100,22 +100,29 @@ def _parse_arguments() -> argparse.Namespace:
     info_parser.add_argument('-x', '--expand', help='expand values', action='store_true',
                              default=False)
 
-    dump_parser = subparsers.add_parser(_DUMP_TASK_CMD, help='dump a task',
-                                        parents=[task_target_parser])
-    dump_parser.add_argument('-i', '--includes', help='with inclusions',
-                             action='store_true', default=False)
-
     list_parser = subparsers.add_parser(_LIST_CMD, help='list tasks')
     list_parser.add_argument('-a', '--all', action='store_true', default=False,
                              help='show hidden and shadowed tasks')
     list_parser.add_argument('--names-only', action='store_true', default=False,
                              help=argparse.SUPPRESS)
 
-    dump_parser = subparsers.add_parser(_DUMP_SCHEMA_CMD, help='dump configuration file schema')
-    dump_parser.add_argument('-t', '--type', choices=SchemaDumpOpts.CHOICES,
-                             default=SchemaDumpOpts.ALL)
+    dump_common_parser = argparse.ArgumentParser(add_help=False)
+    dump_common_parser.add_argument('-s', '--sort', action='store_true',
+                                    default=False, help='sort by keys')
+    dump_common_parser.add_argument('-f', '--format', choices=[e.value for e in DictDumpFmt],
+                                    default=DictDumpFmt.YAML)
+    dump_parser = subparsers.add_parser(_DUMP_TASK_CMD, help='dump a task',
+                                        parents=[task_target_parser, dump_common_parser])
+    dump_parser.add_argument('-i', '--includes', help='with inclusions',
+                             action='store_true', default=False)
 
-    subparsers.add_parser(_DUMP_CONFIG_CMD, help='dump configuration')
+    dump_schme_parser = subparsers.add_parser(_DUMP_SCHEMA_CMD,
+                                              help='dump configuration file schema',
+                                              parents=[dump_common_parser])
+    dump_schme_parser.add_argument('-t', '--type', choices=[e.value for e in SchemaDumpOpts],
+                                   default=SchemaDumpOpts.ALL)
+
+    subparsers.add_parser(_DUMP_CONFIG_CMD, help='dump configuration', parents=[dump_common_parser])
 
     # TODO: Not sure what pyright wants with this type ignore
     argcomplete.autocomplete(parser, always_complete_options=False,
@@ -137,7 +144,7 @@ def main() -> int:
         info("cmd_args={}", args.__getattribute__(AutoVarsKeys.TASK_CLI_ARGS))
 
         if args.subparsers_name == _DUMP_SCHEMA_CMD:
-            dump_schema(args.type)
+            dump_schema(args.type, args.sort, args.format)
             return 0
 
         config = Config(args)
@@ -148,9 +155,9 @@ def main() -> int:
         elif args.subparsers_name == _INFO_CMD:
             show_task_info(config)
         elif args.subparsers_name == _DUMP_CONFIG_CMD:
-            dump_config(config)
+            dump_config(config, args.sort, args.format)
         elif args.subparsers_name == _DUMP_TASK_CMD:
-            dump_task(config)
+            dump_task(config, args.sort, args.format)
 
     except TaskException as e:
         error_and_print(str(e))

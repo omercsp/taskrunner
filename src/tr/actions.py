@@ -1,10 +1,10 @@
 from tr.Task import Task
 from tr.config import Config, ConfigFileModel, TaskModel
-from tr.common import TaskException, TASK_YES_TOKEN, parse_assignment_str, print_dict
+from tr.common import TaskException, TASK_YES_TOKEN, parse_assignment_str, dump_dict
 from tr.logTools import info
 from argparse import Namespace as Args
 from typing import Any
-import json
+from enum import Enum
 import textwrap
 import sys
 
@@ -236,31 +236,32 @@ def run_task(config: Config) -> int:
     return task.run()
 
 
-class SchemaDumpOpts(object):
+class SchemaDumpOpts(str, Enum):
     ALL = "all"
     CONFIG = "config"
     TASK = "task"
 
-    CHOICES = [ALL, CONFIG, TASK]
 
-
-def dump_schema(dump_type: str) -> None:
+def dump_schema(dump_type: str, sort: bool, fmt: str) -> None:
+    d = {}
     if dump_type == SchemaDumpOpts.CONFIG:
-        print_dict(ConfigFileModel.model_json_schema())
+        d = ConfigFileModel.model_json_schema()
     elif dump_type == SchemaDumpOpts.TASK:
-        print_dict(TaskModel.model_json_schema())
+        d = TaskModel.model_json_schema()
     elif dump_type == SchemaDumpOpts.ALL:
-        config_file_schema = ConfigFileModel.model_json_schema()
+        d = ConfigFileModel.model_json_schema()
         task_schema = TaskModel.model_json_schema()
-        config_file_schema["tasks"] = task_schema
-        print_dict(config_file_schema)
+        d["tasks"] = task_schema
+
+    print(dump_dict(d, sort, fmt))
 
 
-def dump_task(config: Config) -> None:
+def dump_task(config: Config, sort: bool, fmt: str) -> None:
     task_name = _active_task_name(config)
     includes = set() if config.args.includes else None
-    print(json.dumps(config.task_desc(task_name, includes), indent=4))
+    desc = config.task_desc(task_name, includes)
+    print(dump_dict(desc, sort, fmt))
 
 
-def dump_config(config: Config) -> None:
-    print(json.dumps(config.conf, indent=4))
+def dump_config(config: Config, sort: bool, fmt: str) -> None:
+    print(dump_dict(config.conf.model_dump(), sort, fmt))

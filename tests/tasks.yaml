@@ -285,7 +285,7 @@ tasks:
   061_dump:
     short_desc: Validate task dump
     variables:
-      task_dump_cmd: task dump
+      task_dump_cmd: task dump --sort --format=json
     commands:
       - echo ----- Task descriptor, simple ------
       - '{{task_dump_cmd}} info_task'
