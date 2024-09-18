@@ -32,6 +32,10 @@ requires-python = ">=3.10,<4"
 devel = [
 	"xeet>=0.5.5"
 ]
+publish = [
+	"build>=1.2",
+	"twine>=5.1"
+]
 
 [project.urls]
 "Homepage" = "https://github.com/omercsp/taskrunner"
