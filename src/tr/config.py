@@ -121,7 +121,7 @@ class Config:
             if ext == ".json":
                 data: dict = json.load(open(file_path, 'r'))
             elif ext == ".yaml" or ext == ".yml":
-                data: dict = yaml.safe_load(open(file_path, 'r'))
+                data: dict = yaml.safe_load(open(file_path, 'r')) or {}
             else:
                 raise TaskException("Unsupported configuration file format")
             return validate_config_file_schema(data)
