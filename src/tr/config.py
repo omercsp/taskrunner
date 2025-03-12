@@ -86,7 +86,7 @@ class ConfigFileModel(BaseModel):
     model_config = ConfigDict(extra='forbid')
     json_schema: str | None = Field(None, alias="$schema")
     includes: list[str] = Field(default_factory=list, alias=INCLUDE)
-    use_default_include: bool = False
+    use_default_include: bool = True
     tasks: dict[str, Any] = Field(default_factory=dict)
     suppress: list[str] = Field(default_factory=list)
     variables: dict[str, str] = Field(default_factory=dict)
