@@ -144,7 +144,8 @@ class Config:
         if len(read_files) == 0 and \
                 file_path not in _DFLT_CONF_FILES and \
                 dflt_conf_file_path and \
-                base_config_model.use_default_include:
+                base_config_model.use_default_include and \
+                dflt_conf_file_path not in includes:
             includes.insert(0, dflt_conf_file_path)
 
         included_tasks = {}
