@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field, ConfigDict, ValidationError, AliasChoices
 from copy import deepcopy
 import yaml
 from enum import Enum
+from functools import cache
 
 
 _COMMON_CONF_FILES: list[str] = [".tasks.yaml", "tasks.yaml", ".tasks.json", "tasks.json"]
@@ -18,6 +19,7 @@ _DFLT_CONF_DIR = str(pathlib.Path.home()) + "/.config/"
 _DFLT_CONF_FILES = [os.path.join(_DFLT_CONF_DIR, f) for f in _COMMON_CONF_FILES]
 
 
+@cache
 def _find_default_config_file(directory: str) -> str | None:
     for f in _COMMON_CONF_FILES:
         file_path = os.path.join(directory, f)
@@ -195,7 +197,7 @@ class Config:
         cwd = os.getcwd()
         const_vars[AutoVarsKeys.CWD] = cwd
         conf_dir_name = os.path.dirname(conf_path)
-        if conf_dir_name:
+        if conf_dir_name and conf_path != _find_default_config_file(_DFLT_CONF_DIR):
             const_vars[AutoVarsKeys.TASK_ROOT] = os.path.dirname(conf_path)
         else:
             const_vars.setdefault(AutoVarsKeys.TASK_ROOT, cwd)
