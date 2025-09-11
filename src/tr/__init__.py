@@ -1,7 +1,7 @@
-import pkg_resources
+from importlib.metadata import version, PackageNotFoundError
 
 try:
-    _vnum = pkg_resources.get_distribution('pytaskrunner').version
+    _vnum = version('pytaskrunner')
     version = f'v{_vnum}'
-except pkg_resources.DistributionNotFound:
+except PackageNotFoundError:
     version = 'v0.0.0'
