@@ -301,6 +301,8 @@ class Config:
                 commands = task_model.commands + base_commands
             else:
                 commands = task_model.commands
+        else:
+            commands = task_model.commands
 
         unified_desc = {}
         unified_desc.update(base_task_desc)
