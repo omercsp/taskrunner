@@ -3,13 +3,14 @@ from tr.common import TASK_YES_TOKEN, TASK_NO_TOKEN, TaskException, DictDumpFmt
 from tr.config import Config, AutoVarsKeys
 from tr.logTools import init_logging, info, error_and_print
 from tr.actions import (run_task, list_tasks, show_task_info, dump_task, dump_config, dump_schema,
-                        SchemaDumpOpts)
+                        export_task, SchemaDumpOpts)
 from tr import version
 import argparse
 import argcomplete
 import sys
 
 _RUN_CMD = "run"
+_EXPORT_CMD = "export"
 _LIST_CMD = "list"
 _INFO_CMD = "info"
 _DUMP_TASK_CMD = "dump"
@@ -23,8 +24,8 @@ def _tasks_complete(**kwargs) -> list[str]:
         parser_name = parsed_args.subparsers_name
     except (KeyError, AttributeError):
         return []
-    if (parser_name == _RUN_CMD or parser_name == _INFO_CMD or parser_name == _DUMP_TASK_CMD) \
-       and parsed_args.task is None:
+    if (parser_name == _RUN_CMD or parser_name == _EXPORT_CMD or parser_name == _INFO_CMD or
+            parser_name == _DUMP_TASK_CMD) and parsed_args.task is None:
         return Config(None).visible_tasks()
     return []
 
@@ -95,6 +96,9 @@ def _parse_arguments() -> argparse.Namespace:
     run_parser.add_argument('--c-cwd', metavar='DIR', default=None,
                             help='set container working directory')
 
+    subparsers.add_parser(_EXPORT_CMD, help='export task bash commands',
+                          parents=[task_target_parser])
+
     info_parser = subparsers.add_parser(_INFO_CMD, help='show task info',
                                         parents=[task_target_parser])
     info_parser.add_argument('-x', '--expand', help='expand values', action='store_true',
@@ -150,6 +154,8 @@ def main() -> int:
         config = Config(args)
         if args.subparsers_name == _RUN_CMD:
             return run_task(config)
+        elif args.subparsers_name == _EXPORT_CMD:
+            export_task(config)
         elif args.subparsers_name == _LIST_CMD:
             list_tasks(config)
         elif args.subparsers_name == _INFO_CMD:

@@ -236,6 +236,18 @@ def run_task(config: Config) -> int:
     return task.run()
 
 
+def export_task(config: Config) -> None:
+    task_name = _active_task_name(config)
+    info("Exporting task '{}'", task_name)
+    task = Task(task_name, config)
+    for v in config.args.variable:
+        key, val = parse_assignment_str(v)
+        task.vars_map[key] = val
+    task.expand()
+    for line in task.export_commands():
+        print(line)
+
+
 class SchemaDumpOpts(str, Enum):
     ALL = "all"
     CONFIG = "config"

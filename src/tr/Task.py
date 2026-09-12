@@ -174,3 +174,28 @@ class Task(object):
             if rc == 0:
                 rc = cmd_rc
         return rc
+
+    def export_commands(self) -> list[str]:
+        if self.expander is None:
+            raise TaskException("Task must be expanded before export")
+        if self.abstract:
+            raise TaskException("Can't run abstract tasks")
+        lines: list[str] = []
+        if self.env:
+            for k, v in self.env.items():
+                lines.append(f"export {k}={shlex.quote(v)}")
+        if self.cwd:
+            lines.append(f"cd {shlex.quote(self.cwd)}")
+        if len(self.commands) == 0:
+            if self.c_image:
+                cmd_arr = self._container_cmd_arr(None)
+                lines.append(shlex.join(cmd_arr))
+            return lines
+
+        for cmd in self.commands:
+            if self.c_image:
+                cmd_arr = self._container_cmd_arr(cmd)
+                lines.append(shlex.join(cmd_arr))
+            else:
+                lines.append(cmd)
+        return lines
