@@ -40,7 +40,7 @@ _build_pkg_venv()
 	pip install --upgrade pip
 
 	# shellcheck disable=SC2102
-	pip install ${repo_flags} pytaskrunner[devel]
+	pip install --no-cache-dir ${repo_flags} pytaskrunner[devel]
 }
 
 _fini_pkg_env()
