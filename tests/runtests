@@ -17,6 +17,6 @@ if [[ -z "${VENV_ACTIVATE}" ]]; then
 	source ${PROJ_ROOT}/.venv/bin/activate || _abort "ERROR: Could not activate virtualenv"
 fi
 
-cmd="xeet run -c xeet.json $*"
+cmd="xeet run -c xeet.yaml $*"
 echo "Running: ${cmd}"
 ${cmd}

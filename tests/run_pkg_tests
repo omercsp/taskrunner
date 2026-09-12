@@ -56,7 +56,7 @@ echo "Taskrunner tests direcotry: ${SCRIPT_DIR}"
 echo "VENV directory: ${venv_dir}"
 echo "xeet binary: $(which xeet)"
 echo "============================"
-xeet run -c ${SCRIPT_DIR}/xeet.json "$@"
+xeet run -c ${SCRIPT_DIR}/xeet.yaml "$@"
 
 ret=$?
 _fini_pkg_env

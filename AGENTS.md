@@ -10,7 +10,7 @@ This document provides a comprehensive overview of the `taskrunner` repository f
 - **CLI Executable**: `task` (entry point: `tr.__main__:main`)
 - **Language**: Python (>= 3.10, < 4.0)
 - **Primary Dependencies**: `pydantic>=2.8`, `PyYAML>=6.0.2,<7.0`, `argcomplete>=2.0.0`, `setuptools>=72`
-- **Dev Dependencies**: `xeet==0.5.5`
+- **Dev Dependencies**: `xeet==0.7.1`
 
 `taskrunner` (abbreviated **TR**) is a CLI tool for managing and executing directory-scoped shell tasks. Similar to task runners embedded in IDEs (like VS Code tasks), TR operates independent of specific IDEs or platforms. It treats directories as task repositories, enabling a dynamic set of commands that become available or unavailable based on the current working directory.
 
@@ -55,7 +55,7 @@ taskrunner/
 │       ├── common.py                  # StringVarExpander, TaskException, dict helpers, error formatting
 │       └── logTools.py                # Logging system with frame inspection and raw/formatted modes
 └── tests/                             # Test suite managed via xeet
-    ├── xeet.json                      # Test matrix and configuration for xeet runner
+    ├── xeet.yaml                      # Test matrix and configuration for xeet runner
     ├── tasks.yaml                     # Primary test task definitions
     ├── base_tasks_a.json              # Include fixture A
     ├── base_tasks_b.json              # Include fixture B
@@ -215,7 +215,7 @@ Configurations can be defined in YAML or JSON.
 The repository relies on `xeet` (an external test harness) for its integration test suite.
 
 ### Test Structure
-- **Definition File**: `tests/xeet.json` defines all test cases, inheritance templates, and allowed return codes.
+- **Definition File**: `tests/xeet.yaml` defines all test cases, inheritance templates, and allowed return codes.
 - **Fixture Config**: `tests/tasks.yaml` defines the tasks executed during testing.
 - **Golden Output Verification**:
   - Tests invoke TR commands and compare stdout and stderr against golden master files stored in `tests/xeet.expected/<test_name>/stdout` and `stderr`.
