@@ -8,7 +8,7 @@ import subprocess
 import signal
 
 
-class Task(object):
+class Task:
     def _check_empty_setting(self, s, title) -> None:
         if len(s) > 0:
             return
@@ -77,7 +77,7 @@ class Task(object):
         self.c_env = {self.expander(k): self.expander(v) for k, v in self.c_env.items()}
         self.c_volumes = [self.expander(v) for v in self.c_volumes]
 
-    def _simple_cmd_arr(self, cmd) -> list:
+    def _simple_cmd_arr(self, cmd: str) -> list[str]:
         info("Preparing simple command")
         if self.shell:
             return [cmd]

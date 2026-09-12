@@ -1,6 +1,5 @@
-from tr.config import Config
-from tr.common import TASK_YES_TOKEN, TASK_NO_TOKEN, TaskException, DictDumpFmt
 from tr.config import Config, AutoVarsKeys
+from tr.common import TASK_YES_TOKEN, TASK_NO_TOKEN, TaskException, DictDumpFmt
 from tr.logTools import init_logging, info, error_and_print
 from tr.actions import (run_task, list_tasks, show_task_info, dump_task, dump_config, dump_schema,
                         export_task, SchemaDumpOpts)
@@ -24,8 +23,8 @@ def _tasks_complete(**kwargs) -> list[str]:
         parser_name = parsed_args.subparsers_name
     except (KeyError, AttributeError):
         return []
-    if (parser_name == _RUN_CMD or parser_name == _EXPORT_CMD or parser_name == _INFO_CMD or
-            parser_name == _DUMP_TASK_CMD) and parsed_args.task is None:
+    valid_parsers = (_RUN_CMD, _EXPORT_CMD, _INFO_CMD, _DUMP_TASK_CMD)
+    if parser_name in valid_parsers and parsed_args.task is None:
         return Config(None).visible_tasks()
     return []
 
@@ -120,11 +119,11 @@ def _parse_arguments() -> argparse.Namespace:
     dump_parser.add_argument('-i', '--includes', help='with inclusions',
                              action='store_true', default=False)
 
-    dump_schme_parser = subparsers.add_parser(_DUMP_SCHEMA_CMD,
-                                              help='dump configuration file schema',
-                                              parents=[dump_common_parser])
-    dump_schme_parser.add_argument('-t', '--type', choices=[e.value for e in SchemaDumpOpts],
-                                   default=SchemaDumpOpts.ALL)
+    dump_schema_parser = subparsers.add_parser(_DUMP_SCHEMA_CMD,
+                                               help='dump configuration file schema',
+                                               parents=[dump_common_parser])
+    dump_schema_parser.add_argument('-t', '--type', choices=[e.value for e in SchemaDumpOpts],
+                                    default=SchemaDumpOpts.ALL)
 
     subparsers.add_parser(_DUMP_CONFIG_CMD, help='dump configuration', parents=[dump_common_parser])
 
@@ -135,7 +134,7 @@ def _parse_arguments() -> argparse.Namespace:
         args = parser.parse_args(tr_argv)
     except SystemExit:
         raise TaskException("")
-    args.__setattr__(AutoVarsKeys.TASK_CLI_ARGS, cmds_argv)
+    setattr(args, AutoVarsKeys.TASK_CLI_ARGS, cmds_argv)
     return args
 
 
@@ -145,7 +144,7 @@ def main() -> int:
         init_logging(args.log_file, args.verbose)
 
         info("args='{}'", sys.argv[1:])
-        info("cmd_args={}", args.__getattribute__(AutoVarsKeys.TASK_CLI_ARGS))
+        info("cmd_args={}", getattr(args, AutoVarsKeys.TASK_CLI_ARGS))
 
         if args.subparsers_name == _DUMP_SCHEMA_CMD:
             dump_schema(args.type, args.sort, args.format)

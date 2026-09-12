@@ -7,7 +7,7 @@ from os.path import basename
 __logger = None
 
 
-class TrLogging(object):
+class TrLogging:
     def __init__(self, log_file: str, log_level: int) -> None:
         self._logger = logging.getLogger()
         self._raw_formatter = logging.Formatter('%(message)s')
@@ -46,7 +46,7 @@ class TrLogging(object):
             else:
                 self._logger.log(verbosity, f"{self._frame_str()}: {msg_args}")
             return
-        assert type(msg_args) is tuple
+        assert isinstance(msg_args, tuple)
         if self.raw_format:
             self._logger.log(verbosity, msg_args[0].format(*msg_args[1:]))
         else:
@@ -77,12 +77,12 @@ def raw_msg(msg) -> None:
     __logger.set_default_format()
 
 
-def blank(count=1) -> None:
+def blank(count: int = 1) -> None:
     global __logger
     if __logger is None:
         return
     __logger.set_raw_format()
-    for _ in range(0, count):
+    for _ in range(count):
         __logger.log(logging.INFO, "")
     __logger.set_default_format()
 

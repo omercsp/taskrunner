@@ -35,7 +35,7 @@ def _dict_path_elements(path: str) -> list:
     return elements
 
 
-def dict_value(d: dict, path: str, require=False, default=None) -> Any:
+def dict_value(d: dict, path: str, require: bool = False, default: Any = None) -> Any:
     elements = _dict_path_elements(path)
     field = d
     try:
@@ -105,7 +105,7 @@ class StringVarExpander:
         if var.startswith("$"):
             return os.getenv(var[1:], "")
         value = self.vars_map.get(var, "")
-        if type(value) is list or type(value) is dict:
+        if isinstance(value, (list, dict)):
             raise TaskException(f"Var expanded path '{var}' doesn't refer to valid type")
         self.expansion_stack.append(var)
         s = re.sub(StringVarExpander.var_re, self._expand_re, str(value))

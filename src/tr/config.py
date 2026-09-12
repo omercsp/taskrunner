@@ -119,9 +119,11 @@ class Config:
         try:
             ext = os.path.splitext(file_path)[1]
             if ext == ".json":
-                data: dict = json.load(open(file_path, 'r'))
-            elif ext == ".yaml" or ext == ".yml":
-                data: dict = yaml.safe_load(open(file_path, 'r')) or {}
+                with open(file_path, 'r') as f:
+                    data: dict = json.load(f)
+            elif ext in (".yaml", ".yml"):
+                with open(file_path, 'r') as f:
+                    data = yaml.safe_load(f) or {}
             else:
                 raise TaskException("Unsupported configuration file format")
             return validate_config_file_schema(data)
@@ -198,9 +200,9 @@ class Config:
             const_vars[AutoVarsKeys.TASK_ROOT] = os.path.dirname(conf_path)
         else:
             const_vars.setdefault(AutoVarsKeys.TASK_ROOT, cwd)
-        if args and args.__contains__(AutoVarsKeys.TASK_CLI_ARGS):
+        if args and hasattr(args, AutoVarsKeys.TASK_CLI_ARGS):
             const_vars[AutoVarsKeys.TASK_CLI_ARGS] = " ".join(
-                args.__getattribute__(AutoVarsKeys.TASK_CLI_ARGS))
+                getattr(args, AutoVarsKeys.TASK_CLI_ARGS))
         set_const_vars_map(const_vars)
 
         self.conf = self._read_configuration(conf_path)
@@ -318,7 +320,7 @@ class Config:
         return validate_task_model(name, desc)
 
 
-class AutoVarsKeys(object):
+class AutoVarsKeys:
     TASK_ROOT = "taskRoot"
     CWD = "cwd"
     TASK_CLI_ARGS = "cliArgs"
