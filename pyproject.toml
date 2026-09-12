@@ -30,7 +30,7 @@ requires-python = ">=3.10,<4"
 
 [project.optional-dependencies]
 devel = [
-	"xeet>=0.5.5"
+	"xeet==0.5.5"
 ]
 
 [project.urls]
