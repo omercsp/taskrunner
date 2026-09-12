@@ -1,4 +1,0 @@
-setuptools>=72
-argcomplete>=2.0.0
-pydantic>=2.8
-PyYAML>=6.0.2<7.0
