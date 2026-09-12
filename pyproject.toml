@@ -33,6 +33,11 @@ devel = [
 	"xeet>=0.7.1,<0.8"
 ]
 
+publish = [
+	"build>=1.2",
+	"twine>=5.1"
+]
+
 [project.urls]
 "Homepage" = "https://github.com/omercsp/taskrunner"
 
